@@ -79,8 +79,8 @@ check_clip_time
 
 # initialize the primary global variables
 readonly PASS_STORE="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
-PASSFILE=""             # the password file chosen by the user for decryption
-declare -A PASSDATA_ARR # the associative array used to hold decrypted password-store data except the password
+PASSFILE=""             # password file chosen by the user for decryption
+declare -A PASSDATA_ARR # decrypted password-store data except the password
 USERNAME=""
 PASSWORD=""
 
@@ -101,8 +101,15 @@ get_pass_file() {
   tmp_pass_3=("${tmp_pass_2[@]%.gpg}")
   shopt -u nullglob globstar
 
-  # PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | fzf --preview='pass {}')"
-  PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | bemenu)"
+  if [[ "$BACKEND" == "bemenu" ]]; then
+    PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | bemenu)"
+  elif [[ "$BACKEND" == "rofi" ]]; then
+    PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | rofi -dmenu)"
+  elif [[ "$BACKEND" == "fzf" ]]; then
+    PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | fzf --preview='pass {}')"
+  else
+    exit 1
+  fi
 
   if [[ -z "$PASSFILE" ]]; then
     exit 1
@@ -117,13 +124,13 @@ get_pass_data() {
   # ASSUMPTION: the key can contain alphanumerics, spaces, hyphen, underscore
   #             the value can contain anything but it has to follow after a space
   passdata_regex="^[[:alnum:][:blank:]_-]+:[[:blank:]].+$"
-  # ASSUMPTION: the basename of the gpg file is the username
+  # ASSUMPTION: the basename of the gpg file is the username although one can still
+  #             select a username field inside the file
   USERNAME="${PASSFILE##*/}"
   # ASSUMPTION: the first line of $PASSFILE will contain the password
   PASSWORD="${passdata[0]}"
 
-  # skip the password present at index 0 and validate each index against $passdata_regex
-  # store the valid results in an associative array
+  # skip the password, validate each entry against $passdata_regex, store valid results
   # ASSUMPTION: each key is unique otherwise, the value of the last non-unique key will be used
   for idx in "${passdata[@]:1}"; do
     if [[ "$idx" =~ $passdata_regex ]]; then
@@ -140,10 +147,16 @@ get_pass_data() {
 key_menu() {
   local choice
 
-  # choice="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | fzf)"
-  choice="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | bemenu)"
+  if [[ "$BACKEND" == "bemenu" ]]; then
+    choice="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | bemenu)"
+  elif [[ "$BACKEND" == "rofi" ]]; then
+    choice="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | rofi -dmenu)"
+  elif [[ "$BACKEND" == "fzf" ]]; then
+    choice="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | fzf)"
+  else
+    exit 1
+  fi
 
-  # ASSUMPTION: fzf seems to discard invalid input and the variable ends up empty
   if [[ -z "$choice" ]]; then
     exit 1
   fi
