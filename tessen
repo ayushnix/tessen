@@ -13,22 +13,25 @@ print_help() {
   printf '%s\n' "    - bemenu (copy + autotype) - the default choice"
   printf '%s\n' "    - rofi (copy + autotype) - lbonn wayland fork"
   printf '%s\n' "    - fzf (copy only when run from a terminal) - limited functionality" ""
-  printf '%s\n' "usage: [-h] [-b backend] [-t seconds]"
+  printf '%s\n' "usage: [-ha] [-b backend] [-s seconds]"
   printf '%s\n' "Command Summary:"
   printf '%s\n' "    -h         show this help menu"
+  printf '%s\n' "    -a         autotype data instead of copying"
   printf '%s\n' "    -b         choose either bemenu, rofi, or fzf"
   printf '%s\n' "    -s         number of seconds to keep copied data in clipboard"
 }
 
 BACKEND="bemenu"
 CLIP_TIME=15
+WTYPE=""
 
-while getopts ':hb:s:' opt; do
+while getopts ':hab:s:' opt; do
   case "$opt" in
     h)
       print_help
       exit 0
       ;;
+    a) WTYPE=1 ;;
     b) BACKEND="$OPTARG" ;;
     s) CLIP_TIME="$OPTARG" ;;
     \?)
@@ -46,13 +49,16 @@ shift $((OPTIND - 1))
 
 readonly CLIP_TIME
 readonly BACKEND
+readonly WTYPE
 
-# the default options for bemenu and fzf
+# validate $BACKEND and set the default options for bemenu and fzf
 if [[ "$BACKEND" == "bemenu" ]]; then
   bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
   readonly BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
   export BEMENU_OPTS
   unset -v bmn_opt
+elif [[ "$BACKEND" == "rofi" ]]; then
+  true
 elif [[ "$BACKEND" == "fzf" ]]; then
   readonly FZF_DEFAULT_COMMAND=""
   fzf_opt=("--no-multi --height=100 --info=hidden --prompt='pass: ' --layout=reverse")
@@ -60,9 +66,11 @@ elif [[ "$BACKEND" == "fzf" ]]; then
   export FZF_DEFAULT_COMMAND
   export FZF_DEFAULT_OPTS
   unset -v fzf_opt
+else
+  exit 1
 fi
 
-# check if the value of CLIP_TIME is valid and contains only digits
+# validate the value of CLIP_TIME
 check_clip_time() {
   local clip_regex
 
@@ -83,6 +91,7 @@ PASSFILE=""             # password file chosen by the user for decryption
 declare -A PASSDATA_ARR # decrypted password-store data except the password
 USERNAME=""
 PASSWORD=""
+CHOICE=""
 
 # exit if the password store directory doesn't exist
 if ! [[ -d "$PASS_STORE" ]]; then
@@ -143,38 +152,72 @@ get_pass_data() {
   done
 }
 
-# the menu for selecting and copying the decrypted data
-key_menu() {
-  local choice
-
+# get the key that the user chooses to copy
+copy_choice_data() {
   if [[ "$BACKEND" == "bemenu" ]]; then
-    choice="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | bemenu)"
+    CHOICE="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | bemenu)"
   elif [[ "$BACKEND" == "rofi" ]]; then
-    choice="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | rofi -dmenu)"
+    CHOICE="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | rofi -dmenu)"
   elif [[ "$BACKEND" == "fzf" ]]; then
-    choice="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | fzf)"
+    CHOICE="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | fzf)"
   else
     exit 1
   fi
 
-  if [[ -z "$choice" ]]; then
+  if [[ -z "$CHOICE" ]]; then
     exit 1
   fi
+}
 
-  if [[ "$choice" == "username" ]]; then
+# the menu for selecting and copying the decrypted data
+copy_key_menu() {
+  if [[ "$CHOICE" == "username" ]]; then
     wl-copy "$USERNAME"
     notify-send "username copied, clearing in $CLIP_TIME seconds ..."
     nohup sh -c "sleep $CLIP_TIME; wl-copy --clear" > /dev/null 2>&1 &
-  elif [[ "$choice" == "password" ]]; then
+    disown
+  elif [[ "$CHOICE" == "password" ]]; then
     wl-copy "$PASSWORD"
     notify-send "password copied, clearing in $CLIP_TIME seconds ..."
     nohup sh -c "sleep $CLIP_TIME; wl-copy --clear" > /dev/null 2>&1 &
     disown
-  elif [[ -n "${PASSDATA_ARR[$choice]}" ]]; then
-    wl-copy "${PASSDATA_ARR[$choice]}"
-    notify-send "$choice copied, clearing in $CLIP_TIME seconds ..."
+  elif [[ -n "${PASSDATA_ARR[$CHOICE]}" ]]; then
+    wl-copy "${PASSDATA_ARR[$CHOICE]}"
+    notify-send "$CHOICE copied, clearing in $CLIP_TIME seconds ..."
     nohup sh -c "sleep $CLIP_TIME; wl-copy --clear" > /dev/null 2>&1 &
     disown
+  else
+    exit 1
+  fi
+}
+
+# get the key that the user chooses to autotype
+autotype_choice_data() {
+  if [[ "$BACKEND" == "bemenu" ]]; then
+    CHOICE="$(printf '%s\n' "autotype" "username" "password" "${!PASSDATA_ARR[@]}" | bemenu)"
+  elif [[ "$BACKEND" == "rofi" ]]; then
+    CHOICE="$(printf '%s\n' "autotype" "username" "password" "${!PASSDATA_ARR[@]}" | rofi -dmenu)"
+  elif [[ "$BACKEND" == "fzf" ]]; then
+    CHOICE="$(printf '%s\n' "autotype" "username" "password" "${!PASSDATA_ARR[@]}" | fzf)"
+  else
+    exit 1
+  fi
+
+  if [[ -z "$CHOICE" ]]; then
+    exit 1
+  fi
+}
+
+# the menu for selecting and autotyping the decrypted data
+autotype_key_menu() {
+  if [[ "$CHOICE" == "autotype" ]]; then
+    wtype -s 100 "$USERNAME" && wtype -s 100 -k Tab -- && wtype -s 100 "$PASSWORD"
+  elif [[ "$CHOICE" == "username" ]]; then
+    wtype "$USERNAME"
+  elif [[ "$CHOICE" == "password" ]]; then
+    wtype "$PASSWORD"
+  elif [[ -n "${PASSDATA_ARR[$CHOICE]}" ]]; then
+    wtype "${PASSDATA_ARR[$CHOICE]}"
   else
     exit 1
   fi
@@ -187,29 +230,20 @@ clean() {
   unset -v USERNAME
   unset -v PASSWORD
   unset -v PASSDATA_ARR
-  unset -v CLIP_TIME
+  unset -v CHOICE
 }
 
-get_pass_file
-get_pass_data
-key_menu
+main() {
+  get_pass_file
+  get_pass_data
 
-# case "$RESPONSE" in
-#   autotype)
-#     wtype -s 200 "$USERNAME" && wtype -P tab -p tab -s 200 && wtype -s 200 "$PASSWORD"
-#     ;;
-#   username)
-#     wtype -s 200 "$USERNAME"
-#     ;;
-#   password)
-#     wtype -s 200 "$PASSWORD"
-#     ;;
-#   *)
-#     for key in "${!NEWPASSDATA[@]}"; do
-#       if [ "$key" == "$RESPONSE" ]; then
-#         wtype -s 200 "${NEWPASSDATA[$RESPONSE]}"
-#       fi
-#     done
-#     exit 1
-#     ;;
-# esac
+  if [[ "$WTYPE" -eq 1 ]]; then
+    autotype_choice_data
+    autotype_key_menu
+  else
+    copy_choice_data
+    copy_key_menu
+  fi
+}
+
+main
