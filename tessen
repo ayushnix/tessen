@@ -1,0 +1,202 @@
+#!/bin/bash
+# SPDX-License-Identifier: MIT
+
+# shell "strict" mode
+set -uo pipefail
+readonly PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+export PATH
+umask 077
+
+print_help() {
+  printf '%s\n' "tessen - select, autotype, and copy your password-store data"
+  printf '%s\n' "tessen can use one of the following backends to process password-store data"
+  printf '%s\n' "    - bemenu (copy + autotype) - the default choice"
+  printf '%s\n' "    - rofi (copy + autotype) - lbonn wayland fork"
+  printf '%s\n' "    - fzf (copy only when run from a terminal) - limited functionality" ""
+  printf '%s\n' "usage: [-h] [-b backend] [-t seconds]"
+  printf '%s\n' "Command Summary:"
+  printf '%s\n' "    -h         show this help menu"
+  printf '%s\n' "    -b         choose either bemenu, rofi, or fzf"
+  printf '%s\n' "    -s         number of seconds to keep copied data in clipboard"
+}
+
+BACKEND="bemenu"
+CLIP_TIME=15
+
+while getopts ':hb:s:' opt; do
+  case "$opt" in
+    h)
+      print_help
+      exit 0
+      ;;
+    b) BACKEND="$OPTARG" ;;
+    s) CLIP_TIME="$OPTARG" ;;
+    \?)
+      notify-send "invalid option: -$OPTARG"
+      exit 1
+      ;;
+    :)
+      notify-send "option -$OPTARG requires a value"
+      exit 1
+      ;;
+  esac
+done
+unset -v opt
+shift $((OPTIND - 1))
+
+readonly CLIP_TIME
+readonly BACKEND
+
+# the default options for bemenu and fzf
+if [[ "$BACKEND" == "bemenu" ]]; then
+  bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
+  readonly BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
+  export BEMENU_OPTS
+  unset -v bmn_opt
+elif [[ "$BACKEND" == "fzf" ]]; then
+  readonly FZF_DEFAULT_COMMAND=""
+  fzf_opt=("--no-multi --height=100 --info=hidden --prompt='pass: ' --layout=reverse")
+  readonly FZF_DEFAULT_OPTS="${fzf_opt[*]}"
+  export FZF_DEFAULT_COMMAND
+  export FZF_DEFAULT_OPTS
+  unset -v fzf_opt
+fi
+
+# check if the value of CLIP_TIME is valid and contains only digits
+check_clip_time() {
+  local clip_regex
+
+  clip_regex="^[[:digit:]]+$"
+
+  if [[ "$CLIP_TIME" =~ $clip_regex ]]; then
+    return 0
+  else
+    notify-send "invalid clipboard time provided"
+    exit 1
+  fi
+}
+check_clip_time
+
+# initialize the primary global variables
+readonly PASS_STORE="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+PASSFILE=""             # the password file chosen by the user for decryption
+declare -A PASSDATA_ARR # the associative array used to hold decrypted password-store data except the password
+USERNAME=""
+PASSWORD=""
+
+# exit if the password store directory doesn't exist
+if ! [[ -d "$PASS_STORE" ]]; then
+  notify-send "password store not found"
+  exit 1
+fi
+
+# display and get the shortened path of the password file
+get_pass_file() {
+  local tmp_pass_1 tmp_pass_2 tmp_pass_3
+
+  # temporarily enable globbing to get the list of gpg files
+  shopt -s nullglob globstar
+  tmp_pass_1=("$PASS_STORE"/**/*.gpg)
+  tmp_pass_2=("${tmp_pass_1[@]#"$PASS_STORE"/}")
+  tmp_pass_3=("${tmp_pass_2[@]%.gpg}")
+  shopt -u nullglob globstar
+
+  # PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | fzf --preview='pass {}')"
+  PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | bemenu)"
+
+  if [[ -z "$PASSFILE" ]]; then
+    exit 1
+  fi
+}
+
+# get the password data including username and other keys
+get_pass_data() {
+  local passdata passdata_regex idx key val
+
+  mapfile -t passdata < <(pass "$PASSFILE")
+  # ASSUMPTION: the key can contain alphanumerics, spaces, hyphen, underscore
+  #             the value can contain anything but it has to follow after a space
+  passdata_regex="^[[:alnum:][:blank:]_-]+:[[:blank:]].+$"
+  # ASSUMPTION: the basename of the gpg file is the username
+  USERNAME="${PASSFILE##*/}"
+  # ASSUMPTION: the first line of $PASSFILE will contain the password
+  PASSWORD="${passdata[0]}"
+
+  # skip the password present at index 0 and validate each index against $passdata_regex
+  # store the valid results in an associative array
+  # ASSUMPTION: each key is unique otherwise, the value of the last non-unique key will be used
+  for idx in "${passdata[@]:1}"; do
+    if [[ "$idx" =~ $passdata_regex ]]; then
+      key="${idx%%:*}"
+      val="${idx##*: }"
+      PASSDATA_ARR["$key"]="$val"
+    else
+      continue
+    fi
+  done
+}
+
+# the menu for selecting and copying the decrypted data
+key_menu() {
+  local choice
+
+  # choice="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | fzf)"
+  choice="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | bemenu)"
+
+  # ASSUMPTION: fzf seems to discard invalid input and the variable ends up empty
+  if [[ -z "$choice" ]]; then
+    exit 1
+  fi
+
+  if [[ "$choice" == "username" ]]; then
+    wl-copy "$USERNAME"
+    notify-send "username copied, clearing in $CLIP_TIME seconds ..."
+    nohup sh -c "sleep $CLIP_TIME; wl-copy --clear" > /dev/null 2>&1 &
+  elif [[ "$choice" == "password" ]]; then
+    wl-copy "$PASSWORD"
+    notify-send "password copied, clearing in $CLIP_TIME seconds ..."
+    nohup sh -c "sleep $CLIP_TIME; wl-copy --clear" > /dev/null 2>&1 &
+    disown
+  elif [[ -n "${PASSDATA_ARR[$choice]}" ]]; then
+    wl-copy "${PASSDATA_ARR[$choice]}"
+    notify-send "$choice copied, clearing in $CLIP_TIME seconds ..."
+    nohup sh -c "sleep $CLIP_TIME; wl-copy --clear" > /dev/null 2>&1 &
+    disown
+  else
+    exit 1
+  fi
+}
+
+# cleanup jobs before the script exits
+clean() {
+  wl-copy --clear
+  unset -v PASSFILE
+  unset -v USERNAME
+  unset -v PASSWORD
+  unset -v PASSDATA_ARR
+  unset -v CLIP_TIME
+}
+
+get_pass_file
+get_pass_data
+key_menu
+
+# case "$RESPONSE" in
+#   autotype)
+#     wtype -s 200 "$USERNAME" && wtype -P tab -p tab -s 200 && wtype -s 200 "$PASSWORD"
+#     ;;
+#   username)
+#     wtype -s 200 "$USERNAME"
+#     ;;
+#   password)
+#     wtype -s 200 "$PASSWORD"
+#     ;;
+#   *)
+#     for key in "${!NEWPASSDATA[@]}"; do
+#       if [ "$key" == "$RESPONSE" ]; then
+#         wtype -s 200 "${NEWPASSDATA[$RESPONSE]}"
+#       fi
+#     done
+#     exit 1
+#     ;;
+# esac
