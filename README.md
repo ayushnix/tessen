@@ -1,10 +1,10 @@
 # tessen
 
 A bash script for Wayland that presents an interactive menu to copy and auto-type
-[passwordstore](https://www.passwordstore.org/) data.
+[password store](https://www.passwordstore.org/) data.
 
 :warning: This script is a work in progress. For now, it should not be relied upon for using your
-password-store.
+password store.
 
 `tessen` relies on one of the following tools -
 
@@ -12,7 +12,7 @@ password-store.
 - [rofi](https://github.com/lbonn/rofi)
 - [fzf](https://github.com/junegunn/fzf)
 
-Additionally, if you want to auto-type password-store data, you'll need
+Additionally, if you want to auto-type password store data, you'll need
 [wtype](https://github.com/atx/wtype).
 
 `tessen` also uses the `notify-send` command from the
@@ -40,7 +40,7 @@ to fork this script and use ydotool if you want.
 ## Assumptions
 
 `tessen` works on several assumptions and tries to fail if they are not met. Please report any
-unexpected behavior in cases.
+unexpected behavior.
 
 A password store gpg encrypted file should be in the following format -
 
