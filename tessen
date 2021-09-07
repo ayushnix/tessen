@@ -31,7 +31,7 @@ get_pass_file() {
 
   PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | "${BACKEND[@]}")"
 
-  if [[ -z "$PASSFILE" ]]; then
+  if ! [[ -e "$PASS_STORE/$PASSFILE".gpg ]]; then
     exit 1
   fi
 }
@@ -65,18 +65,36 @@ get_pass_data() {
 
 # get the key that the user chooses to copy
 choice_data_copy() {
+  local ch flag
+  flag=""
+
   CHOICE="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | "${BACKEND[@]}")"
 
-  if [[ -z "$CHOICE" ]]; then
+  for ch in "username" "password" "${!PASSDATA_ARR[@]}"; do
+    if [[ "$CHOICE" == "$ch" ]]; then
+      flag=1
+    fi
+  done
+
+  if [[ "$flag" -ne 1 ]]; then
     exit 1
   fi
 }
 
 # get the key that the user chooses to autotype
 choice_data_autotype() {
+  local ch flag
+  flag=""
+
   CHOICE="$(printf '%s\n' "autotype" "username" "password" "${!PASSDATA_ARR[@]}" | "${BACKEND[@]}")"
 
-  if [[ -z "$CHOICE" ]]; then
+  for ch in "autotype" "username" "password" "${!PASSDATA_ARR[@]}"; do
+    if [[ "$CHOICE" == "$ch" ]]; then
+      flag=1
+    fi
+  done
+
+  if [[ "$flag" -ne 1 ]]; then
     exit 1
   fi
 }
