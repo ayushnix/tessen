@@ -63,32 +63,19 @@ get_pass_data() {
   done
 }
 
-# get the key that the user chooses to copy
-choice_data_copy() {
-  local ch flag
+# get the key that the user chooses to copy or autotype
+choice_data() {
+  local ch flag choice_arr
   flag=""
+  choice_arr=("autotype" "username" "password" "${!PASSDATA_ARR[@]}")
 
-  CHOICE="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | "${BACKEND[@]}")"
-
-  for ch in "username" "password" "${!PASSDATA_ARR[@]}"; do
-    if [[ "$CHOICE" == "$ch" ]]; then
-      flag=1
-    fi
-  done
-
-  if [[ "$flag" -ne 1 ]]; then
-    exit 1
+  if [[ "$WTYPE" -eq 1 ]]; then
+    CHOICE="$(printf '%s\n' "${choice_arr[@]}" | "${BACKEND[@]}")"
+  else
+    CHOICE="$(printf '%s\n' "${choice_arr[@]:1}" | "${BACKEND[@]}")"
   fi
-}
 
-# get the key that the user chooses to autotype
-choice_data_autotype() {
-  local ch flag
-  flag=""
-
-  CHOICE="$(printf '%s\n' "autotype" "username" "password" "${!PASSDATA_ARR[@]}" | "${BACKEND[@]}")"
-
-  for ch in "autotype" "username" "password" "${!PASSDATA_ARR[@]}"; do
+  for ch in "${choice_arr[@]}"; do
     if [[ "$CHOICE" == "$ch" ]]; then
       flag=1
     fi
@@ -244,12 +231,11 @@ main() {
   trap 'die' EXIT TERM
   get_pass_file
   get_pass_data
+  choice_data
 
   if [[ "$WTYPE" -eq 1 ]]; then
-    choice_data_autotype
     key_menu_autotype
   else
-    choice_data_copy
     key_menu_copy
   fi
   trap - EXIT TERM
