@@ -29,15 +29,7 @@ get_pass_file() {
   tmp_pass_3=("${tmp_pass_2[@]%.gpg}")
   shopt -u nullglob globstar
 
-  if [[ "$BACKEND" == "bemenu" ]]; then
-    PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | bemenu)"
-  elif [[ "$BACKEND" == "rofi" ]]; then
-    PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | rofi -dmenu)"
-  elif [[ "$BACKEND" == "fzf" ]]; then
-    PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | fzf --preview='pass {}')"
-  else
-    exit 1
-  fi
+  PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | "${BACKEND[@]}")"
 
   if [[ -z "$PASSFILE" ]]; then
     exit 1
@@ -73,15 +65,7 @@ get_pass_data() {
 
 # get the key that the user chooses to copy
 choice_data_copy() {
-  if [[ "$BACKEND" == "bemenu" ]]; then
-    CHOICE="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | bemenu)"
-  elif [[ "$BACKEND" == "rofi" ]]; then
-    CHOICE="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | rofi -dmenu)"
-  elif [[ "$BACKEND" == "fzf" ]]; then
-    CHOICE="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | fzf)"
-  else
-    exit 1
-  fi
+  CHOICE="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | "${BACKEND[@]}")"
 
   if [[ -z "$CHOICE" ]]; then
     exit 1
@@ -90,15 +74,7 @@ choice_data_copy() {
 
 # get the key that the user chooses to autotype
 choice_data_autotype() {
-  if [[ "$BACKEND" == "bemenu" ]]; then
-    CHOICE="$(printf '%s\n' "autotype" "username" "password" "${!PASSDATA_ARR[@]}" | bemenu)"
-  elif [[ "$BACKEND" == "rofi" ]]; then
-    CHOICE="$(printf '%s\n' "autotype" "username" "password" "${!PASSDATA_ARR[@]}" | rofi -dmenu)"
-  elif [[ "$BACKEND" == "fzf" ]]; then
-    CHOICE="$(printf '%s\n' "autotype" "username" "password" "${!PASSDATA_ARR[@]}" | fzf)"
-  else
-    exit 1
-  fi
+  CHOICE="$(printf '%s\n' "autotype" "username" "password" "${!PASSDATA_ARR[@]}" | "${BACKEND[@]}")"
 
   if [[ -z "$CHOICE" ]]; then
     exit 1
@@ -174,14 +150,7 @@ validate_backend() {
     export BEMENU_OPTS
     unset -v bmn_opt
   elif [[ "$BACKEND" == "rofi" ]]; then
-    true
-  elif [[ "$BACKEND" == "fzf" ]]; then
-    readonly FZF_DEFAULT_COMMAND=""
-    fzf_opt=("--no-multi --height=100 --info=hidden --prompt='pass: ' --layout=reverse")
-    readonly FZF_DEFAULT_OPTS="${fzf_opt[*]}"
-    export FZF_DEFAULT_COMMAND
-    export FZF_DEFAULT_OPTS
-    unset -v fzf_opt
+    BACKEND=(rofi -dmenu)
   else
     exit 1
   fi
@@ -222,6 +191,9 @@ main() {
   fi
 
   # parse any options given by the user
+  # shellcheck disable=SC2178
+  # we initialized BACKEND as a variable but then used it as an array in case rofi was chosen
+  # but this is done after this getopts loop, not before
   while getopts ':hab:s:' opt; do
     case "$opt" in
       h)
