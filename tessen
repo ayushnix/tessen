@@ -7,20 +7,13 @@ readonly PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 export PATH
 umask 077
 
+# initialize the global variables
 BACKEND="bemenu"
 CLIP_TIME=15
 WTYPE=""
-
-
-readonly CLIP_TIME
-readonly BACKEND
-readonly WTYPE
-
-
-# initialize the primary global variables
 readonly PASS_STORE="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
-PASSFILE=""             # password file chosen by the user for decryption
-declare -A PASSDATA_ARR # decrypted password-store data except the password
+PASSFILE=""
+declare -A PASSDATA_ARR
 USERNAME=""
 PASSWORD=""
 CHOICE=""
@@ -241,9 +234,14 @@ main() {
   unset -v opt
   shift $((OPTIND - 1))
 
+  readonly WTYPE
+  readonly BACKEND
+  readonly CLIP_TIME
+
   validate_backend
   validate_clip_time
 
+  trap 'die' EXIT TERM
   get_pass_file
   get_pass_data
 
@@ -254,6 +252,7 @@ main() {
     choice_data_copy
     key_menu_copy
   fi
+  trap - EXIT TERM
 }
 
 main "$@"
