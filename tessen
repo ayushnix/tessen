@@ -144,17 +144,27 @@ key_menu_autotype() {
 }
 
 print_help() {
-  printf '%s\n' "tessen - select, autotype, and copy your password-store data"
-  printf '%s\n' "tessen can use one of the following backends to process password-store data"
-  printf '%s\n' "    - bemenu (copy + autotype) - the default choice"
-  printf '%s\n' "    - rofi (copy + autotype) - lbonn wayland fork"
-  printf '%s\n' "    - fzf (copy only when run from a terminal) - limited functionality" ""
+  printf '%s\n' "tessen: copy or autotype your PASSWORD_STORE_DIR data" ""
+  printf '%s\n' "tessen can use one of the following backends"
+  printf '%s\n' "       - bemenu"
+  printf '%s\n' "       - rofi" ""
   printf '%s\n' "usage: [-ha] [-b backend] [-s seconds]"
   printf '%s\n' "Command Summary:"
-  printf '%s\n' "    -h         show this help menu"
-  printf '%s\n' "    -a         autotype data instead of copying"
-  printf '%s\n' "    -b         choose either bemenu, rofi, or fzf"
-  printf '%s\n' "    -s         number of seconds to keep copied data in clipboard"
+  printf '%s\n' "       -h              show this help menu"
+  printf '%s\n' "       -a              autotype data instead of copying"
+  printf '%s\n' "       -b bemenu/rofi  choose either bemenu or rofi"
+  printf '%s\n' "       -s seconds      number of seconds to keep copied data in clipboard" ""
+  printf '%s\n' "When using [-a], [-s seconds] will have no effect"
+  printf '%s\n' "tessen will use bemenu and will copy data by default if no options are provided" ""
+  printf '%s\n' "Examples:"
+  printf '%s\n' "       autotype data in PASSWORD_STORE_DIR using bemenu"
+  printf '%s\n' '       ayushnix@laptop ~ $ tessen -a -b bemenu' ''
+  printf '%s\n' "       copy data from PASSWORD_STORE_DIR using rofi to the clipboard for 30 seconds"
+  printf '%s\n' '       ayushnix@laptop ~ $ tessen -b rofi -s 30' ''
+  printf '%s\n' "If you're using the sway window manager, you can add tessen to your sway config file"
+  # shellcheck disable=SC2016
+  printf '%s\n' '       bindsym $mod+z exec tessen' ''
+  printf '%s\n' "For more details, visit https://github.com/ayushnix/tessen"
 }
 
 validate_backend() {
