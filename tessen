@@ -126,7 +126,7 @@ get_pass_data() {
 }
 
 # get the key that the user chooses to copy
-copy_choice_data() {
+choice_data_copy() {
   if [[ "$BACKEND" == "bemenu" ]]; then
     CHOICE="$(printf '%s\n' "username" "password" "${!PASSDATA_ARR[@]}" | bemenu)"
   elif [[ "$BACKEND" == "rofi" ]]; then
@@ -142,30 +142,8 @@ copy_choice_data() {
   fi
 }
 
-# the menu for selecting and copying the decrypted data
-copy_key_menu() {
-  if [[ "$CHOICE" == "username" ]]; then
-    wl-copy "$USERNAME"
-    notify-send "username copied, clearing in $CLIP_TIME seconds ..."
-    nohup sh -c "sleep $CLIP_TIME; wl-copy --clear" > /dev/null 2>&1 &
-    disown
-  elif [[ "$CHOICE" == "password" ]]; then
-    wl-copy "$PASSWORD"
-    notify-send "password copied, clearing in $CLIP_TIME seconds ..."
-    nohup sh -c "sleep $CLIP_TIME; wl-copy --clear" > /dev/null 2>&1 &
-    disown
-  elif [[ -n "${PASSDATA_ARR[$CHOICE]}" ]]; then
-    wl-copy "${PASSDATA_ARR[$CHOICE]}"
-    notify-send "$CHOICE copied, clearing in $CLIP_TIME seconds ..."
-    nohup sh -c "sleep $CLIP_TIME; wl-copy --clear" > /dev/null 2>&1 &
-    disown
-  else
-    exit 1
-  fi
-}
-
 # get the key that the user chooses to autotype
-autotype_choice_data() {
+choice_data_autotype() {
   if [[ "$BACKEND" == "bemenu" ]]; then
     CHOICE="$(printf '%s\n' "autotype" "username" "password" "${!PASSDATA_ARR[@]}" | bemenu)"
   elif [[ "$BACKEND" == "rofi" ]]; then
@@ -181,16 +159,39 @@ autotype_choice_data() {
   fi
 }
 
+# the menu for selecting and copying the decrypted data
+key_menu_copy() {
+  if [[ "$CHOICE" == "username" ]]; then
+    wl-copy "$USERNAME"
+    notify-send "username copied, clearing in $CLIP_TIME seconds ..."
+    clean
+  elif [[ "$CHOICE" == "password" ]]; then
+    wl-copy "$PASSWORD"
+    notify-send "password copied, clearing in $CLIP_TIME seconds ..."
+    clean
+  elif [[ -n "${PASSDATA_ARR[$CHOICE]}" ]]; then
+    wl-copy "${PASSDATA_ARR[$CHOICE]}"
+    notify-send "$CHOICE copied, clearing in $CLIP_TIME seconds ..."
+    clean
+  else
+    exit 1
+  fi
+}
+
 # the menu for selecting and autotyping the decrypted data
-autotype_key_menu() {
+key_menu_autotype() {
   if [[ "$CHOICE" == "autotype" ]]; then
     wtype -s 100 "$USERNAME" && wtype -s 100 -k Tab -- && wtype -s 100 "$PASSWORD"
+    exit 0
   elif [[ "$CHOICE" == "username" ]]; then
     wtype "$USERNAME"
+    exit 0
   elif [[ "$CHOICE" == "password" ]]; then
     wtype "$PASSWORD"
+    exit 0
   elif [[ -n "${PASSDATA_ARR[$CHOICE]}" ]]; then
     wtype "${PASSDATA_ARR[$CHOICE]}"
+    exit 0
   else
     exit 1
   fi
@@ -244,11 +245,11 @@ main() {
   get_pass_data
 
   if [[ "$WTYPE" -eq 1 ]]; then
-    autotype_choice_data
-    autotype_key_menu
+    choice_data_autotype
+    key_menu_autotype
   else
-    copy_choice_data
-    copy_key_menu
+    choice_data_copy
+    key_menu_copy
   fi
 }
 
