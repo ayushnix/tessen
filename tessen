@@ -216,12 +216,12 @@ main() {
   unset -v opt
   shift $((OPTIND - 1))
 
+  validate_backend
+  validate_clip_time
+
   readonly WTYPE
   readonly BACKEND
   readonly CLIP_TIME
-
-  validate_backend
-  validate_clip_time
 
   trap 'die' EXIT TERM
   get_pass_file
