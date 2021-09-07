@@ -25,27 +25,6 @@ BACKEND="bemenu"
 CLIP_TIME=15
 WTYPE=""
 
-while getopts ':hab:s:' opt; do
-  case "$opt" in
-    h)
-      print_help
-      exit 0
-      ;;
-    a) WTYPE=1 ;;
-    b) BACKEND="$OPTARG" ;;
-    s) CLIP_TIME="$OPTARG" ;;
-    \?)
-      notify-send "invalid option: -$OPTARG"
-      exit 1
-      ;;
-    :)
-      notify-send "option -$OPTARG requires a value"
-      exit 1
-      ;;
-  esac
-done
-unset -v opt
-shift $((OPTIND - 1))
 
 readonly CLIP_TIME
 readonly BACKEND
@@ -234,6 +213,29 @@ clean() {
 }
 
 main() {
+  # parse any options given by the user
+  while getopts ':hab:s:' opt; do
+    case "$opt" in
+      h)
+        print_help
+        exit 0
+        ;;
+      a) WTYPE=1 ;;
+      b) BACKEND="$OPTARG" ;;
+      s) CLIP_TIME="$OPTARG" ;;
+      \?)
+        notify-send "invalid option: -$OPTARG"
+        exit 1
+        ;;
+      :)
+        notify-send "option -$OPTARG requires a value"
+        exit 1
+        ;;
+    esac
+  done
+  unset -v opt
+  shift $((OPTIND - 1))
+
   get_pass_file
   get_pass_data
 
@@ -246,4 +248,4 @@ main() {
   fi
 }
 
-main
+main "$@"
