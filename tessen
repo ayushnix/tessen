@@ -7,20 +7,6 @@ readonly PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 export PATH
 umask 077
 
-print_help() {
-  printf '%s\n' "tessen - select, autotype, and copy your password-store data"
-  printf '%s\n' "tessen can use one of the following backends to process password-store data"
-  printf '%s\n' "    - bemenu (copy + autotype) - the default choice"
-  printf '%s\n' "    - rofi (copy + autotype) - lbonn wayland fork"
-  printf '%s\n' "    - fzf (copy only when run from a terminal) - limited functionality" ""
-  printf '%s\n' "usage: [-ha] [-b backend] [-s seconds]"
-  printf '%s\n' "Command Summary:"
-  printf '%s\n' "    -h         show this help menu"
-  printf '%s\n' "    -a         autotype data instead of copying"
-  printf '%s\n' "    -b         choose either bemenu, rofi, or fzf"
-  printf '%s\n' "    -s         number of seconds to keep copied data in clipboard"
-}
-
 BACKEND="bemenu"
 CLIP_TIME=15
 WTYPE=""
@@ -30,39 +16,6 @@ readonly CLIP_TIME
 readonly BACKEND
 readonly WTYPE
 
-# validate $BACKEND and set the default options for bemenu and fzf
-if [[ "$BACKEND" == "bemenu" ]]; then
-  bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
-  readonly BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
-  export BEMENU_OPTS
-  unset -v bmn_opt
-elif [[ "$BACKEND" == "rofi" ]]; then
-  true
-elif [[ "$BACKEND" == "fzf" ]]; then
-  readonly FZF_DEFAULT_COMMAND=""
-  fzf_opt=("--no-multi --height=100 --info=hidden --prompt='pass: ' --layout=reverse")
-  readonly FZF_DEFAULT_OPTS="${fzf_opt[*]}"
-  export FZF_DEFAULT_COMMAND
-  export FZF_DEFAULT_OPTS
-  unset -v fzf_opt
-else
-  exit 1
-fi
-
-# validate the value of CLIP_TIME
-check_clip_time() {
-  local clip_regex
-
-  clip_regex="^[[:digit:]]+$"
-
-  if [[ "$CLIP_TIME" =~ $clip_regex ]]; then
-    return 0
-  else
-    notify-send "invalid clipboard time provided"
-    exit 1
-  fi
-}
-check_clip_time
 
 # initialize the primary global variables
 readonly PASS_STORE="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
@@ -197,6 +150,53 @@ key_menu_autotype() {
   fi
 }
 
+print_help() {
+  printf '%s\n' "tessen - select, autotype, and copy your password-store data"
+  printf '%s\n' "tessen can use one of the following backends to process password-store data"
+  printf '%s\n' "    - bemenu (copy + autotype) - the default choice"
+  printf '%s\n' "    - rofi (copy + autotype) - lbonn wayland fork"
+  printf '%s\n' "    - fzf (copy only when run from a terminal) - limited functionality" ""
+  printf '%s\n' "usage: [-ha] [-b backend] [-s seconds]"
+  printf '%s\n' "Command Summary:"
+  printf '%s\n' "    -h         show this help menu"
+  printf '%s\n' "    -a         autotype data instead of copying"
+  printf '%s\n' "    -b         choose either bemenu, rofi, or fzf"
+  printf '%s\n' "    -s         number of seconds to keep copied data in clipboard"
+}
+
+validate_backend() {
+  if [[ "$BACKEND" == "bemenu" ]]; then
+    bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
+    readonly BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
+    export BEMENU_OPTS
+    unset -v bmn_opt
+  elif [[ "$BACKEND" == "rofi" ]]; then
+    true
+  elif [[ "$BACKEND" == "fzf" ]]; then
+    readonly FZF_DEFAULT_COMMAND=""
+    fzf_opt=("--no-multi --height=100 --info=hidden --prompt='pass: ' --layout=reverse")
+    readonly FZF_DEFAULT_OPTS="${fzf_opt[*]}"
+    export FZF_DEFAULT_COMMAND
+    export FZF_DEFAULT_OPTS
+    unset -v fzf_opt
+  else
+    exit 1
+  fi
+}
+
+validate_clip_time() {
+  local clip_regex
+
+  clip_regex="^[[:digit:]]+$"
+
+  if [[ "$CLIP_TIME" =~ $clip_regex ]]; then
+    return 0
+  else
+    notify-send "invalid clipboard time provided"
+    exit 1
+  fi
+}
+
 clean() {
   {
     sleep "$CLIP_TIME"
@@ -240,6 +240,9 @@ main() {
   done
   unset -v opt
   shift $((OPTIND - 1))
+
+  validate_backend
+  validate_clip_time
 
   get_pass_file
   get_pass_data
