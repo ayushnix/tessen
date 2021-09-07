@@ -72,12 +72,6 @@ USERNAME=""
 PASSWORD=""
 CHOICE=""
 
-# exit if the password store directory doesn't exist
-if ! [[ -d "$PASS_STORE" ]]; then
-  notify-send "password store not found"
-  exit 1
-fi
-
 # display and get the shortened path of the password file
 get_pass_file() {
   local tmp_pass_1 tmp_pass_2 tmp_pass_3
@@ -213,6 +207,12 @@ clean() {
 }
 
 main() {
+  # exit if the password store directory doesn't exist
+  if ! [[ -d "$PASS_STORE" ]]; then
+    notify-send "password store not found"
+    exit 1
+  fi
+
   # parse any options given by the user
   while getopts ':hab:s:' opt; do
     case "$opt" in
