@@ -196,14 +196,18 @@ autotype_key_menu() {
   fi
 }
 
-# cleanup jobs before the script exits
 clean() {
+  {
+    sleep "$CLIP_TIME"
+    wl-copy --clear
+  } > /dev/null 2>&1 &
+  disown
+  unset -v PASSFILE USERNAME PASSWORD PASSDATA_ARR CHOICE
+}
+
+die() {
   wl-copy --clear
-  unset -v PASSFILE
-  unset -v USERNAME
-  unset -v PASSWORD
-  unset -v PASSDATA_ARR
-  unset -v CHOICE
+  unset -v PASSFILE USERNAME PASSWORD PASSDATA_ARR CHOICE
 }
 
 main() {
