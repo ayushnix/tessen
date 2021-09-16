@@ -55,7 +55,7 @@ get_pass_data() {
   for idx in "${passdata[@]:1}"; do
     if [[ "$idx" =~ $passdata_regex ]]; then
       key="${idx%%:*}"
-      val="${idx##*: }"
+      val="${idx#*: }"
       PASSDATA_ARR["$key"]="$val"
     else
       continue
