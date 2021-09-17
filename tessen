@@ -1,5 +1,9 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2021 Ayush Agarwal <ayush at fastmail dot in>
+#
+# tessen - a data selection interface for pass using bemenu or rofi on Wayland
+# ------------------------------------------------------------------------------
 
 # shell "strict" mode
 set -uo pipefail
