@@ -212,23 +212,23 @@ validate_clip_time() {
 
 clean() {
   {
-    sleep "$CLIP_TIME"
+    sleep "$CLIP_TIME" || exit 1
     wl-copy --clear
   } > /dev/null 2>&1 &
   disown
-  unset -v PASSFILE USERNAME PASSWORD PASSDATA_ARR CHOICE
+  unset -v PASSFILE USERNAME PASSWORD PASSDATA_ARR
 }
 
 die() {
   wl-copy --clear
-  unset -v PASSFILE USERNAME PASSWORD PASSDATA_ARR CHOICE
+  unset -v PASSFILE USERNAME PASSWORD PASSDATA_ARR
 }
 
 main() {
   local _opt
 
   # exit if the password store directory doesn't exist
-  if ! [[ -d "$PASS_STORE" ]]; then
+  if ! [[ -d "$PREFIX" ]]; then
     notify-send "password store not found"
     exit 1
   fi
