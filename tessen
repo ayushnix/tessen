@@ -214,7 +214,7 @@ validate_clip_time() {
   if [[ "$CLIP_TIME" =~ $clip_regex ]]; then
     return 0
   else
-    notify-send "invalid clipboard time provided"
+    printf '%s\n' "invalid clipboard time provided" >&2
     exit 1
   fi
 }
@@ -238,7 +238,7 @@ main() {
 
   # exit if the password store directory doesn't exist
   if ! [[ -d "$PREFIX" ]]; then
-    notify-send "password store not found"
+    printf '%s\n' "password store not found" >&2
     exit 1
   fi
 
