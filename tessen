@@ -158,17 +158,17 @@ auto_type() {
 wld_copy() {
   if [[ "${1-}" == "username" ]]; then
     printf '%s' "$USERNAME" | wl-copy
-    notify-send -t $((CLIP_TIME * 1000)) "Copied username to clipboard. Will clear in $CLIP_TIME seconds."
+    notify-send -t $((CLIP_TIME * 1000)) "Copied username to clipboard. Will clear in $CLIP_TIME seconds." || true
     shift
     clean
   elif [[ "${1-}" == "password" ]]; then
     printf '%s' "$PASSWORD" | wl-copy
-    notify-send -t $((CLIP_TIME * 1000)) "Copied password to clipboard. Will clear in $CLIP_TIME seconds."
+    notify-send -t $((CLIP_TIME * 1000)) "Copied password to clipboard. Will clear in $CLIP_TIME seconds." || true
     shift
     clean
   elif [[ -n "${PASSDATA_ARR[${1-}]}" ]]; then
     printf '%s' "${PASSDATA_ARR[${1-}]}" | wl-copy
-    notify-send -t $((CLIP_TIME * 1000)) "Copied ${1-} to clipboard. Will clear in $CLIP_TIME seconds."
+    notify-send -t $((CLIP_TIME * 1000)) "Copied ${1-} to clipboard. Will clear in $CLIP_TIME seconds." || true
     shift
     clean
   else
