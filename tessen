@@ -76,7 +76,7 @@ get_key() {
   local ch="" flag=false key_arr=()
 
   if [[ "${1-}" == "pass_key_list" ]]; then
-    key_arr=("autotype" "username" "password" "${!PASSDATA_ARR[@]}")
+    key_arr=("autotype username and password" "username" "password" "${!PASSDATA_ARR[@]}")
     shift
   elif [[ "${1-}" == "opt_key_list" ]]; then
     key_arr=("autotype" "copy")
@@ -105,7 +105,7 @@ key_menu() {
 
   get_key pass_key_list
 
-  if [[ "$_KEY" == "autotype" ]]; then
+  if [[ "$_KEY" == "autotype username and password" ]]; then
     auto_type username_password
     exit 0
   fi
