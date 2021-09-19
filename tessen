@@ -129,27 +129,17 @@ key_menu_autotype() {
 }
 
 print_help() {
-  printf '%s\n' "tessen: copy or autotype your PASSWORD_STORE_DIR data" ""
-  printf '%s\n' "tessen can use one of the following backends"
-  printf '%s\n' "       - bemenu"
-  printf '%s\n' "       - rofi" ""
-  printf '%s\n' "usage: [-ha] [-b backend] [-s seconds]"
-  printf '%s\n' "Command Summary:"
-  printf '%s\n' "       -h              show this help menu"
-  printf '%s\n' "       -a              autotype data instead of copying"
-  printf '%s\n' "       -b bemenu/rofi  choose either bemenu or rofi"
-  printf '%s\n' "       -s seconds      number of seconds to keep copied data in clipboard" ""
-  printf '%s\n' "When using [-a], [-s seconds] will have no effect"
-  printf '%s\n' "tessen will use bemenu and will copy data by default if no options are provided" ""
-  printf '%s\n' "Examples:"
-  printf '%s\n' "       autotype data in PASSWORD_STORE_DIR using bemenu"
-  printf '%s\n' '       ayushnix@laptop ~ $ tessen -a -b bemenu' ''
-  printf '%s\n' "       copy data from PASSWORD_STORE_DIR using rofi to the clipboard for 30 seconds"
-  printf '%s\n' '       ayushnix@laptop ~ $ tessen -b rofi -s 30' ''
-  printf '%s\n' "If you're using the sway window manager, you can add tessen to your sway config file"
-  # shellcheck disable=SC2016
-  printf '%s\n' '       bindsym $mod+z exec tessen' ''
-  printf '%s\n' "For more details, visit https://github.com/ayushnix/tessen"
+  printf '%s\n' "${0##*/} - data selection interface for password-store on wayland" ""
+  printf '%s\n' "Usage: ${0##*/} [options]" ""
+  printf '%s\n' "  tessen                        use bemenu and either autotype or copy data"
+  printf '%s\n' "  tessen -b rofi -t             use rofi and always autotype data"
+  printf '%s\n' "  tessen -c                     use bemenu and always copy data" ""
+  printf '%s\n' "  -b, --backend, --backend=     choose 'bemenu' or 'rofi' as backend (default: bemenu)"
+  printf '%s\n' "  -t, --autotype                always autotype data"
+  printf '%s\n' "  -c, --clipboard               always copy data"
+  printf '%s\n' "  -h, --help                    print this help menu"
+  printf '%s\n' "  -v, --version                 print the version of tessen" ""
+  printf '%s\n' "For more details, visit https://github.com/ayushnix/pass-tessen"
 }
 
 validate_backend() {
