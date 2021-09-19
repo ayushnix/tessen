@@ -112,6 +112,9 @@ key_menu() {
     exit 0
   elif [[ "${ACTION-}" == "copy" ]]; then
     wld_copy "$_KEY"
+  elif [[ "${ACTION-}" == "both" ]]; then
+    auto_type "$_KEY"
+    wld_copy "$_KEY"
   elif [[ -z "${ACTION-}" ]]; then
     tmp_key="$_KEY"
     get_key opt_key_list
