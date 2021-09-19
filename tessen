@@ -177,17 +177,18 @@ wld_copy() {
 }
 
 print_help() {
-  printf '%s\n' "${0##*/} - data selection interface for password-store on wayland" ""
+  printf '%s\n' "${0##*/} - autotype and copy data from password-store on wayland" ""
   printf '%s\n' "Usage: ${0##*/} [options]" ""
-  printf '%s\n' "  tessen                        use bemenu and either autotype or copy data"
-  printf '%s\n' "  tessen -b rofi -t             use rofi and always autotype data"
-  printf '%s\n' "  tessen -c                     use bemenu and always copy data" ""
+  printf '%s\n' "  tessen                        use bemenu and either autotype OR copy data"
+  printf '%s\n' "  tessen -b rofi                use rofi and either autotype OR copy data"
+  printf '%s\n' "  tessen -b rofi -a autotype    use rofi and always autotype data"
+  printf '%s\n' "  tessen -b rofi -a copy        use rofi and always copy data"
+  printf '%s\n' "  tessen -b rofi -a both        use rofi and always autotype AND copy data" ""
   printf '%s\n' "  -b, --backend, --backend=     choose 'bemenu' or 'rofi' as backend (default: bemenu)"
-  printf '%s\n' "  -t, --autotype                always autotype data"
-  printf '%s\n' "  -c, --clipboard               always copy data"
+  printf '%s\n' "  -a, --action, --action=       choose one of 'autotype|copy|both'"
   printf '%s\n' "  -h, --help                    print this help menu"
   printf '%s\n' "  -v, --version                 print the version of tessen" ""
-  printf '%s\n' "For more details, visit https://github.com/ayushnix/pass-tessen"
+  printf '%s\n' "For more details, visit https://github.com/ayushnix/tessen"
 }
 
 validate_backend() {
