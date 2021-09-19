@@ -11,6 +11,9 @@ readonly PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 export PATH
 umask 077
 
+# don't leak password data if debug mode is enabled
+set +x
+
 # initialize the global variables
 readonly VERSION="2.0.0"
 readonly PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
