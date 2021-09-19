@@ -72,56 +72,96 @@ get_pass_data() {
 get_key() {
   local ch="" flag=false key_arr=()
 
-  if [[ "$WTYPE" -eq 1 ]]; then
-    CHOICE="$(printf '%s\n' "${choice_arr[@]}" | "${BACKEND[@]}")"
+  if [[ "${1-}" == "pass_key_list" ]]; then
+    key_arr=("autotype" "username" "password" "${!PASSDATA_ARR[@]}")
+    shift
+  elif [[ "${1-}" == "opt_key_list" ]]; then
+    key_arr=("autotype" "copy")
+    shift
   else
-    CHOICE="$(printf '%s\n' "${choice_arr[@]:1}" | "${BACKEND[@]}")"
+    exit 1
   fi
 
-  for ch in "${choice_arr[@]}"; do
-    if [[ "$CHOICE" == "$ch" ]]; then
-      flag=1
+  _KEY="$(printf '%s\n' "${key_arr[@]}" | "$BACKEND" "$BACKEND_OPTS")"
+
+  # validate the chosen key name
+  for ch in "${key_arr[@]}"; do
+    if [[ "$_KEY" == "$ch" ]]; then
+      flag=true
+      break
     fi
   done
-
-  if [[ "$flag" -ne 1 ]]; then
+  if [[ "$flag" == "false" ]]; then
     exit 1
   fi
 }
 
-# the menu for selecting and copying the decrypted data
-key_menu_copy() {
-  if [[ "$CHOICE" == "username" ]]; then
-    wl-copy "$USERNAME"
-    notify-send "username copied, clearing in $CLIP_TIME seconds ..."
-    clean
-  elif [[ "$CHOICE" == "password" ]]; then
-    wl-copy "$PASSWORD"
-    notify-send "password copied, clearing in $CLIP_TIME seconds ..."
-    clean
-  elif [[ -n "${PASSDATA_ARR[$CHOICE]}" ]]; then
-    wl-copy "${PASSDATA_ARR[$CHOICE]}"
-    notify-send "$CHOICE copied, clearing in $CLIP_TIME seconds ..."
-    clean
+# the 2nd, and possibly 3rd, stage of the menu
+key_menu() {
+  local tmp_key
+
+  get_key pass_key_list
+
+  if [[ "$_KEY" == "autotype" ]]; then
+    auto_type username_password
+    exit 0
+  fi
+
+  if [[ "${AT_TYPE-}" == "true" ]]; then
+    auto_type "$_KEY"
+    exit 0
+  elif [[ "${AT_TYPE-}" == "false" ]]; then
+    wld_copy "$_KEY"
+  elif [[ -z "${AT_TYPE-}" ]]; then
+    tmp_key="$_KEY"
+    get_key opt_key_list
+    if [[ "$_KEY" == "autotype" ]]; then
+      auto_type "$tmp_key"
+      exit 0
+    elif [[ "$_KEY" == "copy" ]]; then
+      wld_copy "$tmp_key"
+    else
+      exit 1
+    fi
+  fi
+}
+
+auto_type() {
+  if [[ "${1-}" == "username_password" ]]; then
+    printf '%s' "$USERNAME" | wtype -s 100 -
+    wtype -s 100 -k Tab --
+    printf '%s' "$PASSWORD" | wtype -s 100 -
+    shift
+  elif [[ "${1-}" == "username" ]]; then
+    printf '%s' "$USERNAME" | wtype -s 100 -
+    shift
+  elif [[ "${1-}" == "password" ]]; then
+    printf '%s' "$PASSWORD" | wtype -s 100 -
+    shift
+  elif [[ -n "${PASSDATA_ARR[${1-}]}" ]]; then
+    printf '%s' "${PASSDATA_ARR[${1-}]}" | wtype -s 100 -
+    shift
   else
     exit 1
   fi
 }
 
-# the menu for selecting and autotyping the decrypted data
-key_menu_autotype() {
-  if [[ "$CHOICE" == "autotype" ]]; then
-    wtype -s 100 "$USERNAME" && wtype -s 100 -k Tab -- && wtype -s 100 "$PASSWORD"
-    exit 0
-  elif [[ "$CHOICE" == "username" ]]; then
-    wtype "$USERNAME"
-    exit 0
-  elif [[ "$CHOICE" == "password" ]]; then
-    wtype "$PASSWORD"
-    exit 0
-  elif [[ -n "${PASSDATA_ARR[$CHOICE]}" ]]; then
-    wtype "${PASSDATA_ARR[$CHOICE]}"
-    exit 0
+wld_copy() {
+  if [[ "${1-}" == "username" ]]; then
+    printf '%s' "$USERNAME" | wl-copy
+    notify-send -t $((CLIP_TIME * 1000)) "Copied username to clipboard. Will clear in $CLIP_TIME seconds."
+    shift
+    clean
+  elif [[ "${1-}" == "password" ]]; then
+    printf '%s' "$PASSWORD" | wl-copy
+    notify-send -t $((CLIP_TIME * 1000)) "Copied password to clipboard. Will clear in $CLIP_TIME seconds."
+    shift
+    clean
+  elif [[ -n "${PASSDATA_ARR[${1-}]}" ]]; then
+    printf '%s' "${PASSDATA_ARR[${1-}]}" | wl-copy
+    notify-send -t $((CLIP_TIME * 1000)) "Copied ${1-} to clipboard. Will clear in $CLIP_TIME seconds."
+    shift
+    clean
   else
     exit 1
   fi
