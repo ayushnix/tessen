@@ -184,12 +184,15 @@ print_help() {
 validate_backend() {
   if [[ "$BACKEND" == "bemenu" ]]; then
     bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
-    readonly BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
-    export BEMENU_OPTS
+    export BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
+    readonly BACKEND="bemenu"
+    readonly BACKEND_OPTS=""
     unset -v bmn_opt
   elif [[ "$BACKEND" == "rofi" ]]; then
-    BACKEND=(rofi -dmenu)
+    readonly BACKEND="rofi"
+    readonly BACKEND_OPTS="-dmenu"
   else
+    printf '%s\n' "Please specify a backend: bemenu|rofi" >&2
     exit 1
   fi
 }
@@ -282,7 +285,9 @@ main() {
   done
   unset -v _opt
 
-  validate_backend
+  if unset -v BACKEND_OPTS 2> /dev/null; then
+    validate_backend
+  fi
   validate_clip_time
 
   readonly WTYPE
