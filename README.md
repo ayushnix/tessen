@@ -1,68 +1,143 @@
-# tessen
+## tessen
 
-A bash script for Wayland that presents an interactive menu to copy and auto-type
-[password store](https://www.passwordstore.org/) data.
+A bash script that uses either [bemenu](https://github.com/Cloudef/bemenu) or
+[rofi](https://github.com/lbonn/rofi) as an interface for auto-typing and copying [password
+store](https://www.passwordstore.org/) data.
 
-:warning: This script is a work in progress. For now, it should not be relied upon for using your
-password store.
+`tessen` is written to work only on Wayland.
 
-`tessen` relies on one of the following tools -
+If you'd rather use [fzf](https://github.com/junegunn/fzf) to copy your password-store data on both
+Xorg/X11 and Wayland, check out [pass-tessen](https://github.com/ayushnix/pass-tessen).
 
-- [bemenu](https://github.com/Cloudef/bemenu)
-- [rofi](https://github.com/lbonn/rofi)
-- [fzf](https://github.com/junegunn/fzf)
+## Installation
 
-Additionally, if you want to auto-type password store data, you'll need
-[wtype](https://github.com/atx/wtype).
+### Dependencies
 
-`tessen` also uses the `notify-send` command from the
-[libnotify](https://gitlab.gnome.org/GNOME/libnotify) package to send notifications when
-password-data is copied to the clipboard and after how much time will the clipboard be cleared.
+- [pass](https://git.zx2c4.com/password-store/)
+- either [bemenu](https://github.com/Cloudef/bemenu) or [rofi](https://github.com/lbonn/rofi)
+- [wtype](https://github.com/atx/wtype) (if you want to auto-type data)
+- [wl-clipboard](https://github.com/bugaevc/wl-clipboard) or
+  [wl-clipboard-rs](https://github.com/YaLTeR/wl-clipboard-rs) (if you want to copy data)
+- [libnotify](https://gitlab.gnome.org/GNOME/libnotify) (to send notifications about copied data)
+
+### Arch Linux
+
+`tessen` is available in the [Arch User Repository](https://aur.archlinux.org/packages/tessen/).
+
+### Git Release
+
+```
+git clone https://github.com/ayushnix/tessen.git
+cd pass-tessen
+sudo make install
+```
+
+You can also do `doas make install` if you're using [doas](https://github.com/Duncaen/OpenDoas),
+which you probably should.
+
+### Stable Release
+
+```
+wget https://github.com/ayushnix/tessen/releases/download/v2.0.0/tessen-2.0.0.tar.gz
+tar xvzf tessen-2.0.0.tar.gz
+cd tessen-2.0.0
+sudo make install
+```
+
+or, you know, `doas make install`.
+
+## Usage
+
+```
+tessen - autotype and copy data from password-store on wayland
+
+Usage: tessen [options]
+
+  tessen                        use bemenu and either autotype OR copy data
+  tessen -b rofi                use rofi and either autotype OR copy data
+  tessen -b rofi -a autotype    use rofi and always autotype data
+  tessen -b rofi -a copy        use rofi and always copy data
+  tessen -b rofi -a both        use rofi and always autotype AND copy data
+
+  -b, --backend, --backend=     choose 'bemenu' or 'rofi' as backend (default: bemenu)
+  -a, --action, --action=       choose one of 'autotype|copy|both'
+  -h, --help                    print this help menu
+  -v, --version                 print the version of tessen
+```
+
+## Why should I use `tessen`?
+
+- `tessen` can autotype or copy (or perform both operations simultaenously, your choice) your
+  password store data including all of your key-value pair data, besides passwords, on Wayland
+
+  Most scripts out there (as of this writing) do not autotype and copy your key-value pair data.
+  They just work with your passwords or a limited set of key-value pairs assumed in the script. They
+  also do not offer choices about autotyping or copying data with the same flexibility as `tessen`
+  does.
+
+  Also, as of this writing, I haven't come across any scripts with the same feature set and code
+  quality as `tessen` that works on Wayland.
+
+- `tessen` focuses on writing code that is easy to understand and modify for even beginners to shell
+  scripting
+
+- `tessen` tries to minimize the number of external binaries used in the script for speed and
+  efficiency. Besides the dependencies mentioned above, `tessen` doesn't use programs like `sed`,
+  `awk`, `tr`, `cut`, `find`, `sort`, `head`, `tail`, and other GNU coreutils, often used casually
+  by people when writing shell scripts
+
+- `tessen` tries to focus on security
+
+  Please report any security issues if you find them.
 
 ## Caveats :warning:
 
-Although bemenu and rofi work fine, fzf doesn't work as expected when calling `tessen` from a
-terminal popup window using `exec $TERMINAL -e tessen`. I've tried to make this work but I couldn't
-figure out how to and I didn't wanna rely sway specific hacks like
-[this](https://github.com/FunctionalHacker/fzf-pass/blob/master/fzf-pass#L24). Pull requests are
-welcome to fix this issue with the fzf backend.
+The reason why `tessen` offers flexibility between autotyping and copying data is because autotyping
+may not always work accurately. There can be several reasons for this.
 
-I've also observed that auto-typing using `wtype` isn't really accurate. From what I've tested,
-Firefox works mostly fine with `wtype` but Chromium doesn't. Even if you do use Firefox, auto-type
-must be done with care because some web pages don't follow the standard convention of having a
-username and password text field just after another and insert links between them. In such cases,
-auto-type can't work as expected.
+One of the reasons when autotype doesn't work is when a web page doesn't follow the standard
+expectation of having a username and password text field just after the other and links are insert
+between them. In such cases, autotyping can make a real mess.
 
-Using [ydotool](https://github.com/ReimuNotMoe/ydotool) will not be supported because it needs root
-access and I'd rather avoid yet another daemon on my system running with root privileges. Feel free
-to fork this script and use ydotool if you want.
+Autotyping also does not work on Chromium based browsers on Wayland when using
+[v0.3](https://github.com/atx/wtype/releases/tag/v0.3) release of `wtype`. However, it works fine on
+Firefox.
 
 ## Assumptions
 
-`tessen` works on several assumptions and tries to fail if they are not met. Please report any
-unexpected behavior.
+`tessen` works under several assumptions and tries to fail gracefully if they are not met. Please
+report any unexpected behavior.
 
-A password store gpg encrypted file should be in the following format -
+The data organization format is assumed to be the same as mentioned on this
+[page](https://www.passwordstore.org/). If valid key-value pairs aren't found, `tessen` will not
+show them.
 
-```
-12o423asef0912`1!@#12-`4a`
-User Name: ayushnix
-Profile Password 1: 1231bnga--312ob
-Profile-Password-2: asdf-123-3012
-Profile_Password_3: f=211n2r1=-12-31
-```
+It is assumed that the name of the file itself is the username. For example, if you have a file
+`bank/mybankusername.gpg` in your password store, the assumed default username is `mybankusername`.
+However, if a valid username key value pair is present inside the file, `tessen` will show them for
+selection as well.
 
-The first line should be the password.
+If there are multiple non-unique keys, the value of the last key will be considered.
 
-The keys in additional lines can have alphanumerics, spaces, hyphen, and underscore. The
-corresponding values can have arbitrary data.  There should be a space between `key:` and `value`.
-The result should be `key:<space>value`.
+## What does `tessen` mean?
 
-It is assumed that the file name is the username but one can still select a custom username key
-value pair from the selection menu. For example, if the file is `bank/mybankusername.gpg`, the
-assumed default username is `mybankusername`.
+[Here](https://en.wikipedia.org/wiki/Japanese_war_fan) you go.
 
-If there are non-unique keys, the value of the last key will be considered.
+## Why did you choose this weird name?
+
+Because obvious names like pass-fzf and pass-clip are already taken by other projects? Also, for
+some reason, the way how FZF's UI instantly opens up and displays relevant information reminded me
+of Japanese hand fans. I guess I was thinking of some anime while coming up with this name.
+
+## Contributions
+
+Please see [this](https://github.com/ayushnix/tessen/blob/master/CONTRIBUTING.md) file.
+
+## Features that WON'T be implemented
+
+- xorg/x11 support, use [rofi-pass](https://github.com/carnager/rofi-pass) or fork this repo and
+  implement it yourself
+- using [ydotool](https://github.com/ReimuNotMoe/ydotool), because it needs root access
 
 ## TODO
 
