@@ -12,15 +12,16 @@ export PATH
 umask 077
 
 # initialize the global variables
-BACKEND="bemenu"
-CLIP_TIME=15
-WTYPE=""
-readonly PASS_STORE="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+readonly VERSION="1.1.0"
+readonly PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+readonly CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-15}"
+BACKEND="${TESSEN_BACKEND:-bemenu}" # uses the value of TESSEN_BACKEND if set by user
+BACKEND_OPTS=""
+AT_TYPE="${TESSEN_AUTOTYPE-}" # uses the value of TESSEN_AUTOTYPE if set by user
 PASSFILE=""
 declare -A PASSDATA_ARR
 USERNAME=""
 PASSWORD=""
-CHOICE=""
 
 # display and get the shortened path of the password file
 get_pass_file() {
@@ -28,19 +29,19 @@ get_pass_file() {
 
   # temporarily enable globbing to get the list of gpg files
   shopt -s nullglob globstar
-  tmp_pass_1=("$PASS_STORE"/**/*.gpg)
-  tmp_pass_2=("${tmp_pass_1[@]#"$PASS_STORE"/}")
+  tmp_pass_1=("$PREFIX"/**/*.gpg)
+  tmp_pass_2=("${tmp_pass_1[@]#"$PREFIX"/}")
   tmp_pass_3=("${tmp_pass_2[@]%.gpg}")
   shopt -u nullglob globstar
 
-  PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | "${BACKEND[@]}")"
+  PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | "$BACKEND" "$BACKEND_OPTS")"
 
-  if ! [[ -e "$PASS_STORE/$PASSFILE".gpg ]]; then
+  if ! [[ -e "$PREFIX/$PASSFILE".gpg ]]; then
     exit 1
   fi
 }
 
-# get the password data including username and other keys
+# get the password data including every key-value pair inside the encrypted file
 get_pass_data() {
   local passdata passdata_regex idx key val
 
@@ -49,7 +50,7 @@ get_pass_data() {
   #             the value can contain anything but it has to follow after a space
   passdata_regex="^[[:alnum:][:blank:]_-]+:[[:blank:]].+$"
   # ASSUMPTION: the basename of the gpg file is the username although one can still
-  #             select a username field inside the file
+  #             select a username field inside the file, if it exists
   USERNAME="${PASSFILE##*/}"
   # ASSUMPTION: the first line of $PASSFILE will contain the password
   PASSWORD="${passdata[0]}"
@@ -67,11 +68,9 @@ get_pass_data() {
   done
 }
 
-# get the key that the user chooses to copy or autotype
-choice_data() {
-  local ch flag choice_arr
-  flag=""
-  choice_arr=("autotype" "username" "password" "${!PASSDATA_ARR[@]}")
+# get the key that the user will choose to autotype or copy
+get_key() {
+  local ch="" flag=false key_arr=()
 
   if [[ "$WTYPE" -eq 1 ]]; then
     CHOICE="$(printf '%s\n' "${choice_arr[@]}" | "${BACKEND[@]}")"
