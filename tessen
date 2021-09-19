@@ -290,20 +290,12 @@ main() {
   fi
   validate_clip_time
 
-  readonly WTYPE
-  readonly BACKEND
-  readonly CLIP_TIME
+  readonly AT_TYPE
 
   trap 'die' EXIT TERM
   get_pass_file
   get_pass_data
-  choice_data
-
-  if [[ "$WTYPE" -eq 1 ]]; then
-    key_menu_autotype
-  else
-    key_menu_copy
-  fi
+  key_menu
   trap - EXIT TERM
 }
 
