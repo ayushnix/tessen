@@ -17,7 +17,7 @@ readonly PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 readonly CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-15}"
 BACKEND="${TESSEN_BACKEND:-bemenu}" # uses the value of TESSEN_BACKEND if set by user
 BACKEND_OPTS=""
-AT_TYPE="${TESSEN_AUTOTYPE-}" # uses the value of TESSEN_AUTOTYPE if set by user
+ACTION="${TESSEN_ACTION-}" # uses the value of TESSEN_ACTION if set by user
 PASSFILE=""
 declare -A PASSDATA_ARR
 USERNAME=""
@@ -107,12 +107,12 @@ key_menu() {
     exit 0
   fi
 
-  if [[ "${AT_TYPE-}" == "true" ]]; then
+  if [[ "${ACTION-}" == "autotype" ]]; then
     auto_type "$_KEY"
     exit 0
-  elif [[ "${AT_TYPE-}" == "false" ]]; then
+  elif [[ "${ACTION-}" == "copy" ]]; then
     wld_copy "$_KEY"
-  elif [[ -z "${AT_TYPE-}" ]]; then
+  elif [[ -z "${ACTION-}" ]]; then
     tmp_key="$_KEY"
     get_key opt_key_list
     if [[ "$_KEY" == "autotype" ]]; then
@@ -123,6 +123,9 @@ key_menu() {
     else
       exit 1
     fi
+  else
+    printf '%s\n' "Please specify a valid option: autotype|copy|both" >&2
+    exit 1
   fi
 }
 
@@ -250,19 +253,16 @@ main() {
         BACKEND="${_opt##--backend=}"
         validate_backend
         ;;
-      -t | --autotype)
-        unset -v AT_TYPE 2> /dev/null || {
-          printf '%s\n' "Please use either -t|--autotype or -c|--clipboard, not both" >&2
+      -a | --action)
+        [[ "$#" -lt 2 ]] && {
+          printf '%s\n' "Please specify a valid option: autotype|copy|both" >&2
           exit 1
         }
-        readonly AT_TYPE=true
+        ACTION="${2-}"
+        shift
         ;;
-      -c | --clipboard)
-        unset -v AT_TYPE 2> /dev/null || {
-          printf '%s\n' "Please use either -t|--autotype or -c|--clipboard, not both" >&2
-          exit 1
-        }
-        readonly AT_TYPE=false
+      --action=*)
+        ACTION="${_opt##--action=}"
         ;;
       -h | --help)
         print_help
@@ -290,7 +290,7 @@ main() {
   fi
   validate_clip_time
 
-  readonly AT_TYPE
+  readonly ACTION
 
   trap 'die' EXIT TERM
   get_pass_file
