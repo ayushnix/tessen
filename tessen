@@ -193,6 +193,8 @@ die() {
 }
 
 main() {
+  local _opt
+
   # exit if the password store directory doesn't exist
   if ! [[ -d "$PASS_STORE" ]]; then
     notify-send "password store not found"
@@ -200,30 +202,56 @@ main() {
   fi
 
   # parse any options given by the user
-  # shellcheck disable=SC2178
-  # we initialized BACKEND as a variable but then used it as an array in case rofi was chosen
-  # but this is done after this getopts loop, not before
-  while getopts ':hab:s:' opt; do
-    case "$opt" in
-      h)
+  while [[ "$#" -gt 0 ]]; do
+    _opt="${1-}"
+    case "$_opt" in
+      -b | --backend)
+        [[ "$#" -lt 2 ]] && {
+          printf '%s\n' "Please specify a backend: bemenu|rofi" >&2
+          exit 1
+        }
+        BACKEND="${2-}"
+        validate_backend
+        shift
+        ;;
+      --backend=*)
+        BACKEND="${_opt##--backend=}"
+        validate_backend
+        ;;
+      -t | --autotype)
+        unset -v AT_TYPE 2> /dev/null || {
+          printf '%s\n' "Please use either -t|--autotype or -c|--clipboard, not both" >&2
+          exit 1
+        }
+        readonly AT_TYPE=true
+        ;;
+      -c | --clipboard)
+        unset -v AT_TYPE 2> /dev/null || {
+          printf '%s\n' "Please use either -t|--autotype or -c|--clipboard, not both" >&2
+          exit 1
+        }
+        readonly AT_TYPE=false
+        ;;
+      -h | --help)
         print_help
         exit 0
         ;;
-      a) WTYPE=1 ;;
-      b) BACKEND="$OPTARG" ;;
-      s) CLIP_TIME="$OPTARG" ;;
-      \?)
-        notify-send "invalid option: -$OPTARG"
-        exit 1
+      -v | --version)
+        printf '%s\n' "tessen version $VERSION"
+        exit 0
         ;;
-      :)
-        notify-send "option -$OPTARG requires a value"
+      --)
+        shift
+        break
+        ;;
+      *)
+        printf '%s\n' "invalid argument detected" >&2
         exit 1
         ;;
     esac
+    shift
   done
-  unset -v opt
-  shift $((OPTIND - 1))
+  unset -v _opt
 
   validate_backend
   validate_clip_time
