@@ -138,9 +138,3 @@ Please see [this](https://github.com/ayushnix/tessen/blob/master/CONTRIBUTING.md
 - xorg/x11 support, use [rofi-pass](https://github.com/carnager/rofi-pass) or fork this repo and
   implement it yourself
 - using [ydotool](https://github.com/ReimuNotMoe/ydotool), because it needs root access
-
-## TODO
-
-- implement traps to catch errors and do cleanup
-- find a decent alternative for [libnotify](https://gitlab.gnome.org/GNOME/libnotify) if possible
-- review the script for any security flaws
