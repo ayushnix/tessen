@@ -67,28 +67,26 @@ Usage: tessen [options]
 
 ## Why should I use `tessen`?
 
-- `tessen` can autotype or copy (or perform both operations simultaenously, your choice) your
-  password store data including all of your key-value pair data, besides passwords, on Wayland
+- `tessen` can autotype or copy (or, do both at the same time!) your password store data including
+  all of your key-value pair data, not just besides passwords
 
-  Most scripts out there (as of this writing) do not autotype and copy your key-value pair data.
-  They just work with your passwords or a limited set of key-value pairs assumed in the script. They
-  also do not offer choices about autotyping or copying data with the same flexibility as `tessen`
-  does.
+  From what I've observed as of this commit, most scripts out there do not autotype and copy all of
+  your key-value pair data. They also do not offer choices about autotyping or copying data with the
+  same flexibility as `tessen` does.
 
-  Also, as of this writing, I haven't come across any scripts with the same feature set and code
-  quality as `tessen` that works on Wayland.
-
-- `tessen` focuses on writing code that is easy to understand and modify for even beginners to shell
-  scripting
+  Although [rofi-pass](https://github.com/carnager/rofi-pass) is a good alternative, it only works
+  on Xorg/X11. `tessen` is made to work on Wayland.
 
 - `tessen` tries to minimize the number of external binaries used in the script for speed and
   efficiency. Besides the dependencies mentioned above, `tessen` doesn't use programs like `sed`,
   `awk`, `tr`, `cut`, `find`, `sort`, `head`, `tail`, and other GNU coreutils, often used casually
   by people when writing shell scripts
 
-- `tessen` tries to focus on security
+- the code is linted using [shellcheck](https://github.com/koalaman/shellcheck) and formatted using
+  [shfmt](https://github.com/mvdan/sh)
 
-  Please report any security issues if you find them.
+- focuses on minimalism and security (please let me know if you have any suggestions for
+  improvement)
 
 ## Caveats :warning:
 
@@ -101,7 +99,8 @@ between them. In such cases, autotyping can make a real mess.
 
 Autotyping also does not work on Chromium based browsers on Wayland when using
 [v0.3](https://github.com/atx/wtype/releases/tag/v0.3) release of `wtype`. However, it works fine on
-Firefox.
+Firefox. This issue might've been fixed in
+[this](https://github.com/atx/wtype/commit/a81540b7d4920566ad271236ca88befc0002b462) commit.
 
 ## Assumptions
 
