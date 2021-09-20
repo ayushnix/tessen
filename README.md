@@ -48,6 +48,15 @@ or, you know, `doas make install`.
 
 ## Usage
 
+`tessen` will automatically use the following environment variables if they're set or assume
+reasonable defaults.
+
+- `PASSWORD_STORE_DIR` (the default location of your password store)
+- `PASSWORD_STORE_CLIP_TIME` (the amount of time for which password-store data stays on the
+  clipboard)
+- `TESSEN_BACKEND` (choose either `bemenu` or `rofi` as the backend for `tessen`)
+- `TESSEN_ACTION` (choose to either `autotype`, `copy`, or do `both` at the same time)
+
 ```
 tessen - autotype and copy data from password-store on wayland
 
