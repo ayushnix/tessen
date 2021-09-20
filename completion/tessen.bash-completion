@@ -1,0 +1,31 @@
+_tessen() {
+  local cur prev
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD - 1]}"
+  all_long_opts="--backend --action --help --version "
+  all_short_opts="-b -a -h -v "
+  case "$prev" in
+    --backend | -b | --action | -a)
+      mapfile -t COMPREPLY < <(compgen -o bashdefault -o default -- "${cur}")
+      return 0
+      ;;
+    *)
+      case "$cur" in
+        --*)
+          mapfile -t COMPREPLY < <(compgen -W "${all_long_opts}" -- "${cur}")
+          return 0
+          ;;
+        -*)
+          mapfile -t COMPREPLY < <(compgen -W "${all_short_opts}" -- "${cur}")
+          return 0
+          ;;
+        *)
+          mapfile -t COMPREPLY < <(compgen -o bashdefault -o default -- "${cur}")
+          return 0
+          ;;
+      esac
+      ;;
+  esac
+}
+complete -F _tessen tessen
