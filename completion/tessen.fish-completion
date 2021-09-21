@@ -1,5 +1,5 @@
 complete -f -c tessen
-complete -x -c tessen -s b -l backend -k -a "bemenu rofi" -d "use either bemenu (default) or rofi as the backend"
+complete -x -c tessen -s b -l backend -k -a "bemenu rofi wofi" -d "use either bemenu (default), rofi, or wofi as the backend"
 complete -x -c tessen -s a -l action -k -a "autotype copy both" -d "either 'autotype' data, 'copy' it, or do 'both'"
 complete -x -c tessen -s h -l help -d "show the help menu"
 complete -x -c tessen -s v -l version -d "show the version"

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2021 Ayush Agarwal <ayush at fastmail dot in>
 #
-# tessen - a data selection interface for pass using bemenu or rofi on Wayland
+# tessen - a data selection interface for pass on Wayland
 # ------------------------------------------------------------------------------
 
 # shell "strict" mode
@@ -184,8 +184,8 @@ print_help() {
   printf '%s\n' "  ${0##*/} -b rofi -a autotype    use rofi and always autotype data"
   printf '%s\n' "  ${0##*/} -b rofi -a copy        use rofi and always copy data"
   printf '%s\n' "  ${0##*/} -b rofi -a both        use rofi and always autotype AND copy data" ""
-  printf '%s\n' "  -b, --backend, --backend=     choose 'bemenu' or 'rofi' as backend (default: bemenu)"
-  printf '%s\n' "  -a, --action, --action=       choose one of 'autotype|copy|both'"
+  printf '%s\n' "  -b, --backend, --backend=     choose 'bemenu', 'rofi', or 'wofi' as backend (default: bemenu)"
+  printf '%s\n' "  -a, --action, --action=       choose 'autotype', 'copy', or 'both'"
   printf '%s\n' "  -h, --help                    print this help menu"
   printf '%s\n' "  -v, --version                 print the version of ${0##*/}" ""
   printf '%s\n' "For more details, visit https://github.com/ayushnix/tessen"
@@ -201,8 +201,11 @@ validate_backend() {
   elif [[ "$BACKEND" == "rofi" ]]; then
     readonly BACKEND="rofi"
     readonly BACKEND_OPTS="-dmenu"
+  elif [[ "$BACKEND" == "wofi" ]]; then
+    readonly BACKEND="wofi"
+    readonly BACKEND_OPTS="-d"
   else
-    printf '%s\n' "Please specify a backend: bemenu|rofi" >&2
+    printf '%s\n' "Please specify a backend: bemenu|rofi|wofi" >&2
     exit 1
   fi
 }
@@ -249,7 +252,7 @@ main() {
     case "$_opt" in
       -b | --backend)
         [[ "$#" -lt 2 ]] && {
-          printf '%s\n' "Please specify a backend: bemenu|rofi" >&2
+          printf '%s\n' "Please specify a backend: bemenu|rofi|wofi" >&2
           exit 1
         }
         BACKEND="${2-}"

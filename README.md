@@ -1,8 +1,8 @@
 ## tessen
 
-A bash script that uses either [bemenu](https://github.com/Cloudef/bemenu) or
-[rofi](https://github.com/lbonn/rofi) as an interface for auto-typing and copying [password
-store](https://www.passwordstore.org/) data.
+A bash script that can use [bemenu](https://github.com/Cloudef/bemenu),
+[rofi](https://github.com/lbonn/rofi), or [wofi](https://hg.sr.ht/~scoopta/wofi) as an interface for
+auto-typing and copying [password store](https://www.passwordstore.org/) data.
 
 `tessen` is written to work only on Wayland.
 
@@ -14,7 +14,8 @@ Xorg/X11 and Wayland, check out [pass-tessen](https://github.com/ayushnix/pass-t
 ### Dependencies
 
 - [pass](https://git.zx2c4.com/password-store/)
-- either [bemenu](https://github.com/Cloudef/bemenu) or [rofi](https://github.com/lbonn/rofi)
+- either one of [bemenu](https://github.com/Cloudef/bemenu), [rofi](https://github.com/lbonn/rofi),
+  [wofi](https://hg.sr.ht/~scoopta/wofi)
 - [wtype](https://github.com/atx/wtype) (if you want to auto-type data)
 - [wl-clipboard](https://github.com/bugaevc/wl-clipboard) or
   [wl-clipboard-rs](https://github.com/YaLTeR/wl-clipboard-rs) (if you want to copy data)
@@ -38,9 +39,9 @@ which you probably should.
 ### Stable Release
 
 ```
-wget https://github.com/ayushnix/tessen/releases/download/v1.0.0/tessen-1.0.0.tar.gz
-tar xvzf tessen-1.0.0.tar.gz
-cd tessen-1.0.0
+wget https://github.com/ayushnix/tessen/releases/download/v1.1.0/tessen-1.1.0.tar.gz
+tar xvzf tessen-1.1.0.tar.gz
+cd tessen-1.1.0
 sudo make install
 ```
 
@@ -54,7 +55,7 @@ reasonable defaults.
 - `PASSWORD_STORE_DIR` (the default location of your password store)
 - `PASSWORD_STORE_CLIP_TIME` (the amount of time for which password-store data stays on the
   clipboard)
-- `TESSEN_BACKEND` (choose either `bemenu` or `rofi` as the backend for `tessen`)
+- `TESSEN_BACKEND` (either one of `bemenu`, `rofi`, or `wofi` as the backend for `tessen`)
 - `TESSEN_ACTION` (choose to either `autotype`, `copy`, or do `both` at the same time)
 
 ```
@@ -68,8 +69,8 @@ Usage: tessen [options]
   tessen -b rofi -a copy        use rofi and always copy data
   tessen -b rofi -a both        use rofi and always autotype AND copy data
 
-  -b, --backend, --backend=     choose 'bemenu' or 'rofi' as backend (default: bemenu)
-  -a, --action, --action=       choose one of 'autotype|copy|both'
+  -b, --backend, --backend=     choose 'bemenu', 'rofi', or 'wofi' as backend (default: bemenu)
+  -a, --action, --action=       choose 'autotype', 'copy', or 'both'
   -h, --help                    print this help menu
   -v, --version                 print the version of tessen
 ```
