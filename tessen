@@ -192,12 +192,13 @@ print_help() {
 }
 
 validate_backend() {
+  local bmn_opt=()
+
   if [[ "$BACKEND" == "bemenu" ]]; then
     bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
     export BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
     readonly BACKEND="bemenu"
     readonly BACKEND_OPTS=""
-    unset -v bmn_opt
   elif [[ "$BACKEND" == "rofi" ]]; then
     readonly BACKEND="rofi"
     readonly BACKEND_OPTS="-dmenu"
