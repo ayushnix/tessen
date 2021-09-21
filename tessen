@@ -15,7 +15,7 @@ umask 077
 set +x
 
 # initialize the global variables
-readonly VERSION="1.0.0"
+readonly VERSION="1.1.1"
 readonly PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 readonly CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-15}"
 BACKEND="${TESSEN_BACKEND:-bemenu}" # uses the value of TESSEN_BACKEND if set by user

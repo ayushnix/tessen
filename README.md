@@ -39,9 +39,9 @@ which you probably should.
 ### Stable Release
 
 ```
-wget https://github.com/ayushnix/tessen/releases/download/v1.1.0/tessen-1.1.0.tar.gz
-tar xvzf tessen-1.1.0.tar.gz
-cd tessen-1.1.0
+wget https://github.com/ayushnix/tessen/releases/download/v1.1.1/tessen-1.1.1.tar.gz
+tar xvzf tessen-1.1.1.tar.gz
+cd tessen-1.1.1
 sudo make install
 ```
 
