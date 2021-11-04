@@ -78,7 +78,7 @@ Usage: tessen [options]
 ## Why should I use `tessen`?
 
 - `tessen` can autotype or copy (or, do both at the same time!) your password store data including
-  all of your key-value pair data, not just besides passwords
+  all of your key-value pair data, besides the password
 
   From what I've observed as of this commit, most scripts out there do not autotype and copy all of
   your key-value pair data. They also do not offer choices about autotyping or copying data with the
