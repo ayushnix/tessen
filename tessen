@@ -61,7 +61,7 @@ get_pass_data() {
   # skip the password, validate each entry against $passdata_regex, store valid results
   # ASSUMPTION: each key is unique otherwise, the value of the last non-unique key will be used
   for idx in "${passdata[@]:1}"; do
-    if [[ "$idx" =~ $passdata_regex ]]; then
+    if [[ "${idx%%:*}" != "username" && "${idx%%:*}" != "password" && "$idx" =~ $passdata_regex ]]; then
       key="${idx%%:*}"
       val="${idx#*: }"
       PASSDATA_ARR["$key"]="$val"
