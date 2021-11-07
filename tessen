@@ -5,12 +5,6 @@
 # tessen - a data selection interface for pass on Wayland
 # ------------------------------------------------------------------------------
 
-# shell "strict" mode
-set -uo pipefail
-readonly PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
-export PATH
-umask 077
-
 # don't leak password data if debug mode is enabled
 set +x
 
@@ -20,7 +14,7 @@ readonly PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 readonly CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-15}"
 BACKEND="${TESSEN_BACKEND:-bemenu}" # uses the value of TESSEN_BACKEND if set by user
 BACKEND_OPTS=""
-ACTION="${TESSEN_ACTION-}" # uses the value of TESSEN_ACTION if set by user
+ACTION="$TESSEN_ACTION" # uses the value of TESSEN_ACTION if set by user
 PASSFILE=""
 declare -A PASSDATA_ARR
 USERNAME=""
@@ -75,10 +69,10 @@ get_pass_data() {
 get_key() {
   local ch="" flag=false key_arr=()
 
-  if [[ "${1-}" == "pass_key_list" ]]; then
+  if [[ "$1" == "pass_key_list" ]]; then
     key_arr=("autotype username and password" "username" "password" "${!PASSDATA_ARR[@]}")
     shift
-  elif [[ "${1-}" == "opt_key_list" ]]; then
+  elif [[ "$1" == "opt_key_list" ]]; then
     key_arr=("autotype" "copy")
     shift
   else
@@ -110,15 +104,15 @@ key_menu() {
     exit 0
   fi
 
-  if [[ "${ACTION-}" == "autotype" ]]; then
+  if [[ "$ACTION" == "autotype" ]]; then
     auto_type "$_KEY"
     exit 0
-  elif [[ "${ACTION-}" == "copy" ]]; then
+  elif [[ "$ACTION" == "copy" ]]; then
     wld_copy "$_KEY"
-  elif [[ "${ACTION-}" == "both" ]]; then
+  elif [[ "$ACTION" == "both" ]]; then
     auto_type "$_KEY"
     wld_copy "$_KEY"
-  elif [[ -z "${ACTION-}" ]]; then
+  elif [[ -z "$ACTION" ]]; then
     tmp_key="$_KEY"
     get_key opt_key_list
     if [[ "$_KEY" == "autotype" ]]; then
@@ -136,19 +130,19 @@ key_menu() {
 }
 
 auto_type() {
-  if [[ "${1-}" == "username_password" ]]; then
+  if [[ "$1" == "username_password" ]]; then
     printf '%s' "$USERNAME" | wtype -s 100 -
     wtype -s 100 -k Tab --
     printf '%s' "$PASSWORD" | wtype -s 100 -
     shift
-  elif [[ "${1-}" == "username" ]]; then
+  elif [[ "$1" == "username" ]]; then
     printf '%s' "$USERNAME" | wtype -s 100 -
     shift
-  elif [[ "${1-}" == "password" ]]; then
+  elif [[ "$1" == "password" ]]; then
     printf '%s' "$PASSWORD" | wtype -s 100 -
     shift
-  elif [[ -n "${PASSDATA_ARR[${1-}]}" ]]; then
-    printf '%s' "${PASSDATA_ARR[${1-}]}" | wtype -s 100 -
+  elif [[ -n "${PASSDATA_ARR[$1]}" ]]; then
+    printf '%s' "${PASSDATA_ARR[$1]}" | wtype -s 100 -
     shift
   else
     exit 1
@@ -156,19 +150,19 @@ auto_type() {
 }
 
 wld_copy() {
-  if [[ "${1-}" == "username" ]]; then
+  if [[ "$1" == "username" ]]; then
     printf '%s' "$USERNAME" | wl-copy
     notify-send -t $((CLIP_TIME * 1000)) "Copied username to clipboard. Will clear in $CLIP_TIME seconds." || true
     shift
     clean
-  elif [[ "${1-}" == "password" ]]; then
+  elif [[ "$1" == "password" ]]; then
     printf '%s' "$PASSWORD" | wl-copy
     notify-send -t $((CLIP_TIME * 1000)) "Copied password to clipboard. Will clear in $CLIP_TIME seconds." || true
     shift
     clean
-  elif [[ -n "${PASSDATA_ARR[${1-}]}" ]]; then
-    printf '%s' "${PASSDATA_ARR[${1-}]}" | wl-copy
-    notify-send -t $((CLIP_TIME * 1000)) "Copied ${1-} to clipboard. Will clear in $CLIP_TIME seconds." || true
+  elif [[ -n "${PASSDATA_ARR[$1]}" ]]; then
+    printf '%s' "${PASSDATA_ARR[$1]}" | wl-copy
+    notify-send -t $((CLIP_TIME * 1000)) "Copied $1 to clipboard. Will clear in $CLIP_TIME seconds." || true
     shift
     clean
   else
@@ -249,14 +243,14 @@ main() {
 
   # parse any options given by the user
   while [[ "$#" -gt 0 ]]; do
-    _opt="${1-}"
+    _opt="$1"
     case "$_opt" in
       -b | --backend)
         [[ "$#" -lt 2 ]] && {
           printf '%s\n' "Please specify a backend: bemenu|rofi|wofi" >&2
           exit 1
         }
-        BACKEND="${2-}"
+        BACKEND="$2"
         validate_backend
         shift
         ;;
@@ -269,7 +263,7 @@ main() {
           printf '%s\n' "Please specify a valid option: autotype|copy|both" >&2
           exit 1
         }
-        ACTION="${2-}"
+        ACTION="$2"
         shift
         ;;
       --action=*)
