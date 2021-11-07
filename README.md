@@ -147,3 +147,6 @@ Please see [this](https://github.com/ayushnix/tessen/blob/master/CONTRIBUTING.md
 - xorg/x11 support, use [rofi-pass](https://github.com/carnager/rofi-pass) or fork this repo and
   implement it yourself
 - using [ydotool](https://github.com/ReimuNotMoe/ydotool), because it needs root access
+- adding, editing, or removing existing password store data
+- cache for storing frequently used password store selection data
+- importing passwords or exporting them
