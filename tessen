@@ -9,48 +9,49 @@
 set +x
 
 # initialize the global variables
-readonly VERSION="1.1.2"
-readonly PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
-readonly CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-15}"
-BACKEND="${TESSEN_BACKEND:-bemenu}" # uses the value of TESSEN_BACKEND if set by user
-BACKEND_OPTS=""
-ACTION="$TESSEN_ACTION" # uses the value of TESSEN_ACTION if set by user
-PASSFILE=""
-declare -A PASSDATA_ARR
-USERNAME=""
-PASSWORD=""
+readonly tsn_version="1.1.2"
+readonly tsn_prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+readonly tsn_cliptime="${PASSWORD_STORE_CLIP_TIME:-15}"
+tsn_backend="${TESSEN_BACKEND:-bemenu}" # uses the value of TESSEN_BACKEND if set by user
+tsn_backend_opts=""
+tsn_action="${TESSEN_ACTION-}" # uses the value of TESSEN_ACTION if set by user
+tsn_passfile=""
+declare -A tsn_passdata
+tsn_username=""
+tsn_password=""
 
 # display and get the shortened path of the password file
 get_pass_file() {
-  local tmp_pass_1 tmp_pass_2 tmp_pass_3
+  local -a tmp_list
 
   # temporarily enable globbing to get the list of gpg files
   shopt -s nullglob globstar
-  tmp_pass_1=("$PREFIX"/**/*.gpg)
-  tmp_pass_2=("${tmp_pass_1[@]#"$PREFIX"/}")
-  tmp_pass_3=("${tmp_pass_2[@]%.gpg}")
+  tmp_list=("$tsn_prefix"/**/*.gpg)
+  tmp_list=("${tmp_list[@]#"$tsn_prefix"/}")
+  tmp_list=("${tmp_list[@]%.gpg}")
   shopt -u nullglob globstar
 
-  PASSFILE="$(printf '%s\n' "${tmp_pass_3[@]}" | "$BACKEND" "$BACKEND_OPTS")"
+  tsn_passfile="$(printf '%s\n' "${tmp_list[@]}" | "$tsn_backend" "$tsn_backend_opts")"
 
-  if ! [[ -e "$PREFIX/$PASSFILE".gpg ]]; then
+  if ! [[ -e "$tsn_prefix/$tsn_passfile".gpg ]]; then
     exit 1
   fi
 }
 
 # get the password data including every key-value pair inside the encrypted file
 get_pass_data() {
-  local passdata passdata_regex idx key val
+  local -a passdata
+  local passdata_regex idx key val
 
-  mapfile -t passdata < <(pass "$PASSFILE")
+  mapfile -t passdata < <(pass "$tsn_passfile")
   # ASSUMPTION: the key can contain alphanumerics, spaces, hyphen, underscore
   #             the value can contain anything but it has to follow after a space
   passdata_regex="^[[:alnum:][:blank:]_-]+:[[:blank:]].+$"
   # ASSUMPTION: the basename of the gpg file is the username although one can still
   #             select a username field inside the file, if it exists
-  USERNAME="${PASSFILE##*/}"
-  # ASSUMPTION: the first line of $PASSFILE will contain the password
-  PASSWORD="${passdata[0]}"
+  tsn_username="${tsn_passfile##*/}"
+  # ASSUMPTION: the first line of $tsn_passfile will contain the password
+  tsn_password="${passdata[0]}"
 
   # skip the password, validate each entry against $passdata_regex, store valid results
   # ASSUMPTION: each key is unique otherwise, the value of the last non-unique key will be used
@@ -58,7 +59,7 @@ get_pass_data() {
     if [[ "${idx%%:*}" != "username" && "${idx%%:*}" != "password" && "$idx" =~ $passdata_regex ]]; then
       key="${idx%%:*}"
       val="${idx#*: }"
-      PASSDATA_ARR["$key"]="$val"
+      tsn_passdata["$key"]="$val"
     else
       continue
     fi
@@ -67,10 +68,11 @@ get_pass_data() {
 
 # get the key that the user will choose to autotype or copy
 get_key() {
-  local ch="" flag=false key_arr=()
+  local -a key_arr
+  local ch flag=false
 
   if [[ "$1" == "pass_key_list" ]]; then
-    key_arr=("autotype username and password" "username" "password" "${!PASSDATA_ARR[@]}")
+    key_arr=("autotype username and password" "username" "password" "${!tsn_passdata[@]}")
     shift
   elif [[ "$1" == "opt_key_list" ]]; then
     key_arr=("autotype" "copy")
@@ -79,11 +81,12 @@ get_key() {
     exit 1
   fi
 
-  _KEY="$(printf '%s\n' "${key_arr[@]}" | "$BACKEND" "$BACKEND_OPTS")"
+  # a dynamically scoped variable to hold the key selection for key_menu
+  chosen_key="$(printf '%s\n' "${key_arr[@]}" | "$tsn_backend" "$tsn_backend_opts")"
 
   # validate the chosen key name
   for ch in "${key_arr[@]}"; do
-    if [[ "$_KEY" == "$ch" ]]; then
+    if [[ "$chosen_key" == "$ch" ]]; then
       flag=true
       break
     fi
@@ -99,26 +102,26 @@ key_menu() {
 
   get_key pass_key_list
 
-  if [[ "$_KEY" == "autotype username and password" ]]; then
+  if [[ "$chosen_key" == "autotype username and password" ]]; then
     auto_type username_password
     exit 0
   fi
 
-  if [[ "$ACTION" == "autotype" ]]; then
-    auto_type "$_KEY"
+  if [[ "$tsn_action" == "autotype" ]]; then
+    auto_type "$chosen_key"
     exit 0
-  elif [[ "$ACTION" == "copy" ]]; then
-    wld_copy "$_KEY"
-  elif [[ "$ACTION" == "both" ]]; then
-    auto_type "$_KEY"
-    wld_copy "$_KEY"
-  elif [[ -z "$ACTION" ]]; then
-    tmp_key="$_KEY"
+  elif [[ "$tsn_action" == "copy" ]]; then
+    wld_copy "$chosen_key"
+  elif [[ "$tsn_action" == "both" ]]; then
+    auto_type "$chosen_key"
+    wld_copy "$chosen_key"
+  elif [[ -z "$tsn_action" ]]; then
+    tmp_key="$chosen_key"
     get_key opt_key_list
-    if [[ "$_KEY" == "autotype" ]]; then
+    if [[ "$chosen_key" == "autotype" ]]; then
       auto_type "$tmp_key"
       exit 0
-    elif [[ "$_KEY" == "copy" ]]; then
+    elif [[ "$chosen_key" == "copy" ]]; then
       wld_copy "$tmp_key"
     else
       exit 1
@@ -131,18 +134,18 @@ key_menu() {
 
 auto_type() {
   if [[ "$1" == "username_password" ]]; then
-    printf '%s' "$USERNAME" | wtype -s 100 -
+    printf '%s' "$tsn_username" | wtype -s 100 -
     wtype -s 100 -k Tab --
-    printf '%s' "$PASSWORD" | wtype -s 100 -
+    printf '%s' "$tsn_password" | wtype -s 100 -
     shift
   elif [[ "$1" == "username" ]]; then
-    printf '%s' "$USERNAME" | wtype -s 100 -
+    printf '%s' "$tsn_username" | wtype -s 100 -
     shift
   elif [[ "$1" == "password" ]]; then
-    printf '%s' "$PASSWORD" | wtype -s 100 -
+    printf '%s' "$tsn_password" | wtype -s 100 -
     shift
-  elif [[ -n "${PASSDATA_ARR[$1]}" ]]; then
-    printf '%s' "${PASSDATA_ARR[$1]}" | wtype -s 100 -
+  elif [[ -n "${tsn_passdata[$1]}" ]]; then
+    printf '%s' "${tsn_passdata[$1]}" | wtype -s 100 -
     shift
   else
     exit 1
@@ -151,18 +154,18 @@ auto_type() {
 
 wld_copy() {
   if [[ "$1" == "username" ]]; then
-    printf '%s' "$USERNAME" | wl-copy
-    notify-send -t $((CLIP_TIME * 1000)) "Copied username to clipboard. Will clear in $CLIP_TIME seconds." || true
+    printf '%s' "$tsn_username" | wl-copy
+    notify-send -t $((tsn_cliptime * 1000)) "Copied username to clipboard. Will clear in $tsn_cliptime seconds." || true
     shift
     clean
   elif [[ "$1" == "password" ]]; then
-    printf '%s' "$PASSWORD" | wl-copy
-    notify-send -t $((CLIP_TIME * 1000)) "Copied password to clipboard. Will clear in $CLIP_TIME seconds." || true
+    printf '%s' "$tsn_password" | wl-copy
+    notify-send -t $((tsn_cliptime * 1000)) "Copied password to clipboard. Will clear in $tsn_cliptime seconds." || true
     shift
     clean
-  elif [[ -n "${PASSDATA_ARR[$1]}" ]]; then
-    printf '%s' "${PASSDATA_ARR[$1]}" | wl-copy
-    notify-send -t $((CLIP_TIME * 1000)) "Copied $1 to clipboard. Will clear in $CLIP_TIME seconds." || true
+  elif [[ -n "${tsn_passdata[$1]}" ]]; then
+    printf '%s' "${tsn_passdata[$1]}" | wl-copy
+    notify-send -t $((tsn_cliptime * 1000)) "Copied $1 to clipboard. Will clear in $tsn_cliptime seconds." || true
     shift
     clean
   else
@@ -186,31 +189,31 @@ print_help() {
 }
 
 validate_backend() {
-  local bmn_opt=()
+  local -a bmn_opt
 
-  if [[ "$BACKEND" == "bemenu" ]]; then
+  if [[ "$tsn_backend" == "bemenu" ]]; then
     bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
     export BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
-    readonly BACKEND="bemenu"
-    readonly BACKEND_OPTS=""
-  elif [[ "$BACKEND" == "rofi" ]]; then
-    readonly BACKEND="rofi"
-    readonly BACKEND_OPTS="-dmenu"
-  elif [[ "$BACKEND" == "wofi" ]]; then
-    readonly BACKEND="wofi"
-    readonly BACKEND_OPTS="-d"
+    readonly tsn_backend="bemenu"
+    readonly tsn_backend_opts=""
+  elif [[ "$tsn_backend" == "rofi" ]]; then
+    readonly tsn_backend="rofi"
+    readonly tsn_backend_opts="-dmenu"
+  elif [[ "$tsn_backend" == "wofi" ]]; then
+    readonly tsn_backend="wofi"
+    readonly tsn_backend_opts="-d"
   else
     printf '%s\n' "Please specify a backend: bemenu|rofi|wofi" >&2
     exit 1
   fi
 }
 
-validate_clip_time() {
+validate_cliptime() {
   local clip_regex
 
   clip_regex="^[[:digit:]]+$"
 
-  if [[ "$CLIP_TIME" =~ $clip_regex ]]; then
+  if [[ "$tsn_cliptime" =~ $clip_regex ]]; then
     return 0
   else
     printf '%s\n' "invalid clipboard time provided" >&2
@@ -220,23 +223,23 @@ validate_clip_time() {
 
 clean() {
   {
-    sleep "$CLIP_TIME" || exit 1
+    sleep "$tsn_cliptime" || exit 1
     wl-copy --clear
   } > /dev/null 2>&1 &
   disown
-  unset -v PASSFILE USERNAME PASSWORD PASSDATA_ARR
+  unset -v tsn_passfile tsn_username tsn_password tsn_passdata
 }
 
 die() {
   wl-copy --clear
-  unset -v PASSFILE USERNAME PASSWORD PASSDATA_ARR
+  unset -v tsn_passfile tsn_username tsn_password tsn_passdata
 }
 
 main() {
   local _opt
 
   # exit if the password store directory doesn't exist
-  if ! [[ -d "$PREFIX" ]]; then
+  if ! [[ -d "$tsn_prefix" ]]; then
     printf '%s\n' "password store not found" >&2
     exit 1
   fi
@@ -250,12 +253,12 @@ main() {
           printf '%s\n' "Please specify a backend: bemenu|rofi|wofi" >&2
           exit 1
         }
-        BACKEND="$2"
+        tsn_backend="$2"
         validate_backend
         shift
         ;;
       --backend=*)
-        BACKEND="${_opt##--backend=}"
+        tsn_backend="${_opt##--backend=}"
         validate_backend
         ;;
       -a | --action)
@@ -263,18 +266,18 @@ main() {
           printf '%s\n' "Please specify a valid option: autotype|copy|both" >&2
           exit 1
         }
-        ACTION="$2"
+        tsn_action="$2"
         shift
         ;;
       --action=*)
-        ACTION="${_opt##--action=}"
+        tsn_action="${_opt##--action=}"
         ;;
       -h | --help)
         print_help
         exit 0
         ;;
       -v | --version)
-        printf '%s\n' "${0##*/} version $VERSION"
+        printf '%s\n' "${0##*/} version $tsn_version"
         exit 0
         ;;
       --)
@@ -290,12 +293,12 @@ main() {
   done
   unset -v _opt
 
-  if unset -v BACKEND_OPTS 2> /dev/null; then
+  if unset -v tsn_backend_opts 2> /dev/null; then
     validate_backend
   fi
-  validate_clip_time
+  validate_cliptime
 
-  readonly ACTION
+  readonly tsn_action
 
   trap 'die' EXIT TERM
   get_pass_file
