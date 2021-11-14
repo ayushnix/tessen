@@ -149,6 +149,9 @@ key_menu() {
 key_action() {
   local arg="$1"
 
+  # POTENTIAL IMPROVEMENT: used 'printf | wtype' instead of 'auto_type()'
+  # because in all the other cases, 'auto_type()' is meant to exit but we don't
+  # want to exit here
   case "$tsn_action" in
     autotype) auto_type "$arg" ;;
     copy) wld_copy "$arg" ;;
@@ -235,45 +238,71 @@ key_open_url() {
   fi
 }
 
-auto_type() {
-  if [[ "$1" == "username_password" ]]; then
-    printf '%s' "$tsn_username" | wtype -s 100 -
-    wtype -s 100 -k Tab --
-    printf '%s' "$tsn_password" | wtype -s 100 -
-    shift
-  elif [[ "$1" == "username" ]]; then
-    printf '%s' "$tsn_username" | wtype -s 100 -
-    shift
-  elif [[ "$1" == "password" ]]; then
-    printf '%s' "$tsn_password" | wtype -s 100 -
-    shift
-  elif [[ -n "${tsn_passdata[$1]}" ]]; then
-    printf '%s' "${tsn_passdata[$1]}" | wtype -s 100 -
-    shift
+# SECOND MENU: the default autotype function, either autotype the username and
+# password or the custom autotype defined by the user
+# POTENTIAL IMPROVEMENT: Anything better than this ugly hack of
+# else..for..case..if..else..if?
+auto_type_def() {
+  local word tmp_otp
+
+  if [[ -z "$tsn_autotype" ]]; then
+    printf "%s" "$tsn_username" | wtype -s "$tsn_delay" -
+    wtype -s "$tsn_delay" -k Tab --
+    printf "%s" "$tsn_password" | wtype -s "$tsn_delay" -
   else
-    exit 1
+    for word in $tsn_autotype; do
+      case "$word" in
+        ":delay") sleep 1 ;;
+        ":tab") wtype -s "$tsn_delay" -k Tab -- ;;
+        ":space") wtype -s "$tsn_delay" -k space -- ;;
+        ":enter") wtype -s "$tsn_delay" -k Return -- ;;
+        ":otp")
+          if ! pass otp -h > /dev/null 2>&1 || ! is_installed oathtool; then
+            _die "pass-otp is not installed"
+          else
+            tmp_otp="$(pass otp "$tsn_passfile")"
+            if [[ "$tmp_otp" =~ ^[[:digit:]]+$ ]]; then
+              printf "%s" "$tmp_otp" | wtype -s "$tsn_delay" -
+            else
+              _die "invalid OTP detected"
+            fi
+          fi
+          ;;
+        path | basename | filename) printf "%s" "${tsn_passfile##*/}" | wtype -s "$tsn_delay" - ;;
+        "$tsn_userkey") printf "%s" "$tsn_username" | wtype -s "$tsn_delay" - ;;
+        pass | password) printf "%s" "$tsn_password" | wtype -s "$tsn_delay" - ;;
+        *)
+          if [[ -n "${tsn_passdata["$word"]}" ]]; then
+            printf "%s" "${tsn_passdata["$word"]}" | wtype -s "$tsn_delay" -
+          else
+            wtype -s "$tsn_delay" -k space --
+          fi
+          ;;
+      esac
+    done
   fi
+  _clear
+  exit 0
 }
 
+auto_type() {
+  printf "%s" "$1" | wtype -s "$tsn_delay" -
+  _clear
+  exit 0
+}
+
+# POTENTIAL IMPROVEMENT: We could restore the clipboard as it was before pass
+# was used. This is done by default by pass.
 wld_copy() {
-  if [[ "$1" == "username" ]]; then
-    printf '%s' "$tsn_username" | wl-copy
-    notify-send -t $((tsn_cliptime * 1000)) "Copied username to clipboard. Will clear in $tsn_cliptime seconds." || true
-    shift
-    clean
-  elif [[ "$1" == "password" ]]; then
-    printf '%s' "$tsn_password" | wl-copy
-    notify-send -t $((tsn_cliptime * 1000)) "Copied password to clipboard. Will clear in $tsn_cliptime seconds." || true
-    shift
-    clean
-  elif [[ -n "${tsn_passdata[$1]}" ]]; then
-    printf '%s' "${tsn_passdata[$1]}" | wl-copy
-    notify-send -t $((tsn_cliptime * 1000)) "Copied $1 to clipboard. Will clear in $tsn_cliptime seconds." || true
-    shift
-    clean
-  else
-    exit 1
+  printf "%s" "$1" | wl-copy
+  if is_installed notify-send; then
+    notify-send -t $((tsn_cliptime * 1000)) "Copied username to clipboard. Will clear in $tsn_cliptime seconds."
   fi
+  {
+    sleep "$tsn_cliptime" || exit 1
+    wl-copy --clear
+  } > /dev/null 2>&1 &
+  unset -v tsn_passfile tsn_username tsn_password tsn_passdata chosen_key
 }
 
 print_help() {
