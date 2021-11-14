@@ -44,7 +44,7 @@ get_pass_file() {
   tsn_passfile="$(printf "%s\n" "${tmp_list[@]}" | "$tsn_backend" "$tsn_backend_opts")"
 
   if ! [[ -s "$tsn_prefix/$tsn_passfile".gpg ]]; then
-    exit 1
+    _die
   fi
 }
 
@@ -126,7 +126,7 @@ get_key() {
     fi
   done
   if [[ "$flag" == "false" ]]; then
-    exit 1
+    _die
   fi
 }
 
@@ -223,24 +223,50 @@ print_help() {
   printf '%s\n' "For more details, visit https://github.com/ayushnix/tessen"
 }
 
-validate_backend() {
-  local -a bmn_opt
-
-  if [[ "$tsn_backend" == "bemenu" ]]; then
-    bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
-    export BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
-    readonly tsn_backend="bemenu"
-    readonly tsn_backend_opts=""
-  elif [[ "$tsn_backend" == "rofi" ]]; then
-    readonly tsn_backend="rofi"
-    readonly tsn_backend_opts="-dmenu"
-  elif [[ "$tsn_backend" == "wofi" ]]; then
-    readonly tsn_backend="wofi"
-    readonly tsn_backend_opts="-d"
+is_installed() {
+  if command -v "$1" > /dev/null 2>&1; then
+    return 0
   else
-    printf '%s\n' "Please specify a backend: bemenu|rofi|wofi" >&2
-    exit 1
+    return 1
   fi
+}
+
+set_bemenu() {
+  local -a bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
+  readonly tsn_backend="bemenu"
+  # use BEMENU_OPTS if set by the user, otherwise use $bmn_opt
+  export BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
+  # manually using bemenu options doesn't seem to work
+  readonly tsn_backend_opts=""
+}
+
+set_rofi() {
+  readonly tsn_backend="rofi" tsn_backend_opts="-dmenu"
+}
+
+set_wofi() {
+  readonly tsn_backend="wofi" tsn_backend_opts="-d"
+}
+
+assign_backend() {
+  if is_installed "bemenu"; then
+    set_bemenu
+  elif is_installed "rofi"; then
+    set_rofi
+  elif is_installed "wofi"; then
+    set_wofi
+  else
+    _die "Please install either 'bemenu', 'rofi', or 'wofi' to use ${0##*/}"
+  fi
+}
+
+validate_backend() {
+  case "$1" in
+    bemenu) set_bemenu ;;
+    rofi) set_rofi ;;
+    wofi) set_wofi ;;
+    *) _die "Please specify a valid backend: bemenu | rofi | wofi" ;;
+  esac
 }
 
 validate_cliptime() {
@@ -251,61 +277,65 @@ validate_cliptime() {
   if [[ "$tsn_cliptime" =~ $clip_regex ]]; then
     return 0
   else
-    printf '%s\n' "invalid clipboard time provided" >&2
-    exit 1
+    _die "Invalid clipboard time provided"
   fi
 }
 
-clean() {
-  {
-    sleep "$tsn_cliptime" || exit 1
-    wl-copy --clear
-  } > /dev/null 2>&1 &
-  disown
-  unset -v tsn_passfile tsn_username tsn_password tsn_passdata
+validate_action() {
+  case "$1" in
+    autotype) readonly tsn_action="autotype" ;;
+    copy) readonly tsn_action="copy" ;;
+    both) readonly tsn_action="both" ;;
+    "") readonly tsn_action="" ;;
+    *) _die "Please specify a valid action: autotype | copy | both" ;;
+  esac
 }
 
-die() {
+_clear() {
   wl-copy --clear
-  unset -v tsn_passfile tsn_username tsn_password tsn_passdata
+  unset -v tsn_passfile tsn_username tsn_password tsn_passdata chosen_key
+}
+
+_die() {
+  if [[ -n "$1" ]]; then
+    printf "%s\n" "$1" >&2
+  fi
+  _clear
+  exit 1
 }
 
 main() {
   local _opt
 
-  # exit if the password store directory doesn't exist
   if ! [[ -d "$tsn_prefix" ]]; then
-    printf '%s\n' "password store not found" >&2
-    exit 1
+    _die "password store directory not found"
   fi
 
-  # parse any options given by the user
   while [[ "$#" -gt 0 ]]; do
     _opt="$1"
     case "$_opt" in
       -b | --backend)
-        [[ "$#" -lt 2 ]] && {
-          printf '%s\n' "Please specify a backend: bemenu|rofi|wofi" >&2
-          exit 1
-        }
-        tsn_backend="$2"
-        validate_backend
+        if [[ "$#" -lt 2 ]] || ! is_installed "$2"; then
+          _die "Please specify a valid backend: bemenu | rofi | wofi"
+        fi
+        validate_backend "$2"
         shift
         ;;
       --backend=*)
-        tsn_backend="${_opt##--backend=}"
-        validate_backend
+        if ! is_installed "${_opt##--backend=}"; then
+          _die "Please specify a valid backend: bemenu | rofi | wofi"
+        fi
+        validate_backend "${_opt##--backend=}"
         ;;
       -a | --action)
-        [[ "$#" -lt 2 ]] && {
-          printf '%s\n' "Please specify a valid option: autotype|copy|both" >&2
-          exit 1
-        }
-        tsn_action="$2"
+        if [[ "$#" -lt 2 ]]; then
+          _die "Please specify a valid action: autotype | copy | both"
+        fi
+        validate_action "$2"
         shift
         ;;
       --action=*)
-        tsn_action="${_opt##--action=}"
+        validate_action "${_opt##--action=}"
         ;;
       -h | --help)
         print_help
@@ -319,23 +349,19 @@ main() {
         shift
         break
         ;;
-      *)
-        printf '%s\n' "invalid argument detected" >&2
-        exit 1
-        ;;
+      *) _die "invalid argument detected" ;;
     esac
     shift
   done
   unset -v _opt
 
-  if unset -v tsn_backend_opts 2> /dev/null; then
-    validate_backend
+  if [[ -z "$tsn_backend" ]]; then
+    assign_backend
   fi
   validate_cliptime
-
   readonly tsn_action
 
-  trap 'die' EXIT TERM
+  trap '_clear' EXIT TERM
   get_pass_file
   get_pass_data
   key_menu
