@@ -29,20 +29,21 @@ declare -A tsn_passdata
 tsn_username=""
 tsn_password=""
 
-# display and get the shortened path of the password file
+# FIRST MENU: generate a list of password store files, let the user select one
 get_pass_file() {
   local -a tmp_list
 
-  # temporarily enable globbing to get the list of gpg files
+  # temporarily enable globbing, get the list of all gpg files recursively,
+  # remove PASSWORD_STORE_DIR from the file names, and remove the '.gpg' suffix
   shopt -s nullglob globstar
   tmp_list=("$tsn_prefix"/**/*.gpg)
   tmp_list=("${tmp_list[@]#"$tsn_prefix"/}")
   tmp_list=("${tmp_list[@]%.gpg}")
   shopt -u nullglob globstar
 
-  tsn_passfile="$(printf '%s\n' "${tmp_list[@]}" | "$tsn_backend" "$tsn_backend_opts")"
+  tsn_passfile="$(printf "%s\n" "${tmp_list[@]}" | "$tsn_backend" "$tsn_backend_opts")"
 
-  if ! [[ -e "$tsn_prefix/$tsn_passfile".gpg ]]; then
+  if ! [[ -s "$tsn_prefix/$tsn_passfile".gpg ]]; then
     exit 1
   fi
 }
