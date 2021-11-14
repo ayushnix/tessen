@@ -130,40 +130,41 @@ get_key() {
   fi
 }
 
-# the 2nd, and possibly 3rd, stage of the menu
+# SECOND MENU: use 'get_key()' to show a list of possible keys to choose from
 key_menu() {
-  local tmp_key
+  get_key key_list
 
-  get_key pass_key_list
+  case "$chosen_key" in
+    "$tsn_autokey") auto_type_def ;;
+    "$tsn_userkey") key_action "$tsn_username" ;;
+    password) key_action "$tsn_password" ;;
+    otp) key_otp ;;
+    "$tsn_urlkey") key_url "${tsn_passdata["$tsn_urlkey"]}" ;;
+    *) key_action "${tsn_passdata["$chosen_key"]}" ;;
+  esac
+}
 
-  if [[ "$chosen_key" == "autotype username and password" ]]; then
-    auto_type username_password
-    exit 0
-  fi
+# THIRD MENU: optional, use 'get_key()' and TESSEN_ACTION to show the option to
+# either auto type or copy the selected key
+key_action() {
+  local arg="$1"
 
-  if [[ "$tsn_action" == "autotype" ]]; then
-    auto_type "$chosen_key"
-    exit 0
-  elif [[ "$tsn_action" == "copy" ]]; then
-    wld_copy "$chosen_key"
-  elif [[ "$tsn_action" == "both" ]]; then
-    auto_type "$chosen_key"
-    wld_copy "$chosen_key"
-  elif [[ -z "$tsn_action" ]]; then
-    tmp_key="$chosen_key"
-    get_key opt_key_list
-    if [[ "$chosen_key" == "autotype" ]]; then
-      auto_type "$tmp_key"
-      exit 0
-    elif [[ "$chosen_key" == "copy" ]]; then
-      wld_copy "$tmp_key"
-    else
-      exit 1
-    fi
-  else
-    printf '%s\n' "Please specify a valid option: autotype|copy|both" >&2
-    exit 1
-  fi
+  case "$tsn_action" in
+    autotype) auto_type "$arg" ;;
+    copy) wld_copy "$arg" ;;
+    both)
+      printf "%s" "$arg" | wtype -s "$tsn_delay" -
+      wld_copy "$arg"
+      ;;
+    "")
+      get_key option
+      if [[ "$chosen_key" == "$tsn_autokey" ]]; then
+        auto_type "$arg"
+      else
+        wld_copy "$arg"
+      fi
+      ;;
+  esac
 }
 
 auto_type() {
