@@ -8,13 +8,22 @@
 # don't leak password data if debug mode is enabled
 set +x
 
-# initialize the global variables
+# GLOBAL VARIABLES
+# variables which won't be changed and can be made readonly
 readonly tsn_version="1.1.2"
 readonly tsn_prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 readonly tsn_cliptime="${PASSWORD_STORE_CLIP_TIME:-15}"
-tsn_backend="${TESSEN_BACKEND:-bemenu}" # uses the value of TESSEN_BACKEND if set by user
+readonly tsn_delay="${TESSEN_DELAY:-200}"
+# variables which hold data for possible actions and choices
+tsn_backend="${TESSEN_BACKEND-}"
 tsn_backend_opts=""
-tsn_action="${TESSEN_ACTION-}" # uses the value of TESSEN_ACTION if set by user
+tsn_action="${TESSEN_ACTION-}"
+tsn_userkey="${TESSEN_USERKEY:-user}"
+tsn_urlkey="${TESSEN_URLKEY:-url}"
+tsn_autokey="${TESSEN_AUTOKEY:-autotype}"
+tsn_autotype=""
+tsn_otp=false
+# variables with sensitive data which will be manually unset using _clear
 tsn_passfile=""
 declare -A tsn_passdata
 tsn_username=""
