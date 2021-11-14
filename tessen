@@ -167,6 +167,74 @@ key_action() {
   esac
 }
 
+# THIRD MENU: optional, this function is used if an 'otpauth://' URI is found
+key_otp() {
+  local tmp_otp
+
+  if ! pass otp -h > /dev/null 2>&1 || ! is_installed oathtool; then
+    _die "pass-otp is not installed"
+  fi
+
+  tmp_otp="$(pass otp "$tsn_passfile")"
+
+  if [[ "$tmp_otp" =~ ^[[:digit:]]+$ ]]; then
+    get_key option
+    if [[ "$chosen_key" == "$tsn_autokey" ]]; then
+      auto_type "$tmp_otp"
+    else
+      wld_copy "$tmp_otp"
+    fi
+  else
+    _die "invalid OTP detected"
+  fi
+}
+
+# THIRD MENU: optional, this function is used if TESSEN_URLKEY is found.
+# Instead of showing 'autotype', it will show 'open'.
+# This function could've been combined with 'key_action()' but it would've
+# become a bit more complex than I like.
+key_url() {
+  local arg="$1"
+
+  case "$tsn_action" in
+    autotype)
+      key_open_url "$arg" || _die
+      _clear
+      ;;
+    copy) wld_copy "$arg" ;;
+    both)
+      key_open_url "$arg"
+      wld_copy "$arg"
+      ;;
+    "")
+      get_key "$tsn_urlkey"
+      if [[ "$chosen_key" == "open" ]]; then
+        key_open_url "$arg" || _die
+        _clear
+      else
+        wld_copy "$arg"
+      fi
+      ;;
+  esac
+}
+
+# use either xdg-open or $BROWSER to open the selected URL
+key_open_url() {
+  if is_installed xdg-open; then
+    xdg-open "$1" 2> /dev/null || {
+      printf "%s\n" "xdg-open was unable to open '$1'" >&2
+      return 1
+    }
+  elif [[ -n "$BROWSER" ]] && is_installed "$BROWSER"; then
+    "$BROWSER" "$1" > /dev/null 2>&1 || {
+      printf "%s\n" "$BROWSER was unable to open '$1'" >&2
+      return 1
+    }
+  else
+    _die "Failed to open the $tsn_urlkey"
+  fi
+}
+
 auto_type() {
   if [[ "$1" == "username_password" ]]; then
     printf '%s' "$tsn_username" | wtype -s 100 -
