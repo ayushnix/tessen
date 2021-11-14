@@ -306,18 +306,19 @@ wld_copy() {
 }
 
 print_help() {
-  printf '%s\n' "${0##*/} - autotype and copy data from password-store on wayland" ""
-  printf '%s\n' "Usage: ${0##*/} [options]" ""
-  printf '%s\n' "  ${0##*/}                        use bemenu and either autotype OR copy data"
-  printf '%s\n' "  ${0##*/} -b rofi                use rofi and either autotype OR copy data"
-  printf '%s\n' "  ${0##*/} -b rofi -a autotype    use rofi and always autotype data"
-  printf '%s\n' "  ${0##*/} -b rofi -a copy        use rofi and always copy data"
-  printf '%s\n' "  ${0##*/} -b rofi -a both        use rofi and always autotype AND copy data" ""
-  printf '%s\n' "  -b, --backend, --backend=     choose 'bemenu', 'rofi', or 'wofi' as backend (default: bemenu)"
-  printf '%s\n' "  -a, --action, --action=       choose 'autotype', 'copy', or 'both'"
-  printf '%s\n' "  -h, --help                    print this help menu"
-  printf '%s\n' "  -v, --version                 print the version of ${0##*/}" ""
-  printf '%s\n' "For more details, visit https://github.com/ayushnix/tessen"
+  printf "%s\n" "${0##*/} - autotype and copy data from password-store on wayland" ""
+  printf "%s\n" "Usage: ${0##*/} [options]" ""
+  printf "%s\n" "  ${0##*/}                        use an available dmenu interface and either autotype OR copy data"
+  printf "%s\n" "  ${0##*/} -b rofi                use rofi and either autotype OR copy data"
+  printf "%s\n" "  ${0##*/} -b rofi -a autotype    use rofi and always autotype data"
+  printf "%s\n" "  ${0##*/} -b rofi -a copy        use rofi and always copy data"
+  printf "%s\n" "  ${0##*/} -b rofi -a both        use rofi and always autotype AND copy data" ""
+  printf "%s\n" "  -b, --backend, --backend=     choose either 'bemenu', 'rofi', or 'wofi' as backend"
+  printf "%s\n" "  -a, --action, --action=       choose either 'autotype', 'copy', or 'both'"
+  printf "%s\n" "  -h, --help                    print this help menu"
+  printf "%s\n" "  -v, --version                 print the version of ${0##*/}" ""
+  printf "%s\n" "For more details and additional features, please read the man page of tessen(1)"
+  printf "%s\n" "For reporting bugs or feedback, visit https://github.com/ayushnix/tessen"
 }
 
 is_installed() {
@@ -439,7 +440,7 @@ main() {
         exit 0
         ;;
       -v | --version)
-        printf '%s\n' "${0##*/} version $tsn_version"
+        printf "%s\n" "${0##*/} version $tsn_version"
         exit 0
         ;;
       --)
