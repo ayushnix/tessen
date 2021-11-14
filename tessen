@@ -48,32 +48,50 @@ get_pass_file() {
   fi
 }
 
-# get the password data including every key-value pair inside the encrypted file
+# parse the password store file for username, password, otp, custom autotype,
+# and other key value pairs
 get_pass_data() {
   local -a passdata
-  local passdata_regex idx key val
+  local keyval_regex otp_regex idx key val
 
   mapfile -t passdata < <(pass "$tsn_passfile")
-  # ASSUMPTION: the key can contain alphanumerics, spaces, hyphen, underscore
-  #             the value can contain anything but it has to follow after a space
-  passdata_regex="^[[:alnum:][:blank:]_-]+:[[:blank:]].+$"
-  # ASSUMPTION: the basename of the gpg file is the username although one can still
-  #             select a username field inside the file, if it exists
-  tsn_username="${tsn_passfile##*/}"
-  # ASSUMPTION: the first line of $tsn_passfile will contain the password
-  tsn_password="${passdata[0]}"
+  # the key can contain
+  # alphanumerics, spaces, hyphen, underscore, plus, at, and hash
+  # the value can contain
+  # anything but it should be separated with a space from 'key:'
+  keyval_regex='^[[:alnum:][:blank:]+#@_-]+:[[:blank:]].+$'
+  # parse the 'otpauth://' URI
+  # this regex is borrowed from pass-otp at commit 0aadd4c
+  otp_regex='^otpauth:\/\/(totp|hotp)(\/(([^:?]+)?(:([^:?]*))?))?\?(.+)$'
 
-  # skip the password, validate each entry against $passdata_regex, store valid results
-  # ASSUMPTION: each key is unique otherwise, the value of the last non-unique key will be used
+  # the first line should contain the only the password
+  tsn_password="${passdata[0]}"
+  # each key should be unique
+  # if non-unique keys are present, the value of the last non-unique key will
+  # be considered
+  # in addition, the following keys should be case insensitive and unique
+  # 'username', 'autotype'
   for idx in "${passdata[@]:1}"; do
-    if [[ "${idx%%:*}" != "username" && "${idx%%:*}" != "password" && "$idx" =~ $passdata_regex ]]; then
-      key="${idx%%:*}"
-      val="${idx#*: }"
-      tsn_passdata["$key"]="$val"
-    else
+    key="${idx%%:*}"
+    val="${idx#*: }"
+    # keys with the case insensitive name 'password' are ignored
+    if [[ "${key,,}" == "password" ]]; then
       continue
+    elif [[ "${key,,}" == "$tsn_userkey" ]]; then
+      tsn_username="$val"
+    elif [[ "${key,,}" == "$tsn_autokey" ]]; then
+      tsn_autotype="$val"
+    elif [[ "$idx" =~ $otp_regex ]]; then
+      tsn_otp=true
+    elif [[ "$idx" =~ $keyval_regex ]]; then
+      tsn_passdata["$key"]="$val"
     fi
   done
+
+  # if $tsn_userkey isn't found, use the basename of file as username
+  if [[ -z "$tsn_username" ]]; then
+    tsn_username="${tsn_passfile##*/}"
+  fi
 }
 
 # get the key that the user will choose to autotype or copy
