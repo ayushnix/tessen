@@ -10,7 +10,7 @@ set +x
 
 # GLOBAL VARIABLES
 # variables which won't be changed and can be made readonly
-readonly tsn_version="1.2.1"
+readonly tsn_version="1.2.2"
 readonly tsn_prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 readonly tsn_cliptime="${PASSWORD_STORE_CLIP_TIME:-15}"
 readonly tsn_delay="${TESSEN_DELAY:-200}"
@@ -54,7 +54,11 @@ get_pass_data() {
   local -a passdata
   local keyval_regex otp_regex idx key val
 
-  mapfile -t passdata < <(pass "$tsn_passfile")
+  mapfile -t passdata < <(pass "$tsn_passfile" 2> /dev/null)
+  if [[ "${#passdata[@]}" -eq 0 ]]; then
+    _die "$tsn_passfile is empty"
+  fi
+
   # the key can contain
   # alphanumerics, spaces, hyphen, underscore, plus, at, and hash
   # the value can contain
