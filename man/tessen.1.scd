@@ -63,6 +63,7 @@ tessen depends on
 - scdoc(1) (optional, make dependency to build this man page)
 - libnotify (optional, if you want to use notify-send(1) to show notifications
   when copying data)
+- pass-otp(1) (optional, if you want to generate one-time password tokens)
 - xdg-open(1), provided by xdg-utils (optional, if you want to open URLs)
 
 ## ADDITIONAL FEATURES

@@ -45,6 +45,7 @@ Xorg/X11 and Wayland, check out [pass-tessen](https://github.com/ayushnix/pass-t
   [wl-clipboard-rs](https://github.com/YaLTeR/wl-clipboard-rs) (if you want to copy data)
 - [libnotify](https://gitlab.gnome.org/GNOME/libnotify) (optional, to send notifications about
   copied data)
+- [pass-otp](https://github.com/tadfisher/pass-otp) (optional, to generate OTP)
 - [xdg-utils](https://www.freedesktop.org/wiki/Software/xdg-utils/) (optional, to open URLs)
 - [scdoc](https://git.sr.ht/~sircmpwn/scdoc) (optional, to build the man page)
 
