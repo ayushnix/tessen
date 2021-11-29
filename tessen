@@ -178,7 +178,7 @@ key_action() {
 key_otp() {
   local tmp_otp
 
-  if ! pass otp -h > /dev/null 2>&1 || ! is_installed oathtool; then
+  if ! pass otp -h > /dev/null 2>&1; then
     _die "pass-otp is not installed"
   fi
 
@@ -261,7 +261,7 @@ auto_type_def() {
         ":space") wtype -s "$tsn_delay" -k space -- ;;
         ":enter") wtype -s "$tsn_delay" -k Return -- ;;
         ":otp")
-          if ! pass otp -h > /dev/null 2>&1 || ! is_installed oathtool; then
+          if ! pass otp -h > /dev/null 2>&1; then
             _die "pass-otp is not installed"
           else
             tmp_otp="$(pass otp "$tsn_passfile")"
