@@ -337,7 +337,7 @@ is_installed() {
 set_bemenu() {
   local -a bmn_opt=("-i" "-l" "10" "-w" "--scrollbar=autohide" "-n")
   readonly tsn_backend="bemenu"
-  readonly tsn_backend_opts=( "${bmn_opt[@]}" )
+  readonly tsn_backend_opts=("${bmn_opt[@]}")
 }
 
 set_rofi() {
