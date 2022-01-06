@@ -1,4 +1,5 @@
 #!/bin/bash
+# vim: set expandtab ts=2 sw=2 sts=4:
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2021 Ayush Agarwal <ayush at fastmail dot in>
 #
@@ -16,7 +17,7 @@ readonly tsn_cliptime="${PASSWORD_STORE_CLIP_TIME:-15}"
 readonly tsn_delay="${TESSEN_DELAY:-200}"
 # variables which hold data for possible actions and choices
 tsn_backend="${TESSEN_BACKEND-}"
-tsn_backend_opts=""
+tsn_backend_opts=()
 tsn_action="${TESSEN_ACTION-}"
 tsn_userkey="${TESSEN_USERKEY:-user}"
 tsn_urlkey="${TESSEN_URLKEY:-url}"
@@ -41,7 +42,7 @@ get_pass_file() {
   tmp_list=("${tmp_list[@]%.gpg}")
   shopt -u nullglob globstar
 
-  tsn_passfile="$(printf "%s\n" "${tmp_list[@]}" | "$tsn_backend" "$tsn_backend_opts")"
+  tsn_passfile="$(printf "%s\n" "${tmp_list[@]}" | "$tsn_backend" "${tsn_backend_opts[@]}")"
 
   if ! [[ -s "$tsn_prefix/$tsn_passfile".gpg ]]; then
     _die
@@ -120,7 +121,7 @@ get_key() {
   fi
 
   # a dynamically scoped variable to hold the selected key for key_menu
-  chosen_key="$(printf "%s\n" "${key_arr[@]}" | "$tsn_backend" "$tsn_backend_opts")"
+  chosen_key="$(printf "%s\n" "${key_arr[@]}" | "$tsn_backend" "${tsn_backend_opts[@]}")"
 
   # validate the chosen key, if it doesn't exist, exit
   for ch in "${key_arr[@]}"; do
@@ -334,20 +335,17 @@ is_installed() {
 }
 
 set_bemenu() {
-  local -a bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
+  local -a bmn_opt=("-i" "-l" "10" "-w" "--scrollbar=autohide" "-n")
   readonly tsn_backend="bemenu"
-  # use BEMENU_OPTS if set by the user, otherwise use $bmn_opt
-  export BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
-  # manually using bemenu options doesn't seem to work
-  readonly tsn_backend_opts=""
+  readonly tsn_backend_opts=( "${bmn_opt[@]}" )
 }
 
 set_rofi() {
-  readonly tsn_backend="rofi" tsn_backend_opts="-dmenu"
+  readonly tsn_backend="rofi" tsn_backend_opts=("-dmenu")
 }
 
 set_wofi() {
-  readonly tsn_backend="wofi" tsn_backend_opts="-d"
+  readonly tsn_backend="wofi" tsn_backend_opts=("-d")
 }
 
 assign_backend() {
