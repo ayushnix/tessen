@@ -1,0 +1,24 @@
+---
+name: run shellcheck and shfmt
+on: [push, pull_request]
+jobs:
+  lint:
+    name: use shellcheck to lint tessen
+    runs-on: ubuntu-latest
+    container:
+      image: koalaman/shellcheck-alpine:stable
+    steps:
+      - name: checkout tessen for shellcheck
+        uses: actions/checkout@v2
+      - name: run shellcheck
+        run: shellcheck tessen
+  format:
+    name: use shfmt to check tessen code format
+    runs-on: ubuntu-latest
+    container:
+      image: mvdan/shfmt:v3.4.2-alpine
+    steps:
+      - name: checkout tessen for shfmt
+        uses: actions/checkout@v2
+      - name: run shfmt
+        run: shfmt -d -i 2 -bn -ci -sr tessen
