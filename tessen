@@ -1,10 +1,10 @@
 #!/bin/bash
-# vim: set expandtab ts=2 sw=2 sts=4:
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2021 Ayush Agarwal <ayush at fastmail dot in>
 #
 # tessen - a data selection interface for pass on Wayland
 # ------------------------------------------------------------------------------
+# vim: set expandtab ts=2 sw=2 sts=2:
 
 # don't leak password data if debug mode is enabled
 set +x
