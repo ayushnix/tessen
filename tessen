@@ -7,8 +7,6 @@
 # tessen - a data selection interface for pass on Wayland
 # ------------------------------------------------------------------------------
 
-set -euo pipefail
-
 # don't leak password data if debug mode is enabled
 set +x
 
