@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2021 Ayush Agarwal <ayush at fastmail dot in>
 #
+# vim: set expandtab ts=2 sw=2 sts=2:
+#
 # tessen - a data selection interface for pass on Wayland
 # ------------------------------------------------------------------------------
 
@@ -14,10 +16,11 @@ readonly tsn_version="1.2.3"
 readonly tsn_prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 readonly tsn_cliptime="${PASSWORD_STORE_CLIP_TIME:-15}"
 readonly tsn_delay="${TESSEN_DELAY:-200}"
+readonly tsn_known_backends=(bemenu rofi wofi)
 # variables which hold data for possible actions and choices
-tsn_backend="${TESSEN_BACKEND-}"
-tsn_backend_opts=""
-tsn_action="${TESSEN_ACTION-}"
+tsn_backend="${TESSEN_BACKEND:-}"
+tsn_backend_opts=()
+tsn_action="${TESSEN_ACTION:-}"
 tsn_userkey="${TESSEN_USERKEY:-user}"
 tsn_urlkey="${TESSEN_URLKEY:-url}"
 tsn_autokey="${TESSEN_AUTOKEY:-autotype}"
@@ -41,7 +44,7 @@ get_pass_file() {
   tmp_list=("${tmp_list[@]%.gpg}")
   shopt -u nullglob globstar
 
-  tsn_passfile="$(printf "%s\n" "${tmp_list[@]}" | "$tsn_backend" "$tsn_backend_opts")"
+  tsn_passfile="$(printf "%s\n" "${tmp_list[@]}" | "$tsn_backend" "${tsn_backend_opts[@]}")"
 
   if ! [[ -s "$tsn_prefix/$tsn_passfile".gpg ]]; then
     _die
@@ -120,7 +123,7 @@ get_key() {
   fi
 
   # a dynamically scoped variable to hold the selected key for key_menu
-  chosen_key="$(printf "%s\n" "${key_arr[@]}" | "$tsn_backend" "$tsn_backend_opts")"
+  chosen_key="$(printf "%s\n" "${key_arr[@]}" | "$tsn_backend" "${tsn_backend_opts[@]}")"
 
   # validate the chosen key, if it doesn't exist, exit
   for ch in "${key_arr[@]}"; do
@@ -326,49 +329,61 @@ print_help() {
 }
 
 is_installed() {
-  if command -v "$1" > /dev/null 2>&1; then
+  if command -v "${1%% *}" > /dev/null 2>&1; then
     return 0
   else
     return 1
   fi
 }
 
-set_bemenu() {
-  local -a bmn_opt=("-i -l 10 -w --scrollbar=autohide -n")
-  readonly tsn_backend="bemenu"
-  # use BEMENU_OPTS if set by the user, otherwise use $bmn_opt
-  export BEMENU_OPTS="${BEMENU_OPTS:-${bmn_opt[*]}}"
-  # manually using bemenu options doesn't seem to work
-  readonly tsn_backend_opts=""
-}
-
-set_rofi() {
-  readonly tsn_backend="rofi" tsn_backend_opts="-dmenu"
-}
-
-set_wofi() {
-  readonly tsn_backend="wofi" tsn_backend_opts="-d"
-}
-
-assign_backend() {
-  if is_installed "bemenu"; then
-    set_bemenu
-  elif is_installed "rofi"; then
-    set_rofi
-  elif is_installed "wofi"; then
-    set_wofi
-  else
-    _die "Please install either 'bemenu', 'rofi', or 'wofi' to use ${0##*/}"
+setup_backend() {
+  local backend="${1}"
+  local backend_opts="${backend#* }"
+  backend="${backend%% *}"
+  if ! is_installed "${backend}"; then
+    _die "'${backend}' not installed"
   fi
+  if [[ "${backend_opts}" = "${backend}" ]]; then
+    backend_opts="$(get_defaults "${backend}")"
+  fi
+  mapfile -t -d' ' backend_opts < <(printf "%s" "${backend_opts}")
+  readonly tsn_backend="${backend}"
+  readonly tsn_backend_opts=("${backend_opts[@]}")
 }
 
-validate_backend() {
-  case "$1" in
-    bemenu) set_bemenu ;;
-    rofi) set_rofi ;;
-    wofi) set_wofi ;;
-    *) _die "Please specify a valid backend: bemenu | rofi | wofi" ;;
-  esac
+get_defaults() {
+  if [[ "$(type -t "defaults_${1}")" = "function" ]]; then
+    "defaults_${1}"
+  else
+    printf ""
+  fi
+  return 0
+}
+
+defaults_bemenu() {
+  printf "%s\n" "-i -l 10 -w --scrollbar=autohide -n"
+  return 0
+}
+
+defaults_rofi() {
+  printf "%s\n" "-dmenu"
+  return 0
+}
+
+defaults_wofi() {
+  printf "%s\n" "-d"
+  return 0
+}
+
+find_backend() {
+  local backend
+  for backend in "${tsn_known_backends[@]}"; do
+    if is_installed "${backend}"; then
+      printf "%s" "${backend}"
+      return 0
+    fi
+  done
+  _die "Please use '--backend' option or 'TESSEN_BACKEND' environment variable to configure installed 'dmenu' compatible application to use ${0##*/}"
 }
 
 validate_cliptime() {
@@ -417,17 +432,11 @@ main() {
     _opt="$1"
     case "$_opt" in
       -b | --backend)
-        if [[ "$#" -lt 2 ]] || ! is_installed "$2"; then
-          _die "Please specify a valid backend: bemenu | rofi | wofi"
-        fi
-        validate_backend "$2"
+        tsn_backend="${2}"
         shift
         ;;
       --backend=*)
-        if ! is_installed "${_opt##--backend=}"; then
-          _die "Please specify a valid backend: bemenu | rofi | wofi"
-        fi
-        validate_backend "${_opt##--backend=}"
+        tsn_backend="${_opt##--backend=}"
         ;;
       -a | --action)
         if [[ "$#" -lt 2 ]]; then
@@ -457,9 +466,12 @@ main() {
   done
   unset -v _opt
 
-  if [[ -z "$tsn_backend" ]]; then
-    assign_backend
+  if [[ -z "${tsn_backend}" ]]; then
+    tsn_backend=$(find_backend)
   fi
+
+  setup_backend "${tsn_backend}"
+
   validate_cliptime
   readonly tsn_action
 
