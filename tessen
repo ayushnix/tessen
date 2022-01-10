@@ -427,8 +427,11 @@ validate_action() {
 }
 
 _clear() {
+  local -a pids
   wl-copy --clear
   unset -v tsn_passfile tsn_username tsn_password tsn_passdata chosen_key
+  mapfile -t pids < <(jobs -pr)
+  [[ -n "${pids[*]}" ]] && kill -- "${pids[@]}"
 }
 
 _die() {
