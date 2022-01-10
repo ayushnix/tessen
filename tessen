@@ -27,7 +27,7 @@ tsn_userkey="user"
 tsn_urlkey="${TESSEN_URLKEY:-url}"
 tsn_autokey="${TESSEN_AUTOKEY:-autotype}"
 tsn_autotype=""
-tsn_autotype_backend="wtype"
+tsn_autotype_backend="${TESSEN_AUTOTYPE_BACKEND:-wtype}"
 tsn_otp=false
 # variables with sensitive data which will be manually unset using _clear
 tsn_passfile=""
