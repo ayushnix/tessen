@@ -456,11 +456,11 @@ _translate_to_ydotool() {
   local key=""
   while [[ -n "${1:-}" ]]; do
     case "${1}" in
-      -M|-P)
+      -M | -P)
         translation+=" , key --down ${2}"
         shift
         ;;
-      -m|-p)
+      -m | -p)
         translation+=" , key --up ${2}"
         shift
         ;;
@@ -486,7 +486,7 @@ _translate_to_ydotool() {
   return 0
 }
 
-_start_ydotool_daemon(){
+_start_ydotool_daemon() {
   ydotoold &
   return $?
 }
@@ -538,7 +538,7 @@ main() {
       --action=*)
         validate_action "${_opt##--action=}"
         ;;
-      -t|--autotype-backend)
+      -t | --autotype-backend)
         tsn_autotype_backend="${2:-}"
         ;;
       --autotype-backend=*)
