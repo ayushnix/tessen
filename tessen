@@ -167,7 +167,7 @@ key_action() {
     autotype) auto_type "$arg" ;;
     copy) wld_copy "$arg" ;;
     both)
-      printf "%s" "$arg" | wtype -s "$tsn_delay" -
+      printf "%s" "$arg" | _auto_type -s "$tsn_delay" -
       wld_copy "$arg"
       ;;
     "")
@@ -257,36 +257,36 @@ auto_type_def() {
   local word tmp_otp
 
   if [[ -z "$tsn_autotype" ]]; then
-    printf "%s" "$tsn_username" | wtype -s "$tsn_delay" -
-    wtype -s "$tsn_delay" -k Tab --
-    printf "%s" "$tsn_password" | wtype -s "$tsn_delay" -
+    printf "%s" "$tsn_username" | _auto_type -s "$tsn_delay" -
+    _auto_type -s "$tsn_delay" -k Tab --
+    printf "%s" "$tsn_password" | _auto_type -s "$tsn_delay" -
   else
     for word in $tsn_autotype; do
       case "$word" in
         ":delay") sleep 1 ;;
-        ":tab") wtype -s "$tsn_delay" -k Tab -- ;;
-        ":space") wtype -s "$tsn_delay" -k space -- ;;
-        ":enter") wtype -s "$tsn_delay" -k Return -- ;;
+        ":tab") _auto_type -s "$tsn_delay" -k Tab -- ;;
+        ":space") _auto_type -s "$tsn_delay" -k space -- ;;
+        ":enter") _auto_type -s "$tsn_delay" -k Return -- ;;
         ":otp")
           if ! pass otp -h > /dev/null 2>&1; then
             _die "pass-otp is not installed"
           else
             tmp_otp="$(pass otp "$tsn_passfile")"
             if [[ "$tmp_otp" =~ ^[[:digit:]]+$ ]]; then
-              printf "%s" "$tmp_otp" | wtype -s "$tsn_delay" -
+              printf "%s" "$tmp_otp" | _auto_type -s "$tsn_delay" -
             else
               _die "invalid OTP detected"
             fi
           fi
           ;;
-        path | basename | filename) printf "%s" "${tsn_passfile##*/}" | wtype -s "$tsn_delay" - ;;
-        "$tsn_userkey") printf "%s" "$tsn_username" | wtype -s "$tsn_delay" - ;;
-        pass | password) printf "%s" "$tsn_password" | wtype -s "$tsn_delay" - ;;
+        path | basename | filename) printf "%s" "${tsn_passfile##*/}" | _auto_type -s "$tsn_delay" - ;;
+        "$tsn_userkey") printf "%s" "$tsn_username" | _auto_type -s "$tsn_delay" - ;;
+        pass | password) printf "%s" "$tsn_password" | _auto_type -s "$tsn_delay" - ;;
         *)
           if [[ -n "${tsn_passdata["$word"]}" ]]; then
-            printf "%s" "${tsn_passdata["$word"]}" | wtype -s "$tsn_delay" -
+            printf "%s" "${tsn_passdata["$word"]}" | _auto_type -s "$tsn_delay" -
           else
-            wtype -s "$tsn_delay" -k space --
+            _auto_type -s "$tsn_delay" -k space --
           fi
           ;;
       esac
@@ -297,7 +297,7 @@ auto_type_def() {
 }
 
 auto_type() {
-  printf "%s" "$1" | wtype -s "$tsn_delay" -
+  printf "%s" "$1" | _auto_type -s "$tsn_delay" -
   _clear
   exit 0
 }
@@ -427,10 +427,13 @@ validate_action() {
   esac
 }
 
-validate_autotype_backend() {
+setup_autotype_backend() {
   case "$1" in
     wtype) readonly tsn_autotype_backend="wtype" ;;
-    ydotool) readonly tsn_autotype_backend="ydotool" ;;
+    ydotool)
+      readonly tsn_autotype_backend="ydotool"
+      _start_ydotool_daemon || _die "Could not start ydotool daemon"
+      ;;
     *) _die "Please specify a valid autotype backend: wtype | ydotool" ;;
   esac
 }
@@ -443,44 +446,49 @@ _auto_type() {
     ydotool)
       local -a arguments
       mapfile -t -d' ' arguments < <(_translate_to_ydotool "$@")
-      ydotool sleep 500 , "${arguments[@]}"
+      ydotool "${arguments[@]}"
       ;;
   esac
 }
 
 _translate_to_ydotool() {
-  local arguments=""
+  local translation=""
   local key=""
   while [[ -n "${1:-}" ]]; do
-    case "${1}"
+    case "${1}" in
       -M|-P)
-        arguments+=" , key --down ${2}"
+        translation+=" , key --down ${2}"
         shift
         ;;
       -m|-p)
-        arguments+=" , key --up ${2}"
+        translation+=" , key --up ${2}"
         shift
         ;;
       -k)
-        arguments+=" , key ${2}"
+        translation+=" , key ${2}"
         shift
         ;;
       -s)
-        arguments+=" , sleep ${2}"
+        translation+=" , sleep ${2}"
         shift
         ;;
       -)
-        arguments+=" , text --file -"
+        translation+=" , type --file -"
         ;;
       *)
-        arguments+=", text '${1}'"
+        translation+=", type '${1}'"
         ;;
     esac
     shift
   done
-  arguments="${arguments# , }"
-  printf "%s" "${arguments}"
+  translation="${translation# , }"
+  printf "%s" "${translation}"
   return 0
+}
+
+_start_ydotool_daemon(){
+  ydotoold &
+  return $?
 }
 
 _clear() {
@@ -488,7 +496,11 @@ _clear() {
   wl-copy --clear
   unset -v tsn_passfile tsn_username tsn_password tsn_passdata chosen_key
   mapfile -t pids < <(jobs -pr)
-  [[ -n "${pids[*]}" ]] && kill -- "${pids[@]}"
+  echo "${pids[*]}"
+  if [[ -n "${pids[*]}" ]]; then
+    kill -- "${pids[@]}"
+  fi
+  wait
 }
 
 _die() {
@@ -527,10 +539,10 @@ main() {
         validate_action "${_opt##--action=}"
         ;;
       -t|--autotype-backend)
-        validate_autotype_backend "${2:-}"
+        tsn_autotype_backend="${2:-}"
         ;;
       --autotype-backend=*)
-        valudate_autotype_backend "${_opt#*=}"
+        tsn_autotype_backend="${_opt#*=}"
         ;;
       -h | --help)
         print_help
@@ -555,6 +567,7 @@ main() {
   fi
 
   setup_backend "${tsn_backend}"
+  setup_autotype_backend "${tsn_autotype_backend}"
 
   validate_cliptime
   readonly tsn_action
