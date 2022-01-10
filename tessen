@@ -27,6 +27,7 @@ tsn_userkey="user"
 tsn_urlkey="${TESSEN_URLKEY:-url}"
 tsn_autokey="${TESSEN_AUTOKEY:-autotype}"
 tsn_autotype=""
+tsn_autotype_backend="wtype"
 tsn_otp=false
 # variables with sensitive data which will be manually unset using _clear
 tsn_passfile=""
@@ -426,6 +427,62 @@ validate_action() {
   esac
 }
 
+validate_autotype_backend() {
+  case "$1" in
+    wtype) readonly tsn_autotype_backend="wtype" ;;
+    ydotool) readonly tsn_autotype_backend="ydotool" ;;
+    *) _die "Please specify a valid autotype backend: wtype | ydotool" ;;
+  esac
+}
+
+_auto_type() {
+  case "${tsn_autotype_backend}" in
+    wtype)
+      wtype "$@"
+      ;;
+    ydotool)
+      local -a arguments
+      mapfile -t -d' ' arguments < <(_translate_to_ydotool "$@")
+      ydotool sleep 500 , "${arguments[@]}"
+      ;;
+  esac
+}
+
+_translate_to_ydotool() {
+  local arguments=""
+  local key=""
+  while [[ -n "${1:-}" ]]; do
+    case "${1}"
+      -M|-P)
+        arguments+=" , key --down ${2}"
+        shift
+        ;;
+      -m|-p)
+        arguments+=" , key --up ${2}"
+        shift
+        ;;
+      -k)
+        arguments+=" , key ${2}"
+        shift
+        ;;
+      -s)
+        arguments+=" , sleep ${2}"
+        shift
+        ;;
+      -)
+        arguments+=" , text --file -"
+        ;;
+      *)
+        arguments+=", text '${1}'"
+        ;;
+    esac
+    shift
+  done
+  arguments="${arguments# , }"
+  printf "%s" "${arguments}"
+  return 0
+}
+
 _clear() {
   local -a pids
   wl-copy --clear
@@ -457,7 +514,7 @@ main() {
         shift
         ;;
       --backend=*)
-        tsn_backend="${_opt##--backend=}"
+        tsn_backend="${_opt#--backend=}"
         ;;
       -a | --action)
         if [[ "$#" -lt 2 ]]; then
@@ -468,6 +525,12 @@ main() {
         ;;
       --action=*)
         validate_action "${_opt##--action=}"
+        ;;
+      -t|--autotype-backend)
+        validate_autotype_backend "${2:-}"
+        ;;
+      --autotype-backend=*)
+        valudate_autotype_backend "${_opt#*=}"
         ;;
       -h | --help)
         print_help
