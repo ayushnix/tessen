@@ -10,18 +10,18 @@ tessen [*-hv*] [*-b* dmenu_backend] [*-a* action]
 
 # DESCRIPTION
 
-tessen is a bash(1) script that helps interact with pass(1). It can autotype
-and copy data from pass(1), open URLs, generate one-time passwords using
-pass-otp(1), and execute custom auto-type operations.
+tessen is a *bash*(1) script that helps interact with *pass*(1). It can autotype
+and copy data from pass, open URLs, generate one-time passwords using
+*pass-otp*(1), and execute custom auto-type operations.
 
-tessen has been written to work on Wayland compositors, such as sway(1). It
-will NOT work on window managers and desktop environments using the legacy
-X.Org display server.
+tessen has been written to work on wayland compositors based on wlroots, such as
+*sway*(1). It will not work on window managers and desktop environments using
+the legacy X.Org display server.
 
-The options understood by tessen are as follows:
+The options understood by tessen are:
 
 *-b*, *--backend*, *--backend=*[dmenu_backend]
-	choose either *bemenu*, *rofi* or *wofi*
+	specify a dmenu like backend and (optionally) its flags
 
 *-a*, *--action*, *--action=*[action]
 	choose either *autotype*, *copy*, or *both*
@@ -34,14 +34,17 @@ The options understood by tessen are as follows:
 
 ## DEFAULT BEHAVIOR
 
-If a backend is not specified, tessen tries to find bemenu(1), rofi(1), and
-wofi(1) in the order mentioned here. If rofi(1) is used, it is expected that
-the Wayland fork of rofi(1) _https://github.com/lbonn/rofi_ is being used. The
-original rofi(1) _https://github.com/davatorium/rofi_ implementation made for
-X.Org is NOT supported.
+If a backend is not specified, tessen tries to find either one of *bemenu*(1),
+*fuzzel*(1), *rofi*(1), or *wofi*(1) in the order mentioned here. If rofi is
+used, it is expected that the Wayland fork of rofi
+_https://github.com/lbonn/rofi_ is being used. The original rofi
+_https://github.com/davatorium/rofi_ implementation made for X.Org is NOT
+supported.
 
 If an action is not specified, tessen shows an additional menu with the option
-to either autotype or copy data.
+to either autotype or copy data. If data is copied, it will be removed from the
+clipboard after *PASSWORD_STORE_CLIP_TIME*. If this environment variable isn't
+set, a default value of 10 seconds is used.
 
 The default value of the backend can also be set using the *TESSEN_BACKEND*
 environment variable. The default value of the action can be set using the
@@ -55,16 +58,15 @@ variable.
 
 tessen depends on
 
-- bash(1)
-- pass(1)
-- a dmenu like backend interface such as bemenu(1), rofi(1), or wofi(1)
-- wtype(1)
-- wl-clipboard(1)
-- scdoc(1) (optional, make dependency to build this man page)
-- libnotify (optional, if you want to use notify-send(1) to show notifications
-  when copying data)
-- pass-otp(1) (optional, if you want to generate one-time password tokens)
-- xdg-open(1), provided by xdg-utils (optional, if you want to open URLs)
+- *bash*(1)
+- *pass*(1)
+- a wayland native dmenu like backend such as *bemenu*(1) and *fuzzel*(1)
+- *wtype*(1)
+- *wl-clipboard*(1)
+- *scdoc*(1) (optional, to build this man page)
+- *libnotify* (optional, to use *notify-send*(1) for showing notifications)
+- *pass-otp*(1) (optional, to generate one-time password tokens)
+- *xdg-open*(1), provided by *xdg-utils* (optional, to open URLs)
 
 ## ADDITIONAL FEATURES
 
@@ -77,19 +79,19 @@ The first line should always have the password, and nothing else. All other
 lines may have key-value pairs like 'key1: value1' or the *otpauth://* format
 URI. However, if a key called 'password' is present, it will be ignored.
 
-If a key called *user* is present, it's value will be the default username
-instead of the basename of the selected file. This key can be modified using
-the *TESSEN_USERKEY* environment variable.
+If a key called 'user' is present, its value will be the default username
+instead of the basename of the selected file. This key can be modified using the
+*TESSEN_USERKEY* environment variable.
 
-If a key called *url* is present, an option to open the value of the *url* key
+If a key called 'url' is present, an option to open the value of the 'url' key
 in the default web browser will be shown instead of auto type. This becomes the
 default behavior if *-a autotype* option is provided during the execution of
-tessen. The *url* key can be modified using the *TESSEN_URLKEY* environment
+tessen. The 'url' key can be modified using the *TESSEN_URLKEY* environment
 variable.
 
-The *otpauth://* format is supported and used if pass-otp(1) is installed.
+The *otpauth://* format is supported and used if pass-otp is installed.
 
-A value for the *autotype* key can be specified for custom auto-type behavior
+A value for the 'autotype' key can be specified for custom auto-type behavior
 which overrides the default behavior of auto-typing the username and the
 password. For example,
 
@@ -111,7 +113,7 @@ below will be auto-typed:
 value1 <Tab> value2 <space> value3 <Return> value4 <delay for 1 sec> 384534 mypassword
 ```
 
-When specified as a value of the *autotype* key,
+When specified as a value of the 'autotype' key,
 
 - *:tab* can be used to type the Tab key
 - *:space* can be used to type the Space key
@@ -124,7 +126,7 @@ When specified as a value of the *autotype* key,
   selected file
 - any other key, such as 'key1', can be specified to print its value
 
-The value of the *autotype* key can be modified using the *TESSEN_AUTOKEY*
+The value of the 'autotype' key can be modified using the *TESSEN_AUTOKEY*
 environment variable.
 
 # EXAMPLES
@@ -133,19 +135,23 @@ Find a dmenu-like backend and autotype or copy data:
 
 	$ tessen
 
-Use bemenu(1) and autotype or copy data:
+Use bemenu and autotype or copy data:
 
 	$ tessen -b bemenu
 
-Use bemenu(1) and always autotype data:
+Use bemenu but override default options and show 20 lines
+
+	$ tessen -b 'bemenu -l 20'
+
+Use bemenu and always autotype data:
 
 	$ tessen -b bemenu -a autotype
 
-Use bemenu(1) and always copy data:
+Use bemenu and always copy data:
 
 	$ tessen -b bemenu -a copy
 
-Use bemenu(1) and always autotype AND copy data simultaneously:
+Use bemenu and always autotype AND copy data simultaneously:
 
 	$ tessen -b bemenu -a both
 
@@ -158,8 +164,9 @@ Use bemenu(1) and always autotype AND copy data simultaneously:
 	The number of seconds after which the clipboard will be cleared.
 
 *TESSEN_BACKEND*
-	The default dmenu like backend used by tessen. Choose either *bemenu*,
-	the wayland fork of *rofi* by lbonn on GitHub, or *wofi*.
+	A wayland native dmenu like backend that should be used by tessen.
+	Although tessen provides default options for bemenu, fuzzel, rofi, and
+	wofi, any compatible backend may be used.
 
 *TESSEN_ACTION*
 	The default action of tessen. Choose either *autotype*, *copy*, or
@@ -186,8 +193,8 @@ Use bemenu(1) and always autotype AND copy data simultaneously:
 
 # SEE ALSO
 
-pass(1), pass-otp(1), bemenu(1), rofi(1), wofi(1), wl-clipboard(1), wtype(1),
-notify-send(1)
+*pass*(1), *pass-otp*(1), *bemenu*(1), *fuzzel*(1), *rofi*(1), *wofi*(1),
+*wl-clipboard*(1), *wtype*(1), *notify-send*(1)
 
 # AUTHORS
 
