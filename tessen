@@ -242,7 +242,7 @@ key_open_url() {
       return 1
     }
   else
-    _die "Failed to open the $tsn_urlkey"
+    _die "failed to open '$tsn_urlkey'"
   fi
 }
 
@@ -416,7 +416,7 @@ validate_action() {
     copy) readonly tsn_action="copy" ;;
     both) readonly tsn_action="both" ;;
     "") readonly tsn_action="" ;;
-    *) _die "Please specify a valid action: autotype | copy | both" ;;
+    *) _die "please specify a valid action: autotype | copy | both" ;;
   esac
 }
 
@@ -452,7 +452,7 @@ main() {
         ;;
       -a | --action)
         if [[ "$#" -lt 2 ]]; then
-          _die "Please specify a valid action: autotype | copy | both"
+          _die "please specify a valid action: autotype | copy | both"
         fi
         validate_action "$2"
         shift

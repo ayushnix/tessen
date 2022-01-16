@@ -195,7 +195,7 @@ The reason why `tessen` offers flexibility between autotyping and copying data i
 may not always work accurately. There can be several reasons for this.
 
 One of the reasons when autotype doesn't work is when a web page doesn't follow the standard
-expectation of having a username and password text field just after the other and links are insert
+expectation of having a username and password text field one after the other and links are inserted
 between them. In such cases, autotyping can make a real mess.
 
 Autotyping also does not work on Chromium based browsers on Wayland when using
