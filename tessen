@@ -16,7 +16,8 @@ readonly tsn_version="1.2.3"
 readonly tsn_prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 readonly tsn_cliptime="${PASSWORD_STORE_CLIP_TIME:-15}"
 readonly tsn_delay="${TESSEN_DELAY:-200}"
-readonly tsn_known_backends=(bemenu rofi wofi)
+# a list of dmenu backends for which tessen provides default options
+readonly -a tsn_known_backends=('bemenu' 'rofi' 'wofi' 'fuzzel')
 # variables which hold data for possible actions and choices
 tsn_backend="${TESSEN_BACKEND-}"
 tsn_backend_opts=()
@@ -360,19 +361,21 @@ get_defaults() {
   return 0
 }
 
-defaults_bemenu() {
-  printf "%s\n" "-i -l 10 -w --scrollbar=autohide -n"
-  return 0
-}
-
-defaults_rofi() {
-  printf "%s\n" "-dmenu"
-  return 0
-}
-
-defaults_wofi() {
-  printf "%s\n" "-d"
-  return 0
+get_default_opts() {
+  case "$1" in
+    bemenu)
+      printf "%s" "-i -l 10 -w --scrollbar=autohide -n"
+      return 0
+      ;;
+    rofi)
+      printf "%s" "-dmenu"
+      return 0
+      ;;
+    wofi | fuzzel)
+      printf "%s" "-d"
+      return 0
+      ;;
+  esac
 }
 
 find_backend() {
