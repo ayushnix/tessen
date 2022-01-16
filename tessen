@@ -338,27 +338,28 @@ is_installed() {
 }
 
 setup_backend() {
-  local backend="${1}"
+  local backend="$1"
   local backend_opts="${backend#* }"
   backend="${backend%% *}"
-  if ! is_installed "${backend}"; then
-    _die "'${backend}' not installed"
-  fi
-  if [[ "${backend_opts}" = "${backend}" ]]; then
-    backend_opts="$(get_defaults "${backend}")"
-  fi
-  mapfile -t -d' ' backend_opts < <(printf "%s" "${backend_opts}")
-  readonly tsn_backend="${backend}"
-  readonly tsn_backend_opts=("${backend_opts[@]}")
-}
 
-get_defaults() {
-  if [[ "$(type -t "defaults_${1}")" = "function" ]]; then
-    "defaults_${1}"
-  else
-    printf ""
+  if ! is_installed "$backend"; then
+    _die "'$backend' is not installed"
   fi
-  return 0
+  if [[ "$backend_opts" == "$backend" ]]; then
+    backend_opts="$(get_default_opts "$backend")"
+    if [[ -z "$backend_opts" ]]; then
+      printf "%s\n" "unable to determine any dmenu options for '$backend'" >&2
+    fi
+  fi
+
+  readonly tsn_backend="$backend"
+
+  if [[ -n "$backend_opts" ]]; then
+    mapfile -t -d ' ' backend_opts < <(printf "%s" "$backend_opts")
+    readonly -a tsn_backend_opts=("${backend_opts[@]}")
+  else
+    readonly -a tsn_backend_opts=()
+  fi
 }
 
 get_default_opts() {
