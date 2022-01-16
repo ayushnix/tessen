@@ -17,7 +17,7 @@ readonly tsn_prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 readonly tsn_cliptime="${PASSWORD_STORE_CLIP_TIME:-15}"
 readonly tsn_delay="${TESSEN_DELAY:-200}"
 # a list of dmenu backends for which tessen provides default options
-readonly -a tsn_known_backends=('bemenu' 'rofi' 'wofi' 'fuzzel')
+readonly -a tsn_known_backends=('bemenu' 'fuzzel' 'rofi' 'wofi')
 # variables which hold data for possible actions and choices
 tsn_backend="${TESSEN_BACKEND-}"
 tsn_backend_opts=()
