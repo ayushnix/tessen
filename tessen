@@ -380,14 +380,15 @@ get_default_opts() {
 }
 
 find_backend() {
-  local backend
-  for backend in "${tsn_known_backends[@]}"; do
-    if is_installed "${backend}"; then
-      printf "%s" "${backend}"
+  local dmbd
+
+  for dmbd in "${tsn_known_backends[@]}"; do
+    if is_installed "$dmbd"; then
+      printf "%s" "$dmbd"
       return 0
     fi
   done
-  _die "Please use '--backend' option or 'TESSEN_BACKEND' environment variable to configure installed 'dmenu' compatible application to use ${0##*/}"
+  _die "%s\n" "unable to find a 'dmenu' compatible application"
 }
 
 validate_cliptime() {
@@ -471,7 +472,7 @@ main() {
   unset -v _opt
 
   if [[ -z "${tsn_backend}" ]]; then
-    tsn_backend=$(find_backend)
+    tsn_backend="$(find_backend)"
   fi
 
   setup_backend "${tsn_backend}"
