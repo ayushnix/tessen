@@ -314,19 +314,26 @@ wld_copy() {
 }
 
 print_help() {
-  printf "%s\n" "${0##*/} - autotype and copy data from password-store on wayland" ""
-  printf "%s\n" "Usage: ${0##*/} [options]" ""
-  printf "%s\n" "  ${0##*/}                        use an available dmenu interface and either autotype OR copy data"
-  printf "%s\n" "  ${0##*/} -b rofi                use rofi and either autotype OR copy data"
-  printf "%s\n" "  ${0##*/} -b rofi -a autotype    use rofi and always autotype data"
-  printf "%s\n" "  ${0##*/} -b rofi -a copy        use rofi and always copy data"
-  printf "%s\n" "  ${0##*/} -b rofi -a both        use rofi and always autotype AND copy data" ""
-  printf "%s\n" "  -b, --backend, --backend=     choose either 'bemenu', 'rofi', or 'wofi' as backend"
-  printf "%s\n" "  -a, --action, --action=       choose either 'autotype', 'copy', or 'both'"
-  printf "%s\n" "  -h, --help                    print this help menu"
-  printf "%s\n" "  -v, --version                 print the version of ${0##*/}" ""
-  printf "%s\n" "For more details and additional features, please read the man page of tessen(1)"
-  printf "%s\n" "For reporting bugs or feedback, visit https://github.com/ayushnix/tessen"
+  printf "%s" "\
+${0##*/} - autotype and copy data from password-store on wayland
+
+Usage: ${0##*/} [options]
+
+  ${0##*/}                        use a dmenu backend and either autotype OR copy data
+  ${0##*/} -b bemenu              use bemenu and either autotype OR copy data
+  ${0##*/} -b 'bemenu -l 20'      use bemenu but override default options and show 20 lines
+  ${0##*/} -b bemenu -a autotype  use bemenu and always autotype data
+  ${0##*/} -b bemenu -a copy      use bemenu and always copy data                       
+  ${0##*/} -b bemenu -a both      use bemenu and always autotype AND copy data
+
+  -b, --backend, --backend=     specify a dmenu like backend and (optionally) its flags
+  -a, --action, --action=       choose either 'autotype', 'copy', or 'both'
+  -h, --help                    print this help menu
+  -v, --version                 print the version of ${0##*/}
+
+For more details and additional features, please read the man page of tessen(1)
+For reporting bugs or feedback, visit https://github.com/ayushnix/tessen
+"
 }
 
 is_installed() {
