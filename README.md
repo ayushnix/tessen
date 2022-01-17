@@ -44,7 +44,6 @@ xorg/x11 and wayland, check out [pass-tessen](https://github.com/ayushnix/pass-t
   [fuzzel](https://codeberg.org/dnkl/fuzzel), [rofi](https://github.com/lbonn/rofi),
   [wofi](https://hg.sr.ht/~scoopta/wofi)
 - [wtype](https://github.com/atx/wtype) (optional, if you want to auto-type data)
-- [ydotool](https://github.com/ReimuNotMoe/ydotool) (optional, if you want to auto-type data)
 - [wl-clipboard](https://github.com/bugaevc/wl-clipboard) or
   [wl-clipboard-rs](https://github.com/YaLTeR/wl-clipboard-rs) (optional, if you want to copy data)
 - [libnotify](https://gitlab.gnome.org/GNOME/libnotify) (optional, to send notifications about
@@ -107,19 +106,6 @@ Firefox. This issue might've been fixed in
 [this](https://github.com/atx/wtype/commit/a81540b7d4920566ad271236ca88befc0002b462) commit but the
 author hasn't released a new version yet.
 
-### Using `ydotool`
-`ydotool` requires write access to `/dev/uinput` device, which is root only by default.<br>
-To overcome this issue udev rule might be used.
-
-Example tested on Fedora:<br>
-**`/etc/udev/rules.d/60-uinput.rules`**<br>
-```shell
-KERNEL=="uinput", SUBSYSTEM=="misc", TAG+="uaccess", OPTIONS+="static_node=uinput"
-```
-
-This rule should also work on other modern distros, which provides udev rules for seat.
-
-
 ## What does `tessen` mean?
 
 [Here](https://en.wikipedia.org/wiki/Japanese_war_fan) you go.
@@ -139,6 +125,7 @@ Please see [this](https://github.com/ayushnix/tessen/blob/master/CONTRIBUTING.md
 
 - xorg/x11 support, use [rofi-pass](https://github.com/carnager/rofi-pass) or fork this repo and
   implement it yourself
+- using [ydotool](https://github.com/ReimuNotMoe/ydotool), because it needs root access
 - adding, editing, or removing existing password store data
 - cache for storing frequently used password store selection data
 - importing passwords or exporting them
