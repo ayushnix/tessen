@@ -85,7 +85,7 @@ get_pass_data() {
     # keys with the case insensitive name 'password' are ignored
     if [[ "${key,,}" == "password" ]]; then
       continue
-    elif [[ "${key,,}" =~ ^${tsn_userkey}$ ]]; then
+    elif [[ -z "${tsn_username}" ]] && [[ "${key,,}" =~ ^${tsn_userkey}$ ]]; then
       tsn_username="$val"
     elif [[ "${key,,}" == "$tsn_autokey" ]]; then
       tsn_autotype="$val"
