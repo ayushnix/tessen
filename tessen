@@ -488,6 +488,7 @@ _translate_to_ydotool() {
 
 _start_ydotool_daemon() {
   ydotoold &
+  sleep 0.5
   return $?
 }
 
