@@ -383,6 +383,10 @@ get_default_opts() {
       printf "%s" "-d"
       return 0
       ;;
+    *)
+      printf ""
+      return 1
+      ;;
   esac
 }
 
