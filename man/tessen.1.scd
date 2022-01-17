@@ -27,7 +27,7 @@ The options understood by tessen are:
 	choose either *autotype*, *copy*, or *both*
 
 *-t*, *--autotype-backend*, *--autotype-backend*=[backend]
-	autotype backend, wtype and ydotool are supported (default: wtype)
+	autotype backend have to support *wtype*(1) flags and options (default: wtype)
 
 *-h*, *--help*
 	show a brief help message
@@ -51,7 +51,7 @@ set, a default value of 10 seconds is used.
 
 The default value of the backend can also be set using the *TESSEN_BACKEND*
 environment variable. The default value of the action can be set using the
-*TESSEN_ACTION* environment variable. Autotype action can be configured
+*TESSEN_ACTION* environment variable. Autotype binary can be configured
 by setting *TESSEN_AUTOTYPE_BACKEND* environment variable.
 
 By default, tessen will keep a delay of 200 milliseconds when auto-typing data
@@ -66,7 +66,6 @@ tessen depends on
 - *pass*(1)
 - a wayland native dmenu like backend such as *bemenu*(1) and *fuzzel*(1)
 - *wtype*(1)
-- *ydotool*(1) (optional), alternative auto-type backend
 - *wl-clipboard*(1)
 - *scdoc*(1) (optional, to build this man page)
 - *libnotify* (optional, to use *notify-send*(1) for showing notifications)

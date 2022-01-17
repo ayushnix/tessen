@@ -428,68 +428,15 @@ validate_action() {
 }
 
 setup_autotype_backend() {
-  case "$1" in
-    wtype) readonly tsn_autotype_backend="wtype" ;;
-    ydotool)
-      readonly tsn_autotype_backend="ydotool"
-      _start_ydotool_daemon || _die "Could not start ydotool daemon"
-      ;;
-    *) _die "Please specify a valid autotype backend: wtype | ydotool" ;;
-  esac
+  local backend="${1}"
+  if ! is_installed "$backend"; then
+    _die "'$backend' is not installed"
+  fi
+  readonly tsn_autotype_backend="${backend}"
 }
 
 _auto_type() {
-  case "${tsn_autotype_backend}" in
-    wtype)
-      wtype "$@"
-      ;;
-    ydotool)
-      local -a arguments
-      mapfile -t -d' ' arguments < <(_translate_to_ydotool "$@")
-      ydotool "${arguments[@]}"
-      ;;
-  esac
-}
-
-_translate_to_ydotool() {
-  local translation=""
-  local key=""
-  while [[ -n "${1:-}" ]]; do
-    case "${1}" in
-      -M | -P)
-        translation+=" , key --down ${2}"
-        shift
-        ;;
-      -m | -p)
-        translation+=" , key --up ${2}"
-        shift
-        ;;
-      -k)
-        translation+=" , key ${2}"
-        shift
-        ;;
-      -s)
-        translation+=" , sleep ${2}"
-        shift
-        ;;
-      -)
-        translation+=" , type --file -"
-        ;;
-      *)
-        translation+=", type '${1}'"
-        ;;
-    esac
-    shift
-  done
-  translation="${translation# , }"
-  printf "%s" "${translation}"
-  return 0
-}
-
-_start_ydotool_daemon() {
-  ydotoold &
-  sleep 0.5
-  return $?
+  "${tsn_autotype_backend}"
 }
 
 _clear() {
