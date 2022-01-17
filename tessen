@@ -436,7 +436,7 @@ setup_autotype_backend() {
 }
 
 _auto_type() {
-  "${tsn_autotype_backend}"
+  "${tsn_autotype_backend}" "$@"
 }
 
 _clear() {
@@ -488,6 +488,7 @@ main() {
         ;;
       -t | --autotype-backend)
         tsn_autotype_backend="${2:-}"
+        shift
         ;;
       --autotype-backend=*)
         tsn_autotype_backend="${_opt#*=}"
