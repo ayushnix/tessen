@@ -331,6 +331,9 @@ Usage: ${0##*/} [options]
 
   -b, --backend, --backend=     specify a dmenu like backend and (optionally) its flags
   -a, --action, --action=       choose either 'autotype', 'copy', or 'both'
+  -t, --autotype-backend, --autotype-backend=
+                                specify autotype backend, have to support flags and options
+                                (default: wtype)
   -h, --help                    print this help menu
   -v, --version                 print the version of ${0##*/}
 
