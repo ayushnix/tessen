@@ -432,6 +432,7 @@ validate_action() {
 
 setup_autotype_backend() {
   local backend="${1}"
+  [[ "${tsn_action}" == "copy" ]] && return 0
   if ! is_installed "$backend"; then
     _die "'$backend' is not installed"
   fi
