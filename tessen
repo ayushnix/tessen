@@ -22,7 +22,8 @@ readonly -a tsn_known_backends=('bemenu' 'fuzzel' 'rofi' 'wofi')
 tsn_backend="${TESSEN_BACKEND-}"
 tsn_backend_opts=()
 tsn_action="${TESSEN_ACTION-}"
-tsn_userkey="${TESSEN_USERKEY:-"user"}"
+tsn_userkey_regex="${TESSEN_USERKEY:-user}"
+tns_userkey="user"
 tsn_urlkey="${TESSEN_URLKEY:-url}"
 tsn_autokey="${TESSEN_AUTOKEY:-autotype}"
 tsn_autotype=""
@@ -85,8 +86,9 @@ get_pass_data() {
     # keys with the case insensitive name 'password' are ignored
     if [[ "${key,,}" == "password" ]]; then
       continue
-    elif [[ -z "${tsn_username}" ]] && [[ "${key,,}" =~ ^${tsn_userkey}$ ]]; then
+    elif [[ -z "${tsn_username}" ]] && [[ "${key,,}" =~ ^${tsn_userkey_regex}$ ]]; then
       tsn_username="$val"
+      tns_userkey="${key,,}"
     elif [[ "${key,,}" == "$tsn_autokey" ]]; then
       tsn_autotype="$val"
     elif [[ "$idx" =~ $otp_regex ]]; then
@@ -96,7 +98,7 @@ get_pass_data() {
     fi
   done
 
-  # if $tsn_userkey isn't found, use the basename of file as username
+  # if $tsn_userkey_pattern isn't found, use the basename of file as username
   if [[ -z "$tsn_username" ]]; then
     tsn_username="${tsn_passfile##*/}"
   fi
