@@ -81,7 +81,8 @@ URI. However, if a key called 'password' is present, it will be ignored.
 
 If a key called 'user' is present, its value will be the default username
 instead of the basename of the selected file. This key can be modified using the
-*TESSEN_USERKEY* environment variable.
+*TESSEN_USERKEY* environment variable. If entries in password store use
+different keys for specifying user names regular expression can be used.
 
 If a key called 'url' is present, an option to open the value of the 'url' key
 in the default web browser will be shown instead of auto type. This becomes the
