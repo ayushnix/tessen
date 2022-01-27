@@ -100,11 +100,9 @@ expectation of having a username and password text field one after the other and
 between them. A good example is Discourse forums. In such cases, autotyping can make a real mess.
 This is why `tessen` also provides an option to define custom autotype operations.
 
-I haven't been able to make autotyping work on Chromium on Wayland using
-[v0.3](https://github.com/atx/wtype/releases/tag/v0.3) of `wtype`. However, it works fine on
-Firefox. This issue might've been fixed in
-[this](https://github.com/atx/wtype/commit/a81540b7d4920566ad271236ca88befc0002b462) commit but the
-author hasn't released a new version yet.
+`tessen` uses [wtype](https://github.com/atx/wtype/) for autotyping and it seems to work fine on
+Firefox. You'll need at least version [v0.4](https://github.com/atx/wtype/releases/tag/v0.4), or
+later, of wtype for autotyping to work on Chromium. I haven't tested any other web browsers.
 
 ## What does `tessen` mean?
 
