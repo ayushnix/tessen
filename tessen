@@ -364,7 +364,11 @@ setup_backend() {
   readonly tsn_backend="$backend"
 
   if [[ -n "$backend_opts" ]]; then
-    mapfile -t -d ' ' backend_opts < <(printf "%s" "$backend_opts")
+    mapfile -t -d ' ' backend_opts < <(
+      printf "%s" "$backend_opts" \
+        | awk 'BEGIN{FPAT = "([^[:space:]]+)|(\"[^\"]+\")|('\''[^'\'']+'\'')"}
+              {for(i=1;i<=NF;i++) print gensub("(^[\"'\'']|[\"'\'']$)","", "g", $i)}'
+    )
     readonly -a tsn_backend_opts=("${backend_opts[@]}")
   else
     readonly -a tsn_backend_opts=()
