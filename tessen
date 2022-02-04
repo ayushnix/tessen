@@ -21,6 +21,11 @@ readonly -a tsn_known_backends=('bemenu' 'fuzzel' 'rofi' 'wofi')
 # variables which hold data for possible actions and choices
 tsn_backend="${TESSEN_BACKEND-}"
 tsn_backend_opts=()
+# a list of frontends to the password store with which tessen can communicate
+readonly -a tsn_known_frontends=('pass' 'gopass')
+tsn_frontend=""
+tsn_frontend_cmd="pass"
+tsn_frontend_show_subcmd=""
 tsn_action="${TESSEN_ACTION-}"
 tsn_userkey_regex="${TESSEN_USERKEY:-user}"
 tsn_userkey="user"
@@ -59,7 +64,7 @@ get_pass_data() {
   local -a passdata
   local keyval_regex otp_regex idx key val
 
-  mapfile -t passdata < <(pass "$tsn_passfile" 2> /dev/null)
+  mapfile -t passdata < <("$tsn_frontend_cmd" "$tsn_frontend_show_subcmd" "$tsn_passfile" 2> /dev/null)
   if [[ "${#passdata[@]}" -eq 0 ]]; then
     _die "$tsn_passfile is empty"
   fi
@@ -184,11 +189,11 @@ key_action() {
 key_otp() {
   local tmp_otp
 
-  if ! pass otp -h > /dev/null 2>&1; then
+  if ! $tsn_frontend_cmd otp -h > /dev/null 2>&1; then
     _die "pass-otp is not installed"
   fi
 
-  tmp_otp="$(pass otp "$tsn_passfile")"
+  tmp_otp="$($tsn_frontend_cmd otp "$tsn_passfile")"
 
   if [[ "$tmp_otp" =~ ^[[:digit:]]+$ ]]; then
     get_key option
@@ -267,10 +272,10 @@ auto_type_def() {
         ":space") wtype -s "$tsn_delay" -k space -- ;;
         ":enter") wtype -s "$tsn_delay" -k Return -- ;;
         ":otp")
-          if ! pass otp -h > /dev/null 2>&1; then
+          if ! $tsn_frontend_cmd otp -h > /dev/null 2>&1; then
             _die "pass-otp is not installed"
           else
-            tmp_otp="$(pass otp "$tsn_passfile")"
+            tmp_otp="$($tsn_frontend_cmd otp "$tsn_passfile")"
             if [[ "$tmp_otp" =~ ^[[:digit:]]+$ ]]; then
               printf "%s" "$tmp_otp" | wtype -s "$tsn_delay" -
             else
@@ -280,7 +285,7 @@ auto_type_def() {
           ;;
         path | basename | filename) printf "%s" "${tsn_passfile##*/}" | wtype -s "$tsn_delay" - ;;
         "$tsn_userkey") printf "%s" "$tsn_username" | wtype -s "$tsn_delay" - ;;
-        pass | password) printf "%s" "$tsn_password" | wtype -s "$tsn_delay" - ;;
+        "$tsn_frontend_cmd" | password) printf "%s" "$tsn_password" | wtype -s "$tsn_delay" - ;;
         *)
           if [[ -n "${tsn_passdata["$word"]}" ]]; then
             printf "%s" "${tsn_passdata["$word"]}" | wtype -s "$tsn_delay" -
@@ -329,6 +334,7 @@ Usage: ${0##*/} [options]
   ${0##*/} -b bemenu -a both      use bemenu and always autotype AND copy data
 
   -b, --backend, --backend=     specify a dmenu like backend and (optionally) its flags
+  -f, --frontend, --frontend=   specify a password store frontend
   -a, --action, --action=       choose either 'autotype', 'copy', or 'both'
   -h, --help                    print this help menu
   -v, --version                 print the version of ${0##*/}
@@ -371,6 +377,15 @@ setup_backend() {
   fi
 }
 
+setup_frontend() {
+  local frontend="$1"
+
+  if [[ "$frontend" == "gopass" ]]; then
+    tsn_frontend_cmd="gopass"
+    tsn_frontend_show_subcmd="show"
+  fi
+}
+
 get_default_opts() {
   case "$1" in
     bemenu)
@@ -402,6 +417,17 @@ find_backend() {
     fi
   done
   _die "%s\n" "unable to find a 'dmenu' compatible application"
+}
+
+find_frontend() {
+  local fe
+
+  for fe in "${tsn_known_frontends[@]}"; do
+    if is_installed "$fe"; then
+      printf "%s" "$fe"
+    fi
+  done
+  _die "%s\n" "unable to find a pass or compatible application"
 }
 
 validate_cliptime() {
@@ -456,6 +482,13 @@ main() {
       --backend=*)
         tsn_backend="${_opt##--backend=}"
         ;;
+      -f | --frontend)
+        tsn_frontend="${2}"
+        shift
+        ;;
+      --frontend=*)
+        tsn_frontend="${_opt##--frontend=}"
+        ;;
       -a | --action)
         if [[ "$#" -lt 2 ]]; then
           _die "please specify a valid action: autotype | copy | both"
@@ -489,6 +522,12 @@ main() {
   fi
 
   setup_backend "${tsn_backend}"
+
+  if [[ -z "${tsn_frontend}" ]]; then
+    tsn_frontend="$(find_frontend)"
+  fi
+
+  setup_frontend "$tsn_frontend"
 
   validate_cliptime
   readonly tsn_action
