@@ -319,13 +319,13 @@ print_help() {
   printf "%s" "\
 ${0##*/} - autotype and copy data from password-store on wayland
 
-Usage: ${0##*/} [options]
+usage: ${0##*/} [options]
 
   ${0##*/}                        use a dmenu backend and either autotype OR copy data
   ${0##*/} -b bemenu              use bemenu and either autotype OR copy data
   ${0##*/} -b 'bemenu -l 20'      use bemenu but override default options and show 20 lines
   ${0##*/} -b bemenu -a autotype  use bemenu and always autotype data
-  ${0##*/} -b bemenu -a copy      use bemenu and always copy data                       
+  ${0##*/} -b bemenu -a copy      use bemenu and always copy data
   ${0##*/} -b bemenu -a both      use bemenu and always autotype AND copy data
 
   -b, --backend, --backend=     specify a dmenu like backend and (optionally) its flags
@@ -333,8 +333,8 @@ Usage: ${0##*/} [options]
   -h, --help                    print this help menu
   -v, --version                 print the version of ${0##*/}
 
-For more details and additional features, please read the man page of tessen(1)
-For reporting bugs or feedback, visit https://github.com/ayushnix/tessen
+for more details and additional features, please read the man page of tessen(1)
+for reporting bugs or feedback, visit https://github.com/ayushnix/tessen
 "
 }
 
