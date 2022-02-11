@@ -34,6 +34,9 @@ xorg/x11 and wayland, check out [pass-tessen](https://github.com/ayushnix/pass-t
   sensitive data. Please raise an issue or a pull request if you can make tessen more minimalistic
   or secure.
 
+- if you're using a web browser extension to access your passwords, you may wanna read
+  [this](https://cmpxchg8b.com/passmgrs.html) article
+
 ## Installation
 
 ### Dependencies
