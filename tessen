@@ -32,7 +32,7 @@ declare -A tsn_passdata
 # FIRST MENU: generate a list of pass files, let the user select one
 get_pass_files() {
   local tmp_prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
-  if ! [[ -d "$tmp_prefix" ]]; then
+  if ! [[ -d $tmp_prefix ]]; then
     _die "password store directory not found"
   fi
 
@@ -80,7 +80,7 @@ get_gopass_files() {
   # like drew devault wrote on his blog, I hate the stale bot
   # https://drewdevault.com/2021/10/26/stalebot.html
   shopt -s nullglob globstar
-  while read -r line || [[ -n "$line" ]]; do
+  while read -r line || [[ -n $line ]]; do
     # we could've used `gopass config path` but since we have parse the output
     # of `gopass config` because of possible mounts, better to just use `gopass
     # config`
@@ -88,7 +88,7 @@ get_gopass_files() {
     # do, we parse the list of all the files inside the dir and store them in
     # an associative array with the name of the files as the index and the path
     # as the value
-    if [[ "$line" == path* ]] && [[ -d "${line#* }" ]]; then
+    if [[ $line == path* ]] && [[ -d ${line#* } ]]; then
       path_files=("${line#* }"/**/*.gpg)
       path_files=("${path_files[@]#"${line#* }"/}")
       path_files=("${path_files[@]%.gpg}")
@@ -103,7 +103,7 @@ get_gopass_files() {
     #
     # there's no easy way to parse and associate file names with mount points
     # so we'll have to resort to some ugly hacks again
-    if [[ "$line" == mount* ]]; then
+    if [[ $line == mount* ]]; then
       # remove the quotes from the parsed line
       line="${line//\"/}"
       # the mount name needs to be extracted to distinguish files with
@@ -111,7 +111,7 @@ get_gopass_files() {
       mount_name="${line#mount *}"
       mount_name="${mount_name% =>*}"
       mount_name_arr+=("$mount_name")
-      if [[ -d "${line#*=> }" ]]; then
+      if [[ -d ${line#*=> } ]]; then
         path_files=("${line#*=> }"/**/*.gpg)
         path_files=("${path_files[@]#"${line#*=> }"/}")
         path_files=("$mount_name"/"${path_files[@]%.gpg}")
@@ -127,7 +127,7 @@ get_gopass_files() {
   tsn_passfile="$(printf "%s\n" "${!tmp_gopass_files[@]}" \
     | "$dmenu_backend" "${dmenu_backend_opts[*]}")"
 
-  if [[ -z "$tsn_passfile" ]]; then
+  if [[ -z $tsn_passfile ]]; then
     _die
   fi
 
@@ -136,7 +136,7 @@ get_gopass_files() {
   # entry from the gopass path is chosen
   tmp_tsn_passfile="$tsn_passfile"
   for idx in "${mount_name_arr[@]}"; do
-    if [[ "${tsn_passfile%%/*}" == "$idx" ]]; then
+    if [[ ${tsn_passfile%%/*} == "$idx" ]]; then
       tmp_tsn_passfile="${tsn_passfile#*/}"
     fi
   done
@@ -144,7 +144,7 @@ get_gopass_files() {
   # we had to use an associative array to keep track of the absolute path of
   # the selected file because it is possible to give invalid input to dmenu
   # while making a selection and tessen should exit in that case
-  if [[ -n "${tmp_gopass_files["$tsn_passfile"]}" ]]; then
+  if [[ -n ${tmp_gopass_files["$tsn_passfile"]} ]]; then
     if ! [[ -f "${tmp_gopass_files["$tsn_passfile"]}"/"$tmp_tsn_passfile".gpg ]]; then
       _die "the selected file was not found"
     fi
@@ -159,18 +159,18 @@ get_pass_data() {
   local -a passdata
   local keyval_regex otp_regex idx key val
 
-  if [[ "$pass_backend" == "pass" ]]; then
+  if [[ $pass_backend == "pass" ]]; then
     mapfile -t passdata < <(pass show "$tsn_passfile" 2> /dev/null)
-    if [[ "${#passdata[@]}" -eq 0 ]]; then
+    if [[ ${#passdata[@]} -eq 0 ]]; then
       _die "$tsn_passfile is empty"
     fi
-  elif [[ "$pass_backend" == "gopass" ]]; then
+  elif [[ $pass_backend == "gopass" ]]; then
     # gopass show -n -f is weird because it emits a first line 'Secret:
     # truncated-file-name' and that doesn't get assigned to a variable. but if
     # I redirect stdout to /dev/null, that first line gets redirected as well.
     # there doesn't seem to be any way to disable printing this first line.
     mapfile -t passdata < <(gopass show -n -f "$tsn_passfile" 2> /dev/null)
-    if [[ "${#passdata[@]}" -eq 0 ]]; then
+    if [[ ${#passdata[@]} -eq 0 ]]; then
       _die "$tsn_passfile is empty"
     fi
   fi
@@ -203,20 +203,20 @@ get_pass_data() {
     key="${idx%%:*}"
     val="${idx#*: }"
     # keys with the case insensitive name 'password' are ignored
-    if [[ "${key,,}" == "password" ]]; then
+    if [[ ${key,,} == "password" ]]; then
       continue
-    elif [[ "${key,,}" =~ ^$tsn_userkey$ ]] && [[ -z "${tsn_username}" ]]; then
+    elif [[ ${key,,} =~ ^$tsn_userkey$ ]] && [[ -z ${tsn_username} ]]; then
       tsn_userkey="${key,,}"
       tsn_username="$val"
-    elif [[ "${key,,}" =~ ^$tsn_autokey$ ]] && [[ -z "${tsn_autotype}" ]]; then
+    elif [[ ${key,,} =~ ^$tsn_autokey$ ]] && [[ -z ${tsn_autotype} ]]; then
       tsn_autokey="${key,,}"
       tsn_autotype="$val"
-    elif [[ "${key,,}" =~ ^$tsn_urlkey$ ]] && [[ -z "${tsn_url}" ]]; then
+    elif [[ ${key,,} =~ ^$tsn_urlkey$ ]] && [[ -z ${tsn_url} ]]; then
       tsn_urlkey="${key,,}"
       tsn_url="$val"
-    elif [[ "$idx" =~ $otp_regex ]] && [[ "$tsn_otp" == "false" ]]; then
+    elif [[ $idx =~ $otp_regex ]] && [[ $tsn_otp == "false" ]]; then
       tsn_otp=true
-    elif [[ "$idx" =~ $keyval_regex ]] && [[ -z "${tsn_passdata["$key"]}" ]]; then
+    elif [[ $idx =~ $keyval_regex ]] && [[ -z ${tsn_passdata["$key"]} ]]; then
       tsn_passdata["$key"]="$val"
     fi
   done
@@ -226,14 +226,14 @@ get_pass_data() {
   # this prevents the userkey from showing up as a regex in case a user has set
   # it in the config file
   # the same goes for other custom key variables
-  if [[ -z "$tsn_username" ]]; then
+  if [[ -z $tsn_username ]]; then
     tsn_username="${tsn_passfile##*/}"
     tsn_userkey="user"
   fi
-  if [[ -z "$tsn_autotype" ]]; then
+  if [[ -z $tsn_autotype ]]; then
     tsn_autokey="autotype"
   fi
-  if [[ -z "$tsn_url" ]]; then
+  if [[ -z $tsn_url ]]; then
     tsn_urlkey="url"
   fi
 
@@ -252,35 +252,35 @@ get_key() {
   # when tsn_action is set to copy, the autotype key shouldn't be shown in the 2nd menu
   case "$tsn_action" in
     autotype | both | default)
-      if [[ "$1" == "key_list" ]]; then
-        if [[ "$tsn_otp" == "false" ]] && [[ -z "$tsn_url" ]]; then
+      if [[ $1 == "key_list" ]]; then
+        if [[ $tsn_otp == "false" ]] && [[ -z $tsn_url ]]; then
           key_arr=("$tsn_autokey" "$tsn_userkey" "password" "${!tsn_passdata[@]}")
-        elif [[ "$tsn_otp" == "false" ]] && [[ -n "$tsn_url" ]]; then
+        elif [[ $tsn_otp == "false" ]] && [[ -n $tsn_url ]]; then
           key_arr=("$tsn_autokey" "$tsn_userkey" "password" "$tsn_urlkey" "${!tsn_passdata[@]}")
-        elif [[ "$tsn_otp" == "true" ]] && [[ -z "$tsn_url" ]]; then
+        elif [[ $tsn_otp == "true" ]] && [[ -z $tsn_url ]]; then
           key_arr=("$tsn_autokey" "$tsn_userkey" "password" "otp" "${!tsn_passdata[@]}")
-        elif [[ "$tsn_otp" == "true" ]] && [[ -n "$tsn_url" ]]; then
+        elif [[ $tsn_otp == "true" ]] && [[ -n $tsn_url ]]; then
           key_arr=("$tsn_autokey" "$tsn_userkey" "password" "otp" "$tsn_urlkey" "${!tsn_passdata[@]}")
         fi
       fi
       # the (optional) third menu, its appearance depends on tsn_action being default
-      if [[ "$tsn_action" == "default" ]] && [[ "$1" == "option" ]]; then
+      if [[ $tsn_action == "default" ]] && [[ $1 == "option" ]]; then
         key_arr=("$tsn_autokey" "copy")
-      # the (optional) third menu if tsn_urlkey is chosen, it depends on
-      # tsn_action being default
-      elif [[ "$tsn_action" == "default" ]] && [[ "$1" == "$tsn_urlkey" ]]; then
+        # the (optional) third menu if tsn_urlkey is chosen, it depends on
+        # tsn_action being default
+      elif [[ $tsn_action == "default" ]] && [[ $1 == "$tsn_urlkey" ]]; then
         key_arr=("open" "copy")
       fi
       ;;
     copy)
-      if [[ "$1" == "key_list" ]]; then
-        if [[ "$tsn_otp" == "false" ]] && [[ -z "$tsn_url" ]]; then
+      if [[ $1 == "key_list" ]]; then
+        if [[ $tsn_otp == "false" ]] && [[ -z $tsn_url ]]; then
           key_arr=("$tsn_userkey" "password" "${!tsn_passdata[@]}")
-        elif [[ "$tsn_otp" == "false" ]] && [[ -n "$tsn_url" ]]; then
+        elif [[ $tsn_otp == "false" ]] && [[ -n $tsn_url ]]; then
           key_arr=("$tsn_userkey" "password" "$tsn_urlkey" "${!tsn_passdata[@]}")
-        elif [[ "$tsn_otp" == "true" ]] && [[ -z "$tsn_url" ]]; then
+        elif [[ $tsn_otp == "true" ]] && [[ -z $tsn_url ]]; then
           key_arr=("$tsn_userkey" "password" "otp" "${!tsn_passdata[@]}")
-        elif [[ "$tsn_otp" == "true" ]] && [[ -n "$tsn_url" ]]; then
+        elif [[ $tsn_otp == "true" ]] && [[ -n $tsn_url ]]; then
           key_arr=("$tsn_userkey" "password" "otp" "$tsn_urlkey" "${!tsn_passdata[@]}")
         fi
       fi
@@ -292,12 +292,12 @@ get_key() {
 
   # validate the chosen key, if it doesn't exist, exit
   for ch in "${key_arr[@]}"; do
-    if [[ "$chosen_key" == "$ch" ]]; then
+    if [[ $chosen_key == "$ch" ]]; then
       flag=true
       break
     fi
   done
-  if [[ "$flag" == "false" ]]; then
+  if [[ $flag == "false" ]]; then
     _die
   fi
 
@@ -327,21 +327,21 @@ key_action() {
 
   case "$tsn_action" in
     autotype)
-      if [[ "$arg" == "$tsn_urlkey" ]]; then
+      if [[ $arg == "$tsn_urlkey" ]]; then
         key_open_url || _die
         return 0
       fi
       auto_type "$arg"
       ;;
     copy)
-      if [[ "$arg" == "$tsn_urlkey" ]]; then
+      if [[ $arg == "$tsn_urlkey" ]]; then
         wld_copy "$tsn_url" || _die
         return 0
       fi
       wld_copy "$arg"
       ;;
     both)
-      if [[ "$arg" == "$tsn_urlkey" ]]; then
+      if [[ $arg == "$tsn_urlkey" ]]; then
         key_open_url
         wld_copy "$tsn_url"
       else
@@ -350,9 +350,9 @@ key_action() {
       fi
       ;;
     default)
-      if [[ "$arg" == "$tsn_urlkey" ]]; then
+      if [[ $arg == "$tsn_urlkey" ]]; then
         get_key "$tsn_urlkey"
-        if [[ "$chosen_key" == "open" ]]; then
+        if [[ $chosen_key == "open" ]]; then
           key_open_url || _die
           return 0
         else
@@ -360,7 +360,7 @@ key_action() {
         fi
       else
         get_key option
-        if [[ "$chosen_key" == "$tsn_autokey" ]]; then
+        if [[ $chosen_key == "$tsn_autokey" ]]; then
           auto_type "$arg"
         else
           wld_copy "$arg"
@@ -378,17 +378,17 @@ key_action() {
 key_otp() {
   local tmp_otp
 
-  if [[ "$pass_backend" == "pass" ]] && ! pass otp -h > /dev/null 2>&1; then
+  if [[ $pass_backend == "pass" ]] && ! pass otp -h > /dev/null 2>&1; then
     _die "pass-otp is not installed"
   fi
 
-  if [[ "$pass_backend" == "pass" ]]; then
+  if [[ $pass_backend == "pass" ]]; then
     tmp_otp="$(pass otp "$tsn_passfile")"
-  elif [[ "$pass_backend" == "gopass" ]]; then
+  elif [[ $pass_backend == "gopass" ]]; then
     tmp_otp="$(gopass otp -o "$tsn_passfile")"
   fi
 
-  if ! [[ "$tmp_otp" =~ ^[[:digit:]]+$ ]]; then
+  if ! [[ $tmp_otp =~ ^[[:digit:]]+$ ]]; then
     _die "invalid OTP detected"
   fi
   key_action "$tmp_otp"
@@ -399,7 +399,7 @@ key_otp() {
 # open the url using either xdg-open or tsn_web_browser
 # if tsn_web_browser is defined, xdg-open won't be used
 key_open_url() {
-  if [[ -n "$tsn_web_browser" ]]; then
+  if [[ -n $tsn_web_browser ]]; then
     "$tsn_web_browser" "$tsn_url" > /dev/null 2>&1 || {
       printf "%s\n" "$tsn_web_browser was unable to open '$tsn_url'" >&2
       return 1
@@ -419,7 +419,7 @@ key_open_url() {
 auto_type_def() {
   local word tmp_otp
 
-  if [[ -z "$tsn_autotype" ]]; then
+  if [[ -z $tsn_autotype ]]; then
     printf "%s" "$tsn_username" | wtype -s "$tsn_delay" -
     wtype -s "$tsn_delay" -k Tab --
     printf "%s" "$tsn_password" | wtype -s "$tsn_delay" -
@@ -435,7 +435,7 @@ auto_type_def() {
         "$tsn_userkey") printf "%s" "$tsn_username" | wtype -s "$tsn_delay" - ;;
         pass | password) printf "%s" "$tsn_password" | wtype -s "$tsn_delay" - ;;
         *)
-          if [[ -n "${tsn_passdata["$word"]}" ]]; then
+          if [[ -n ${tsn_passdata["$word"]} ]]; then
             printf "%s" "${tsn_passdata["$word"]}" | wtype -s "$tsn_delay" -
           else
             wtype -s "$tsn_delay" -k space --
@@ -459,13 +459,13 @@ auto_type() {
 wld_copy() {
   local tsn_cliptime
 
-  if [[ "$pass_backend" == "pass" ]]; then
+  if [[ $pass_backend == "pass" ]]; then
     tsn_cliptime="${PASSWORD_STORE_CLIP_TIME:-15}"
     if ! are_digits "$tsn_cliptime"; then
       printf "%s\n" "invalid clipboard timeout value in PASSWORD_STORE_CLIP_TIME" >&2
       return 1
     fi
-  elif [[ "$pass_backend" == "gopass" ]]; then
+  elif [[ $pass_backend == "gopass" ]]; then
     tsn_cliptime="$(gopass config cliptimeout)"
     tsn_cliptime="${tsn_cliptime##*: }"
     if ! are_digits "$tsn_cliptime"; then
@@ -492,7 +492,7 @@ wld_copy() {
 }
 
 are_digits() {
-  if [[ "$1" =~ ^[[:digit:]]+$ ]]; then
+  if [[ $1 =~ ^[[:digit:]]+$ ]]; then
     return 0
   else
     return 1
@@ -503,7 +503,7 @@ validate_pass_backend() {
   if ! is_installed "$1"; then
     _die "please install a valid password store backend: pass | gopass"
   fi
-  if [[ "$1" == "pass" ]] || [[ "$1" == "gopass" ]]; then
+  if [[ $1 == "pass" ]] || [[ $1 == "gopass" ]]; then
     pass_backend="$1"
   else
     _die "please specify a valid password store backend: pass | gopass"
@@ -542,7 +542,7 @@ validate_dmenu_backend() {
       dmenu_backend="bemenu"
       dmenu_backend_opts=()
       bemenu_opts=('-i' '-l' '10' '-w' '--scrollbar=autohide' '-n')
-      if [[ -z "${BEMENU_OPTS[*]}" ]]; then
+      if [[ -z ${BEMENU_OPTS[*]} ]]; then
         export BEMENU_OPTS="${bemenu_opts[*]}"
       fi
       ;;
@@ -606,7 +606,7 @@ find_pass_backend() {
       break
     fi
   done
-  if [[ -z "$pass_backend" ]]; then
+  if [[ -z $pass_backend ]]; then
     _die "please install a valid password store backend: pass | gopass"
   fi
 
@@ -623,7 +623,7 @@ find_dmenu_backend() {
       break
     fi
   done
-  if [[ -z "$dmenu_backend" ]]; then
+  if [[ -z $dmenu_backend ]]; then
     _die "please install a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
   fi
   unset -v idx tmp_dmenu_arr
@@ -638,7 +638,7 @@ is_installed() {
 }
 
 _clear() {
-  if [[ "$tsn_action" =~ ^(copy|both|default)$ ]]; then
+  if [[ $tsn_action =~ ^(copy|both|default)$ ]]; then
     wl-copy --clear
   fi
   unset -v tsn_passfile tsn_passdata tsn_username tsn_password tsn_url
@@ -646,7 +646,7 @@ _clear() {
 }
 
 _die() {
-  if [[ -n "$1" ]]; then
+  if [[ -n $1 ]]; then
     printf "%s\n" "$1" >&2
   fi
   _clear
@@ -691,18 +691,18 @@ for reporting bugs or feedback, visit https://github.com/ayushnix/tessen/issues
 # arbitrary input
 parse_config() {
   local _opt
-  while [[ "$#" -gt 0 ]]; do
+  while [[ $# -gt 0 ]]; do
     _opt="$1"
     case "$_opt" in
       -c | --config)
-        if [[ "$#" -lt 2 ]] || ! [[ -s "$2" ]]; then
+        if [[ $# -lt 2 ]] || ! [[ -s $2 ]]; then
           _die "please specify a valid path for the configuration file of tessen"
         fi
         tsn_config="$2"
         shift
         ;;
       --config=*)
-        if ! [[ -s "${_opt##--config=}" ]]; then
+        if ! [[ -s ${_opt##--config=} ]]; then
           _die "please specify a valid path for the configuration file of tessen"
         fi
         tsn_config="${_opt##--config=}"
@@ -717,11 +717,11 @@ parse_config() {
   local config_regex='^[[:alpha:]_]+="[[:alnum:]~_.\/^$|()*?-]+"$'
   # in case the user hasn't provided an explicit location, we'll have to check
   # if the default file exists before we parse it
-  if [[ -s "$tsn_config" ]]; then
-    while read -r line || [[ -n "$line" ]]; do
-      if [[ "$line" == \#* ]]; then
+  if [[ -s $tsn_config ]]; then
+    while read -r line || [[ -n $line ]]; do
+      if [[ $line == \#* ]]; then
         continue
-      elif [[ "$line" =~ $config_regex ]]; then
+      elif [[ $line =~ $config_regex ]]; then
         config_arr+=("$line")
       fi
     done < "$tsn_config"
@@ -730,34 +730,34 @@ parse_config() {
       val="${idx#*\"}"
       val="${val%*\"}"
       # here comes the ladder
-      if [[ "$key" == "pass_backend" ]]; then
+      if [[ $key == "pass_backend" ]]; then
         validate_pass_backend "$val"
-      elif [[ "$key" == "dmenu_backend" ]]; then
+      elif [[ $key == "dmenu_backend" ]]; then
         validate_dmenu_backend "$val"
-      elif [[ "$key" == "action" ]]; then
+      elif [[ $key == "action" ]]; then
         validate_action "$val"
-      elif [[ "$key" == "rofi_config_file" ]] && [[ "$dmenu_backend" == "rofi" ]]; then
+      elif [[ $key == "rofi_config_file" ]] && [[ $dmenu_backend == "rofi" ]]; then
         validate_dmenu_backend rofi
         dmenu_backend_opts+=("-config $val")
         tmp_opts+=("-config $val")
-      elif [[ "$key" == "wofi_config_file" ]] && [[ "$dmenu_backend" == "wofi" ]]; then
+      elif [[ $key == "wofi_config_file" ]] && [[ $dmenu_backend == "wofi" ]]; then
         dmenu_backend_opts+=("-c $val")
         tmp_opts+=("-c $val")
-      elif [[ "$key" == "wofi_style_file" ]] && [[ "$dmenu_backend" == "wofi" ]]; then
+      elif [[ $key == "wofi_style_file" ]] && [[ $dmenu_backend == "wofi" ]]; then
         dmenu_backend_opts+=("-s $val")
         tmp_opts+=("-s $val")
-      elif [[ "$key" == "wofi_color_file" ]] && [[ "$dmenu_backend" == "wofi" ]]; then
+      elif [[ $key == "wofi_color_file" ]] && [[ $dmenu_backend == "wofi" ]]; then
         dmenu_backend_opts+=("-C $val")
         tmp_opts+=("-C $val")
-      elif [[ "$key" == "userkey" ]]; then
+      elif [[ $key == "userkey" ]]; then
         tsn_userkey="$val"
-      elif [[ "$key" == "urlkey" ]]; then
+      elif [[ $key == "urlkey" ]]; then
         tsn_urlkey="$val"
-      elif [[ "$key" == "autotype_key" ]]; then
+      elif [[ $key == "autotype_key" ]]; then
         tsn_autokey="$val"
-      elif [[ "$key" == "delay" ]]; then
+      elif [[ $key == "delay" ]]; then
         tsn_delay="$val"
-      elif [[ "$key" == "web_browser" ]] && is_installed "$val"; then
+      elif [[ $key == "web_browser" ]] && is_installed "$val"; then
         tsn_web_browser="$val"
       fi
     done
@@ -768,10 +768,10 @@ parse_config() {
 main() {
   # initialize basic options for users who expect sane defaults and don't use
   # either the config file or args
-  if [[ -z "$pass_backend" ]]; then
+  if [[ -z $pass_backend ]]; then
     find_pass_backend
   fi
-  if [[ -z "$dmenu_backend" ]]; then
+  if [[ -z $dmenu_backend ]]; then
     find_dmenu_backend
   fi
   validate_dmenu_backend "$dmenu_backend"
@@ -783,11 +783,11 @@ main() {
   # parse command line arguments after the config file because args hold more
   # precedence and priority than the config file
   local _opt
-  while [[ "$#" -gt 0 ]]; do
+  while [[ $# -gt 0 ]]; do
     _opt="$1"
     case "$_opt" in
       -p | --pass)
-        if [[ "$#" -lt 2 ]]; then
+        if [[ $# -lt 2 ]]; then
           _die "please specify a valid password store backend: pass | gopass"
         fi
         validate_pass_backend "$2"
@@ -795,14 +795,14 @@ main() {
         shift
         ;;
       --pass=*)
-        if [[ -z "${_opt##--pass=}" ]]; then
+        if [[ -z ${_opt##--pass=} ]]; then
           _die "please specify a valid password store backend: pass | gopass"
         fi
         validate_pass_backend "${_opt##--pass=}"
         readonly pass_backend
         ;;
       -d | --dmenu)
-        if [[ "$#" -lt 2 ]]; then
+        if [[ $# -lt 2 ]]; then
           _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
         fi
         validate_dmenu_backend "$2"
@@ -813,8 +813,8 @@ main() {
         # correct value, validating it would reset it back to the default
         # values
         readonly dmenu_backend
-        if [[ "$dmenu_backend" == "rofi" ]] || [[ "$dmenu_backend" == "wofi" ]]; then
-          if [[ "${#tmp_opts[@]}" -gt 0 ]]; then
+        if [[ $dmenu_backend == "rofi" ]] || [[ $dmenu_backend == "wofi" ]]; then
+          if [[ ${#tmp_opts[@]} -gt 0 ]]; then
             dmenu_backend_opts+=("${tmp_opts[@]}")
             readonly dmenu_backend_opts
           fi
@@ -822,20 +822,20 @@ main() {
         shift
         ;;
       --dmenu=*)
-        if [[ -z "${_opt##--dmenu=}" ]]; then
+        if [[ -z ${_opt##--dmenu=} ]]; then
           _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
         fi
         validate_dmenu_backend "${_opt##--dmenu=}"
         readonly dmenu_backend
-        if [[ "$dmenu_backend" == "rofi" ]] || [[ "$dmenu_backend" == "wofi" ]]; then
-          if [[ "${#tmp_opts[@]}" -gt 0 ]]; then
+        if [[ $dmenu_backend == "rofi" ]] || [[ $dmenu_backend == "wofi" ]]; then
+          if [[ ${#tmp_opts[@]} -gt 0 ]]; then
             dmenu_backend_opts+=("${tmp_opts[@]}")
             readonly dmenu_backend_opts
           fi
         fi
         ;;
       -a | --action)
-        if [[ "$#" -lt 2 ]]; then
+        if [[ $# -lt 2 ]]; then
           _die "please specify a valid action: autotype | copy | both"
         fi
         validate_action "$2"
@@ -871,9 +871,9 @@ main() {
   unset -v _opt tmp_opts
 
   trap '_clear' EXIT TERM INT
-  if [[ "$pass_backend" == "pass" ]]; then
+  if [[ $pass_backend == "pass" ]]; then
     get_pass_files
-  elif [[ "$pass_backend" == "gopass" ]]; then
+  elif [[ $pass_backend == "gopass" ]]; then
     get_gopass_files
   fi
   get_pass_data
