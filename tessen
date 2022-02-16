@@ -827,20 +827,15 @@ main() {
   done
   unset -v _opt tmp_opts
 
-  if [[ -z "${tsn_backend}" ]]; then
-    tsn_backend="$(find_backend)"
+  trap '_clear' EXIT TERM INT
+  if [[ "$pass_backend" == "pass" ]]; then
+    get_pass_files
+  elif [[ "$pass_backend" == "gopass" ]]; then
+    get_gopass_files
   fi
-
-  setup_backend "${tsn_backend}"
-
-  validate_cliptime
-  readonly tsn_action
-
-  trap '_clear' EXIT TERM
-  get_pass_file
   get_pass_data
   key_menu
-  trap - EXIT TERM
+  trap - EXIT TERM INT
 }
 
 main "$@"
