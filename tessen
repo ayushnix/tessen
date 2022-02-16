@@ -500,74 +500,62 @@ is_installed() {
   fi
 }
 
-setup_backend() {
-  local backend="$1"
-  local backend_opts="${backend#* }"
-  backend="${backend%% *}"
-
-  if ! is_installed "$backend"; then
-    _die "'$backend' is not installed"
+validate_pass_backend() {
+  if ! is_installed "$1"; then
+    _die "please install a valid password store backend: pass | gopass"
   fi
-  if [[ "$backend_opts" == "$backend" ]]; then
-    backend_opts="$(get_default_opts "$backend")"
-    if [[ -z "$backend_opts" ]]; then
-      printf "%s\n" "unable to determine any dmenu options for '$backend'" >&2
-    fi
-  fi
-
-  readonly tsn_backend="$backend"
-
-  if [[ -n "$backend_opts" ]]; then
-    mapfile -t -d ' ' backend_opts < <(printf "%s" "$backend_opts")
-    readonly -a tsn_backend_opts=("${backend_opts[@]}")
+  if [[ "$1" == "pass" ]] || [[ "$1" == "gopass" ]]; then
+    pass_backend="$1"
   else
-    readonly -a tsn_backend_opts=()
+    _die "please specify a valid password store backend: pass | gopass"
   fi
 }
 
-get_default_opts() {
+# fuzzel and bemenu do not support config files so their backend options won't
+# be changed after this function, rofi and wofi do support config files and
+# those will be appended to the dmenu_backend_opts array by sourcing the config
+# file of tessen
+#
+# of course, this limits customization when using fuzzel or bemenu and when
+# multiple contexts are invovled, which I don't like myself, but I won't accept
+# arbitrary input as arguments and use hacks like
+# [this](https://github.com/ayushnix/tessen/pull/13)
+#
+# if [this](https://codeberg.org/dnkl/fuzzel/issues/3) issue gets resolved,
+# fuzzel will be promoted as the recommended and the default dmenu backend for
+# tessen
+validate_dmenu_backend() {
+  if ! is_installed "$1"; then
+    _die "please install a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
+  fi
+
+  local -a bemenu_opts
   case "$1" in
-    bemenu)
-      printf "%s" "-i -l 10 -w --scrollbar=autohide -n"
-      return 0
-      ;;
     rofi)
-      printf "%s" "-dmenu"
-      return 0
+      dmenu_backend="rofi"
+      dmenu_backend_opts=('-dmenu')
       ;;
-    wofi | fuzzel)
-      printf "%s" "-d"
-      return 0
+    fuzzel)
+      dmenu_backend="fuzzel"
+      dmenu_backend_opts=('-d')
+      ;;
+    bemenu)
+      dmenu_backend="bemenu"
+      dmenu_backend_opts=()
+      bemenu_opts=('-i' '-l' '10' '-w' '--scrollbar=autohide' '-n')
+      if [[ -z "${BEMENU_OPTS[*]}" ]]; then
+        export BEMENU_OPTS="${bemenu_opts[*]}"
+      fi
+      ;;
+    wofi)
+      dmenu_backend="wofi"
+      dmenu_backend_opts=('-d' '-k /dev/null')
       ;;
     *)
-      printf ""
-      return 1
+      _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
       ;;
   esac
-}
-
-find_backend() {
-  local dmbd
-
-  for dmbd in "${tsn_known_backends[@]}"; do
-    if is_installed "$dmbd"; then
-      printf "%s" "$dmbd"
-      return 0
-    fi
-  done
-  _die "%s\n" "unable to find a 'dmenu' compatible application"
-}
-
-validate_cliptime() {
-  local clip_regex
-
-  clip_regex="^[[:digit:]]+$"
-
-  if [[ "$tsn_cliptime" =~ $clip_regex ]]; then
-    return 0
-  else
-    _die "Invalid clipboard time provided"
-  fi
+  unset -v bemenu_opts
 }
 
 validate_action() {
