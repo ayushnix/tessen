@@ -21,4 +21,4 @@ jobs:
       - name: checkout tessen for shfmt
         uses: actions/checkout@v2
       - name: run shfmt
-        run: shfmt -d -i 2 -bn -ci -sr tessen
+        run: shfmt -d -s -i 2 -bn -ci -sr tessen

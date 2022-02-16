@@ -9,7 +9,7 @@ please ensure that
 - your bash code has been formatted using [shfmt](https://github.com/mvdan/sh) with the following
   settings
 
-  `-i 2 -ci -sr -bn`
+  `-s -i 2 -ci -sr -bn`
 
 Please raise an [issue](https://github.com/ayushnix/tessen/issues/new/choose) if you have any
 questions.
