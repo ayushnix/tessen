@@ -51,6 +51,106 @@ get_pass_files() {
   if ! [[ -s "$tmp_prefix/$tsn_passfile".gpg ]]; then
     _die
   fi
+
+  unset -v tmp_pass_files tmp_prefix
+}
+
+# FIRST MENU: generate a list of gopass files, let the user select one
+# this function feels like a hack to me. ideally, the issues that led to this
+# hack should be fixed in gopass but if anyone has any suggestions about making
+# this function better, please raise a PR
+get_gopass_files() {
+  local line path_files file mount_name tmp_tsn_passfile
+  local -A tmp_gopass_files
+  local -a mount_name_arr
+
+  # this feels like a hack and it's dependent on the output of `gopass config`
+  #
+  # still, this block of code saves us from using coreutils
+  #
+  # to be clear, this is needed to confirm whether the filename entered in the
+  # dmenu actually exists or not because dmenu backends will happily print the
+  # input received from a user even if that input doesn't exist in the menu
+  # presented to the user
+  #
+  # if you're wondering why I didn't just use `gopass ls -f`, it's because in
+  # an apparent effort to be user-friendly, `gopass show -n invalid-input`
+  # doesn't seem to exit with an error
+  # https://github.com/gopasspw/gopass/issues/551
+  # like drew devault wrote on his blog, I hate the stale bot
+  # https://drewdevault.com/2021/10/26/stalebot.html
+  shopt -s nullglob globstar
+  while read -r line || [[ -n "$line" ]]; do
+    # we could've used `gopass config path` but since we have parse the output
+    # of `gopass config` because of possible mounts, better to just use `gopass
+    # config`
+    # we assume that we'll encounter `path: ...` only once and as soon as we
+    # do, we parse the list of all the files inside the dir and store them in
+    # an associative array with the name of the files as the index and the path
+    # as the value
+    if [[ "$line" == path* ]] && [[ -d "${line#* }" ]]; then
+      path_files=("${line#* }"/**/*.gpg)
+      path_files=("${path_files[@]#"${line#* }"/}")
+      path_files=("${path_files[@]%.gpg}")
+      for file in "${path_files[@]}"; do
+        tmp_gopass_files["$file"]="${line#* }"
+      done
+    fi
+    # similarly, we go through the mount points, generate the list of files
+    # inside those mount points, add those files to the associative array with
+    # the file names as the index and the location of the mount point as the
+    # value
+    #
+    # there's no easy way to parse and associate file names with mount points
+    # so we'll have to resort to some ugly hacks again
+    if [[ "$line" == mount* ]]; then
+      # remove the quotes from the parsed line
+      line="${line//\"/}"
+      # the mount name needs to be extracted to distinguish files with
+      # potentially identical names
+      mount_name="${line#mount *}"
+      mount_name="${mount_name% =>*}"
+      mount_name_arr+=("$mount_name")
+      if [[ -d "${line#*=> }" ]]; then
+        path_files=("${line#*=> }"/**/*.gpg)
+        path_files=("${path_files[@]#"${line#*=> }"/}")
+        path_files=("$mount_name"/"${path_files[@]%.gpg}")
+        for file in "${path_files[@]}"; do
+          tmp_gopass_files["$file"]="${line#*=> }"
+        done
+      fi
+    fi
+  done < <(gopass config)
+  shopt -u nullglob globstar
+
+  # the actual menu
+  tsn_passfile="$(printf "%s\n" "${!tmp_gopass_files[@]}" \
+    | "$dmenu_backend" "${dmenu_backend_opts[*]}")"
+
+  if [[ -z "$tsn_passfile" ]]; then
+    _die
+  fi
+
+  # remove the mount name for the path check to be successful
+  # initialize the temp variable with the value of tsn_passfile in case an
+  # entry from the gopass path is chosen
+  tmp_tsn_passfile="$tsn_passfile"
+  for idx in "${mount_name_arr[@]}"; do
+    if [[ "${tsn_passfile%%/*}" == "$idx" ]]; then
+      tmp_tsn_passfile="${tsn_passfile#*/}"
+    fi
+  done
+
+  # we had to use an associative array to keep track of the absolute path of
+  # the selected file because it is possible to give invalid input to dmenu
+  # while making a selection and tessen should exit in that case
+  if [[ -n "${tmp_gopass_files["$tsn_passfile"]}" ]]; then
+    if ! [[ -f "${tmp_gopass_files["$tsn_passfile"]}"/"$tmp_tsn_passfile".gpg ]]; then
+      _die "the selected file was not found"
+    fi
+  fi
+
+  unset -v tmp_gopass_files line path_files file mount_name mount_name_arr tmp_tsn_passfile
 }
 
 # parse the password store file for username, password, otp, custom autotype,
