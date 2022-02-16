@@ -491,9 +491,8 @@ wld_copy() {
   unset -v tsn_passfile tsn_passdata tsn_username tsn_password chosen_key
 }
 
-
-is_installed() {
-  if command -v "${1%% *}" > /dev/null 2>&1; then
+are_digits() {
+  if [[ "$1" =~ ^[[:digit:]]+$ ]]; then
     return 0
   else
     return 1
@@ -595,6 +594,47 @@ validate_action() {
       ;;
     *) _die "please specify a valid action: autotype | copy | both" ;;
   esac
+}
+
+find_pass_backend() {
+  local -a tmp_pass_arr=('pass' 'gopass')
+  local idx
+
+  for idx in "${tmp_pass_arr[@]}"; do
+    if is_installed "$idx"; then
+      pass_backend="$idx"
+      break
+    fi
+  done
+  if [[ -z "$pass_backend" ]]; then
+    _die "please install a valid password store backend: pass | gopass"
+  fi
+
+  unset -v idx tmp_pass_arr
+}
+
+find_dmenu_backend() {
+  local -a tmp_dmenu_arr=('rofi' 'fuzzel' 'bemenu' 'wofi')
+  local idx
+
+  for idx in "${tmp_dmenu_arr[@]}"; do
+    if is_installed "$idx"; then
+      dmenu_backend="$idx"
+      break
+    fi
+  done
+  if [[ -z "$dmenu_backend" ]]; then
+    _die "please install a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
+  fi
+  unset -v idx tmp_dmenu_arr
+}
+
+is_installed() {
+  if command -v "$1" > /dev/null 2>&1; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 _clear() {
