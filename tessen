@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2021 Ayush Agarwal <ayush at fastmail dot in>
 #
