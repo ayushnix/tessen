@@ -399,14 +399,14 @@ key_otp() {
 # open the url using either xdg-open or tsn_web_browser
 # if tsn_web_browser is defined, xdg-open won't be used
 key_open_url() {
-  if is_installed xdg-open; then
-    xdg-open "$1" 2> /dev/null || {
-      printf "%s\n" "xdg-open was unable to open '$1'" >&2
+  if [[ -n "$tsn_web_browser" ]]; then
+    "$tsn_web_browser" "$tsn_url" > /dev/null 2>&1 || {
+      printf "%s\n" "$tsn_web_browser was unable to open '$tsn_url'" >&2
       return 1
     }
-  elif [[ -n "$BROWSER" ]] && is_installed "$BROWSER"; then
-    "$BROWSER" "$1" > /dev/null 2>&1 || {
-      printf "%s\n" "$BROWSER was unable to open '$1'" >&2
+  elif is_installed xdg-open; then
+    xdg-open "$tsn_url" 2> /dev/null || {
+      printf "%s\n" "xdg-open was unable to open '$tsn_url'" >&2
       return 1
     }
   else
