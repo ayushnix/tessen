@@ -644,6 +644,84 @@ _die() {
   exit 1
 }
 
+# this block of code is needed because we can't source the file and execute
+# arbitrary input
+parse_config() {
+  local _opt
+  while [[ "$#" -gt 0 ]]; do
+    _opt="$1"
+    case "$_opt" in
+      -c | --config)
+        if [[ "$#" -lt 2 ]] || ! [[ -s "$2" ]]; then
+          _die "please specify a valid path for the configuration file of tessen"
+        fi
+        tsn_config="$2"
+        shift
+        ;;
+      --config=*)
+        if ! [[ -s "${_opt##--config=}" ]]; then
+          _die "please specify a valid path for the configuration file of tessen"
+        fi
+        tsn_config="${_opt##--config=}"
+        ;;
+    esac
+    shift
+  done
+  unset -v _opt
+
+  local line idx key val
+  local -a config_arr
+  local config_regex='^[[:alpha:]_]+="[[:alnum:]~_.\/^$|()*?-]+"$'
+  # in case the user hasn't provided an explicit location, we'll have to check
+  # if the default file exists before we parse it
+  if [[ -s "$tsn_config" ]]; then
+    while read -r line || [[ -n "$line" ]]; do
+      if [[ "$line" == \#* ]]; then
+        continue
+      elif [[ "$line" =~ $config_regex ]]; then
+        config_arr+=("$line")
+      fi
+    done < "$tsn_config"
+    for idx in "${config_arr[@]}"; do
+      key="${idx%=*}"
+      val="${idx#*\"}"
+      val="${val%*\"}"
+      # here comes the ladder
+      if [[ "$key" == "pass_backend" ]]; then
+        validate_pass_backend "$val"
+      elif [[ "$key" == "dmenu_backend" ]]; then
+        validate_dmenu_backend "$val"
+      elif [[ "$key" == "action" ]]; then
+        validate_action "$val"
+      elif [[ "$key" == "rofi_config_file" ]] && [[ "$dmenu_backend" == "rofi" ]]; then
+        validate_dmenu_backend rofi
+        dmenu_backend_opts+=("-config $val")
+        tmp_opts+=("-config $val")
+      elif [[ "$key" == "wofi_config_file" ]] && [[ "$dmenu_backend" == "wofi" ]]; then
+        dmenu_backend_opts+=("-c $val")
+        tmp_opts+=("-c $val")
+      elif [[ "$key" == "wofi_style_file" ]] && [[ "$dmenu_backend" == "wofi" ]]; then
+        dmenu_backend_opts+=("-s $val")
+        tmp_opts+=("-s $val")
+      elif [[ "$key" == "wofi_color_file" ]] && [[ "$dmenu_backend" == "wofi" ]]; then
+        dmenu_backend_opts+=("-C $val")
+        tmp_opts+=("-C $val")
+      elif [[ "$key" == "userkey" ]]; then
+        tsn_userkey="$val"
+      elif [[ "$key" == "urlkey" ]]; then
+        tsn_urlkey="$val"
+      elif [[ "$key" == "autotype_key" ]]; then
+        tsn_autokey="$val"
+      elif [[ "$key" == "delay" ]]; then
+        tsn_delay="$val"
+      elif [[ "$key" == "web_browser" ]] && is_installed "$val"; then
+        tsn_web_browser="$val"
+      fi
+    done
+  fi
+  unset -v line key val idx config_arr config_regex
+}
+
 main() {
   local _opt
 
