@@ -313,35 +313,63 @@ key_menu() {
     "$tsn_userkey") key_action "$tsn_username" ;;
     password) key_action "$tsn_password" ;;
     otp) key_otp ;;
-    "$tsn_urlkey") key_url "${tsn_passdata["$tsn_urlkey"]}" ;;
+    "$tsn_urlkey") key_action "$tsn_urlkey" ;;
     *) key_action "${tsn_passdata["$chosen_key"]}" ;;
   esac
 }
 
-# THIRD MENU: optional, use 'get_key()' and TESSEN_ACTION to show the option to
-# either auto type or copy the selected key
+# this function checks the value of tsn_action and decides if the third menu
+# should be presented or not
+# in case it receives a parameter called "url", autotype becomes equivalent to
+# opening the url in the web browser
 key_action() {
   local arg="$1"
 
-  # POTENTIAL IMPROVEMENT: used 'printf | wtype' instead of 'auto_type()'
-  # because in all the other cases, 'auto_type()' is meant to exit but we don't
-  # want to exit here
   case "$tsn_action" in
-    autotype) auto_type "$arg" ;;
-    copy) wld_copy "$arg" ;;
-    both)
-      printf "%s" "$arg" | wtype -s "$tsn_delay" -
+    autotype)
+      if [[ "$arg" == "$tsn_urlkey" ]]; then
+        key_open_url || _die
+        return 0
+      fi
+      auto_type "$arg"
+      ;;
+    copy)
+      if [[ "$arg" == "$tsn_urlkey" ]]; then
+        wld_copy "$tsn_url" || _die
+        return 0
+      fi
       wld_copy "$arg"
       ;;
-    "")
-      get_key option
-      if [[ "$chosen_key" == "$tsn_autokey" ]]; then
-        auto_type "$arg"
+    both)
+      if [[ "$arg" == "$tsn_urlkey" ]]; then
+        key_open_url
+        wld_copy "$tsn_url"
       else
+        printf "%s" "$arg" | wtype -s "$tsn_delay" -
         wld_copy "$arg"
       fi
       ;;
+    default)
+      if [[ "$arg" == "$tsn_urlkey" ]]; then
+        get_key "$tsn_urlkey"
+        if [[ "$chosen_key" == "open" ]]; then
+          key_open_url || _die
+          return 0
+        else
+          wld_copy "$tsn_url"
+        fi
+      else
+        get_key option
+        if [[ "$chosen_key" == "$tsn_autokey" ]]; then
+          auto_type "$arg"
+        else
+          wld_copy "$arg"
+        fi
+      fi
+      ;;
   esac
+
+  unset -v arg
 }
 
 # THIRD MENU: optional, this function is used if an 'otpauth://' URI is found
