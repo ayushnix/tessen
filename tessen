@@ -4,7 +4,7 @@
 #
 # vim: set expandtab ts=2 sw=2 sts=2:
 #
-# tessen - a data selection interface for pass on Wayland
+# tessen - a data selection interface for pass and gopass on Wayland
 # ------------------------------------------------------------------------------
 
 # don't leak password data if debug mode is enabled
@@ -491,28 +491,6 @@ wld_copy() {
   unset -v tsn_passfile tsn_passdata tsn_username tsn_password chosen_key
 }
 
-print_help() {
-  printf "%s" "\
-${0##*/} - autotype and copy data from password-store on wayland
-
-usage: ${0##*/} [options]
-
-  ${0##*/}                        use a dmenu backend and either autotype OR copy data
-  ${0##*/} -b bemenu              use bemenu and either autotype OR copy data
-  ${0##*/} -b 'bemenu -l 20'      use bemenu but override default options and show 20 lines
-  ${0##*/} -b bemenu -a autotype  use bemenu and always autotype data
-  ${0##*/} -b bemenu -a copy      use bemenu and always copy data
-  ${0##*/} -b bemenu -a both      use bemenu and always autotype AND copy data
-
-  -b, --backend, --backend=     specify a dmenu like backend and (optionally) its flags
-  -a, --action, --action=       choose either 'autotype', 'copy', or 'both'
-  -h, --help                    print this help menu
-  -v, --version                 print the version of ${0##*/}
-
-for more details and additional features, please read the man page of tessen(1)
-for reporting bugs or feedback, visit https://github.com/ayushnix/tessen
-"
-}
 
 is_installed() {
   if command -v "${1%% *}" > /dev/null 2>&1; then
@@ -642,6 +620,40 @@ _die() {
   fi
   _clear
   exit 1
+}
+
+print_help() {
+  local prog="${0##*/}"
+
+  printf "%s" "\
+$prog - autotype and copy data from password-store and gopass on wayland
+
+usage: $prog [options]
+
+  $prog                      find a dmenu and pass backend, look for a config
+                              file in \$XDG_CONFIG_HOME/tessen/config, and either
+                              autotype OR copy data
+  $prog -p gopass            use gopass as the pass backend
+  $prog -d rofi              use rofi as the dmenu backend
+  $prog -d rofi -a autotype  use rofi and always autotype data
+  $prog -d rofi -a copy      use rofi and always copy data
+  $prog -d rofi -a both      use rofi and always autotype AND copy data
+  $prog -c \$HOME/tsncfg      specify a custom location for the $prog config file
+
+  -p, --pass, --pass=         choose either 'pass' or 'gopass'
+  -d, --dmenu, --dmenu=       specify a dmenu backend - 'rofi', 'fuzzel',
+                              'bemenu', and 'wofi' are supported
+  -a, --action, --action=     choose either 'autotype', 'copy', or 'both'
+                              omit this option to use the default behavior
+  -c, --config, --config=     use a config file on a custom path
+  -h, --help                  print this help menu
+  -v, --version               print the version of $prog
+
+for more details and additional features, please read the man page of $prog(1)
+for reporting bugs or feedback, visit https://github.com/ayushnix/tessen/issues
+"
+
+  unset -v prog
 }
 
 # this block of code is needed because we can't source the file and execute
