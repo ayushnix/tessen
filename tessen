@@ -594,10 +594,39 @@ validate_cliptime() {
 
 validate_action() {
   case "$1" in
-    autotype) readonly tsn_action="autotype" ;;
-    copy) readonly tsn_action="copy" ;;
-    both) readonly tsn_action="both" ;;
-    "") readonly tsn_action="" ;;
+    autotype)
+      if ! is_installed "wtype"; then
+        _die "wtype is not installed, unable to autotype pass data"
+      fi
+      tsn_action="autotype"
+      ;;
+    copy)
+      if ! is_installed "wl-copy"; then
+        _die "wl-clipboard is not installed, unable to copy-paste pass data"
+      fi
+      tsn_action="copy"
+      ;;
+    both)
+      if ! is_installed "wtype"; then
+        _die "wtype is not installed, unable to autotype pass data"
+      elif ! is_installed "wl-copy"; then
+        _die "wl-clipboard is not installed, unable to copy-paste pass data"
+      fi
+      tsn_action="both"
+      ;;
+    default)
+      if is_installed "wtype" && is_installed "wl-copy"; then
+        tsn_action="default"
+      elif is_installed "wtype" && ! is_installed "wl-copy"; then
+        printf "%s\n" "wl-clipboard is not installed, unable to copy-paste pass data" >&2
+        tsn_action="autotype"
+      elif ! is_installed "wtype" && is_installed "wl-copy"; then
+        printf "%s\n" "wtype is not installed, unable to autotype pass data" >&2
+        tsn_action="copy"
+      elif ! is_installed "wtype" && ! is_installed "wl-copy"; then
+        _die "please install at least one the following backends to use tessen: wtype | wl-clipboard "
+      fi
+      ;;
     *) _die "please specify a valid action: autotype | copy | both" ;;
   esac
 }
