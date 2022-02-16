@@ -416,8 +416,6 @@ key_open_url() {
 
 # SECOND MENU: the default autotype function, either autotype the username and
 # password or the custom autotype defined by the user
-# POTENTIAL IMPROVEMENT: Anything better than this ugly hack of
-# else..for..case..if..else..if?
 auto_type_def() {
   local word tmp_otp
 
@@ -432,18 +430,7 @@ auto_type_def() {
         ":tab") wtype -s "$tsn_delay" -k Tab -- ;;
         ":space") wtype -s "$tsn_delay" -k space -- ;;
         ":enter") wtype -s "$tsn_delay" -k Return -- ;;
-        ":otp")
-          if ! pass otp -h > /dev/null 2>&1; then
-            _die "pass-otp is not installed"
-          else
-            tmp_otp="$(pass otp "$tsn_passfile")"
-            if [[ "$tmp_otp" =~ ^[[:digit:]]+$ ]]; then
-              printf "%s" "$tmp_otp" | wtype -s "$tsn_delay" -
-            else
-              _die "invalid OTP detected"
-            fi
-          fi
-          ;;
+        ":otp") key_otp ;;
         path | basename | filename) printf "%s" "${tsn_passfile##*/}" | wtype -s "$tsn_delay" - ;;
         "$tsn_userkey") printf "%s" "$tsn_username" | wtype -s "$tsn_delay" - ;;
         pass | password) printf "%s" "$tsn_password" | wtype -s "$tsn_delay" - ;;
