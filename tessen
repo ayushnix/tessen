@@ -373,25 +373,27 @@ key_action() {
 }
 
 # THIRD MENU: optional, this function is used if an 'otpauth://' URI is found
+# note that OTP support in gopass is deprecated and if they end up removing
+# support for it, we'll have to make changes here as well
 key_otp() {
   local tmp_otp
 
-  if ! pass otp -h > /dev/null 2>&1; then
+  if [[ "$pass_backend" == "pass" ]] && ! pass otp -h > /dev/null 2>&1; then
     _die "pass-otp is not installed"
   fi
 
-  tmp_otp="$(pass otp "$tsn_passfile")"
+  if [[ "$pass_backend" == "pass" ]]; then
+    tmp_otp="$(pass otp "$tsn_passfile")"
+  elif [[ "$pass_backend" == "gopass" ]]; then
+    tmp_otp="$(gopass otp -o "$tsn_passfile")"
+  fi
 
-  if [[ "$tmp_otp" =~ ^[[:digit:]]+$ ]]; then
-    get_key option
-    if [[ "$chosen_key" == "$tsn_autokey" ]]; then
-      auto_type "$tmp_otp"
-    else
-      wld_copy "$tmp_otp"
-    fi
-  else
+  if ! [[ "$tmp_otp" =~ ^[[:digit:]]+$ ]]; then
     _die "invalid OTP detected"
   fi
+  key_action "$tmp_otp"
+
+  unset -v tmp_otp
 }
 
 # THIRD MENU: optional, this function is used if TESSEN_URLKEY is found.
