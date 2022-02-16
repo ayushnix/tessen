@@ -240,29 +240,55 @@ get_pass_data() {
   unset -v passdata keyval_regex otp_regex idx key val
 }
 
-# SECOND MENU: show a list of possible keys to choose from for auto typing or
-# copying
-# THIRD MENU: optional, this will show up if TESSEN_ACTION is blank
+# SECOND MENU: show a list of possible keys to choose from for autotyping or
+# copying, depending on the value of tsn_action
+# THIRD MENU: optional, this will show up if tsn_action is blank
 get_key() {
   local -a key_arr
   local ch flag=false
 
-  # the second menu
-  if [[ "$1" == "key_list" ]]; then
-    if [[ "$tsn_otp" == "true" ]]; then
-      key_arr=("$tsn_autokey" "$tsn_userkey" "password" "otp" "${!tsn_passdata[@]}")
-    else
-      key_arr=("$tsn_autokey" "$tsn_userkey" "password" "${!tsn_passdata[@]}")
-    fi
-  # the (optional) third menu, depends on $tsn_action
-  elif [[ "$1" == "option" ]]; then
-    key_arr=("$tsn_autokey" "copy")
-  elif [[ "$1" == "$tsn_urlkey" ]]; then
-    key_arr=("open" "copy")
-  fi
+  # the 2nd menu for autotype, both, and the default actions will be the same
+  # and the autotype key will be present in these cases
+  # when tsn_action is set to copy, the autotype key shouldn't be shown in the 2nd menu
+  case "$tsn_action" in
+    autotype | both | default)
+      if [[ "$1" == "key_list" ]]; then
+        if [[ "$tsn_otp" == "false" ]] && [[ -z "$tsn_url" ]]; then
+          key_arr=("$tsn_autokey" "$tsn_userkey" "password" "${!tsn_passdata[@]}")
+        elif [[ "$tsn_otp" == "false" ]] && [[ -n "$tsn_url" ]]; then
+          key_arr=("$tsn_autokey" "$tsn_userkey" "password" "$tsn_urlkey" "${!tsn_passdata[@]}")
+        elif [[ "$tsn_otp" == "true" ]] && [[ -z "$tsn_url" ]]; then
+          key_arr=("$tsn_autokey" "$tsn_userkey" "password" "otp" "${!tsn_passdata[@]}")
+        elif [[ "$tsn_otp" == "true" ]] && [[ -n "$tsn_url" ]]; then
+          key_arr=("$tsn_autokey" "$tsn_userkey" "password" "otp" "$tsn_urlkey" "${!tsn_passdata[@]}")
+        fi
+      fi
+      # the (optional) third menu, its appearance depends on tsn_action being default
+      if [[ "$tsn_action" == "default" ]] && [[ "$1" == "option" ]]; then
+        key_arr=("$tsn_autokey" "copy")
+      # the (optional) third menu if tsn_urlkey is chosen, it depends on
+      # tsn_action being default
+      elif [[ "$tsn_action" == "default" ]] && [[ "$1" == "$tsn_urlkey" ]]; then
+        key_arr=("open" "copy")
+      fi
+      ;;
+    copy)
+      if [[ "$1" == "key_list" ]]; then
+        if [[ "$tsn_otp" == "false" ]] && [[ -z "$tsn_url" ]]; then
+          key_arr=("$tsn_userkey" "password" "${!tsn_passdata[@]}")
+        elif [[ "$tsn_otp" == "false" ]] && [[ -n "$tsn_url" ]]; then
+          key_arr=("$tsn_userkey" "password" "$tsn_urlkey" "${!tsn_passdata[@]}")
+        elif [[ "$tsn_otp" == "true" ]] && [[ -z "$tsn_url" ]]; then
+          key_arr=("$tsn_userkey" "password" "otp" "${!tsn_passdata[@]}")
+        elif [[ "$tsn_otp" == "true" ]] && [[ -n "$tsn_url" ]]; then
+          key_arr=("$tsn_userkey" "password" "otp" "$tsn_urlkey" "${!tsn_passdata[@]}")
+        fi
+      fi
+      ;;
+  esac
 
-  # a dynamically scoped variable to hold the selected key for key_menu
-  chosen_key="$(printf "%s\n" "${key_arr[@]}" | "$tsn_backend" "${tsn_backend_opts[@]}")"
+  # a global variable to hold the selected key for key_menu
+  chosen_key="$(printf "%s\n" "${key_arr[@]}" | "$dmenu_backend" "${dmenu_backend_opts[@]}")"
 
   # validate the chosen key, if it doesn't exist, exit
   for ch in "${key_arr[@]}"; do
@@ -274,6 +300,8 @@ get_key() {
   if [[ "$flag" == "false" ]]; then
     _die
   fi
+
+  unset -v key_arr ch flag
 }
 
 # SECOND MENU: use 'get_key()' to show a list of possible keys to choose from
