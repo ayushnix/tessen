@@ -159,49 +159,85 @@ get_pass_data() {
   local -a passdata
   local keyval_regex otp_regex idx key val
 
-  mapfile -t passdata < <(pass "$tsn_passfile" 2> /dev/null)
-  if [[ "${#passdata[@]}" -eq 0 ]]; then
-    _die "$tsn_passfile is empty"
+  if [[ "$pass_backend" == "pass" ]]; then
+    mapfile -t passdata < <(pass show "$tsn_passfile" 2> /dev/null)
+    if [[ "${#passdata[@]}" -eq 0 ]]; then
+      _die "$tsn_passfile is empty"
+    fi
+  elif [[ "$pass_backend" == "gopass" ]]; then
+    # gopass show -n -f is weird because it emits a first line 'Secret:
+    # truncated-file-name' and that doesn't get assigned to a variable. but if
+    # I redirect stdout to /dev/null, that first line gets redirected as well.
+    # there doesn't seem to be any way to disable printing this first line.
+    mapfile -t passdata < <(gopass show -n -f "$tsn_passfile" 2> /dev/null)
+    if [[ "${#passdata[@]}" -eq 0 ]]; then
+      _die "$tsn_passfile is empty"
+    fi
   fi
 
-  # the key can contain
-  # alphanumerics, spaces, hyphen, underscore, plus, at, and hash
-  # the value can contain
-  # anything but it should be separated with a space from 'key:'
+  # the key can contain alphanumerics, spaces, hyphen, underscore, plus, at,
+  # and hash
+  #
+  # the value can contain anything but `key:` and `val` should be separated
+  # with a whitespace
   keyval_regex='^[[:alnum:][:blank:]+#@_-]+:[[:blank:]].+$'
   # parse the 'otpauth://' URI
-  # this regex is borrowed from pass-otp at commit 0aadd4c
-  otp_regex='^otpauth:\/\/(totp|hotp)(\/(([^:?]+)?(:([^:?]*))?))?\?(.+)$'
+  # this regex is borrowed from pass-otp at commit 3ba564c
+  #
+  # note that OTP support in gopass has been deprecated and for good reasons
+  # I, for one, don't see how storing OTPs in the same place as storing your
+  # passwords is a sane idea
+  # https://github.com/gopasspw/gopass/blob/master/docs/features.md#adding-otp-secrets
+  otp_regex='^otpauth:\/\/(totp|hotp)(\/(([^:?]+)?(:([^:?]*))?)(:([0-9]+))?)?\?(.+)$'
 
   # the first line should contain the only the password
+  # this assumes the caveat highlighted earlier about gopass' behavior
   tsn_password="${passdata[0]}"
+
   # each key should be unique
-  # if non-unique keys are present, the value of the last non-unique key will
+  # if non-unique keys are present, the value of the first non-unique key will
   # be considered
-  # in addition, the following keys should be case insensitive and unique
-  # 'username', 'autotype'
+  # in addition, the 'username', 'autotype', 'url', and 'password' keys are
+  # considered as case insensitive
   for idx in "${passdata[@]:1}"; do
     key="${idx%%:*}"
     val="${idx#*: }"
     # keys with the case insensitive name 'password' are ignored
     if [[ "${key,,}" == "password" ]]; then
       continue
-    elif [[ -z "${tsn_username}" ]] && [[ "${key,,}" =~ ^${tsn_userkey_regex}$ ]]; then
-      tsn_username="$val"
+    elif [[ "${key,,}" =~ ^$tsn_userkey$ ]] && [[ -z "${tsn_username}" ]]; then
       tsn_userkey="${key,,}"
-    elif [[ "${key,,}" == "$tsn_autokey" ]]; then
+      tsn_username="$val"
+    elif [[ "${key,,}" =~ ^$tsn_autokey$ ]] && [[ -z "${tsn_autotype}" ]]; then
+      tsn_autokey="${key,,}"
       tsn_autotype="$val"
-    elif [[ "$idx" =~ $otp_regex ]]; then
+    elif [[ "${key,,}" =~ ^$tsn_urlkey$ ]] && [[ -z "${tsn_url}" ]]; then
+      tsn_urlkey="${key,,}"
+      tsn_url="$val"
+    elif [[ "$idx" =~ $otp_regex ]] && [[ "$tsn_otp" == "false" ]]; then
       tsn_otp=true
-    elif [[ "$idx" =~ $keyval_regex ]]; then
+    elif [[ "$idx" =~ $keyval_regex ]] && [[ -z "${tsn_passdata["$key"]}" ]]; then
       tsn_passdata["$key"]="$val"
     fi
   done
 
-  # if $tsn_userkey_regex isn't found, use the basename of file as username
+  # if $tsn_userkey isn't found, use the basename of file as username
+  # also set the value of the tsn_userkey to the default value
+  # this prevents the userkey from showing up as a regex in case a user has set
+  # it in the config file
+  # the same goes for other custom key variables
   if [[ -z "$tsn_username" ]]; then
     tsn_username="${tsn_passfile##*/}"
+    tsn_userkey="user"
   fi
+  if [[ -z "$tsn_autotype" ]]; then
+    tsn_autokey="autotype"
+  fi
+  if [[ -z "$tsn_url" ]]; then
+    tsn_urlkey="url"
+  fi
+
+  unset -v passdata keyval_regex otp_regex idx key val
 }
 
 # SECOND MENU: show a list of possible keys to choose from for auto typing or
