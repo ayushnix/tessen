@@ -723,32 +723,92 @@ parse_config() {
 }
 
 main() {
-  local _opt
-
-  if ! [[ -d "$tsn_prefix" ]]; then
-    _die "password store directory not found"
+  # initialize basic options for users who expect sane defaults and don't use
+  # either the config file or args
+  if [[ -z "$pass_backend" ]]; then
+    find_pass_backend
   fi
+  if [[ -z "$dmenu_backend" ]]; then
+    find_dmenu_backend
+  fi
+  validate_dmenu_backend "$dmenu_backend"
+  validate_action default
 
+  # parse the config file
+  parse_config "$@"
+
+  # parse command line arguments after the config file because args hold more
+  # precedence and priority than the config file
+  local _opt
   while [[ "$#" -gt 0 ]]; do
     _opt="$1"
     case "$_opt" in
-      -b | --backend)
-        tsn_backend="${2}"
+      -p | --pass)
+        if [[ "$#" -lt 2 ]]; then
+          _die "please specify a valid password store backend: pass | gopass"
+        fi
+        validate_pass_backend "$2"
+        readonly pass_backend
         shift
         ;;
-      --backend=*)
-        tsn_backend="${_opt##--backend=}"
+      --pass=*)
+        if [[ -z "${_opt##--pass=}" ]]; then
+          _die "please specify a valid password store backend: pass | gopass"
+        fi
+        validate_pass_backend "${_opt##--pass=}"
+        readonly pass_backend
+        ;;
+      -d | --dmenu)
+        if [[ "$#" -lt 2 ]]; then
+          _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
+        fi
+        validate_dmenu_backend "$2"
+        # if rofi or wofi are selected, the additional values of
+        # dmenu_backend_opts which were mentioned in the config file should be
+        # appended
+        # we need tmp_opts because even if dmenu_backend_opts is set to the
+        # correct value, validating it would reset it back to the default
+        # values
+        readonly dmenu_backend
+        if [[ "$dmenu_backend" == "rofi" ]] || [[ "$dmenu_backend" == "wofi" ]]; then
+          if [[ "${#tmp_opts[@]}" -gt 0 ]]; then
+            dmenu_backend_opts+=("${tmp_opts[@]}")
+            readonly dmenu_backend_opts
+          fi
+        fi
+        shift
+        ;;
+      --dmenu=*)
+        if [[ -z "${_opt##--dmenu=}" ]]; then
+          _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
+        fi
+        validate_dmenu_backend "${_opt##--dmenu=}"
+        readonly dmenu_backend
+        if [[ "$dmenu_backend" == "rofi" ]] || [[ "$dmenu_backend" == "wofi" ]]; then
+          if [[ "${#tmp_opts[@]}" -gt 0 ]]; then
+            dmenu_backend_opts+=("${tmp_opts[@]}")
+            readonly dmenu_backend_opts
+          fi
+        fi
         ;;
       -a | --action)
         if [[ "$#" -lt 2 ]]; then
           _die "please specify a valid action: autotype | copy | both"
         fi
         validate_action "$2"
+        readonly tsn_action
         shift
         ;;
       --action=*)
+        if [[ -z ${_opt##--action=} ]]; then
+          _die "please specify a valid action: autotype | copy | both"
+        fi
         validate_action "${_opt##--action=}"
+        readonly tsn_action
         ;;
+      # we've already parsed `-c` before so we'll need to skip it here
+      -c | --config) shift ;;
+      --config=*) : ;;
       -h | --help)
         print_help
         exit 0
@@ -765,7 +825,7 @@ main() {
     esac
     shift
   done
-  unset -v _opt
+  unset -v _opt tmp_opts
 
   if [[ -z "${tsn_backend}" ]]; then
     tsn_backend="$(find_backend)"
