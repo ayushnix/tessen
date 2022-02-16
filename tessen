@@ -457,15 +457,38 @@ auto_type() {
 # POTENTIAL IMPROVEMENT: We could restore the clipboard as it was before pass
 # was used. This is done by default by pass.
 wld_copy() {
+  local tsn_cliptime
+
+  if [[ "$pass_backend" == "pass" ]]; then
+    tsn_cliptime="${PASSWORD_STORE_CLIP_TIME:-15}"
+    if ! are_digits "$tsn_cliptime"; then
+      printf "%s\n" "invalid clipboard timeout value in PASSWORD_STORE_CLIP_TIME" >&2
+      return 1
+    fi
+  elif [[ "$pass_backend" == "gopass" ]]; then
+    tsn_cliptime="$(gopass config cliptimeout)"
+    tsn_cliptime="${tsn_cliptime##*: }"
+    if ! are_digits "$tsn_cliptime"; then
+      printf "%s\n" "invalid clipboard timeout value in cliptimeout" >&2
+      return 1
+    fi
+  fi
+  # it would've been better to use, or at least provide an option, to paste
+  # only once using `wl-copy -o` but web browsers don't work well with this
+  # feature
+  # https://github.com/bugaevc/wl-clipboard/issues/107
   printf "%s" "$1" | wl-copy
   if is_installed notify-send; then
-    notify-send -t $((tsn_cliptime * 1000)) "Copied username to clipboard. Will clear in $tsn_cliptime seconds."
+    notify-send -t $((tsn_cliptime * 1000)) \
+      "Copied username to clipboard. Will clear in $tsn_cliptime seconds."
   fi
   {
     sleep "$tsn_cliptime" || exit 1
     wl-copy --clear
   } > /dev/null 2>&1 &
-  unset -v tsn_passfile tsn_username tsn_password tsn_passdata chosen_key
+
+  unset -v tsn_cliptime
+  unset -v tsn_passfile tsn_passdata tsn_username tsn_password chosen_key
 }
 
 print_help() {
