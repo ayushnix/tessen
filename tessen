@@ -11,28 +11,23 @@
 set +x
 
 # GLOBAL VARIABLES
-# variables which won't be changed and can be made readonly
-readonly tsn_version="1.3.1"
-readonly tsn_prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
-readonly tsn_cliptime="${PASSWORD_STORE_CLIP_TIME:-15}"
-readonly tsn_delay="${TESSEN_DELAY:-200}"
-# a list of dmenu backends for which tessen provides default options
-readonly -a tsn_known_backends=('bemenu' 'fuzzel' 'rofi' 'wofi')
-# variables which hold data for possible actions and choices
-tsn_backend="${TESSEN_BACKEND-}"
-tsn_backend_opts=()
-tsn_action="${TESSEN_ACTION-}"
-tsn_userkey_regex="${TESSEN_USERKEY:-user}"
-tsn_userkey="user"
-tsn_urlkey="${TESSEN_URLKEY:-url}"
-tsn_autokey="${TESSEN_AUTOKEY:-autotype}"
-tsn_autotype=""
+readonly tsn_version="2.0.0"
+declare pass_backend dmenu_backend tsn_action tsn_config
+declare -a dmenu_backend_opts tmp_opts
+declare tsn_userkey tsn_urlkey tsn_autokey tsn_delay tsn_web_browser
+# show both actions, 'autotype' and 'copy', to choose from by default
+tsn_action="default"
 tsn_otp=false
+# initialize default values for keys
+tsn_userkey="user"
+tsn_urlkey="url"
+tsn_autokey="autotype"
+tsn_delay=100
+# initialize the default location of the config file
+tsn_config="${XDG_CONFIG_HOME:-$HOME/.config}"/tessen/config
 # variables with sensitive data which will be manually unset using _clear
-tsn_passfile=""
+declare tsn_passfile tsn_username tsn_password tsn_url tsn_autotype chosen_key
 declare -A tsn_passdata
-tsn_username=""
-tsn_password=""
 
 # FIRST MENU: generate a list of password store files, let the user select one
 get_pass_file() {
