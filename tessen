@@ -29,21 +29,26 @@ tsn_config="${XDG_CONFIG_HOME:-$HOME/.config}"/tessen/config
 declare tsn_passfile tsn_username tsn_password tsn_url tsn_autotype chosen_key
 declare -A tsn_passdata
 
-# FIRST MENU: generate a list of password store files, let the user select one
-get_pass_file() {
-  local -a tmp_list
+# FIRST MENU: generate a list of pass files, let the user select one
+get_pass_files() {
+  local tmp_prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+  if ! [[ -d "$tmp_prefix" ]]; then
+    _die "password store directory not found"
+  fi
 
+  local -a tmp_pass_files
   # temporarily enable globbing, get the list of all gpg files recursively,
   # remove PASSWORD_STORE_DIR from the file names, and remove the '.gpg' suffix
   shopt -s nullglob globstar
-  tmp_list=("$tsn_prefix"/**/*.gpg)
-  tmp_list=("${tmp_list[@]#"$tsn_prefix"/}")
-  tmp_list=("${tmp_list[@]%.gpg}")
+  tmp_pass_files=("$tmp_prefix"/**/*.gpg)
+  tmp_pass_files=("${tmp_pass_files[@]#"$tmp_prefix"/}")
+  tmp_pass_files=("${tmp_pass_files[@]%.gpg}")
   shopt -u nullglob globstar
 
-  tsn_passfile="$(printf "%s\n" "${tmp_list[@]}" | "$tsn_backend" "${tsn_backend_opts[@]}")"
+  tsn_passfile="$(printf "%s\n" "${tmp_pass_files[@]}" \
+    | "$dmenu_backend" "${dmenu_backend_opts[@]}")"
 
-  if ! [[ -s "$tsn_prefix/$tsn_passfile".gpg ]]; then
+  if ! [[ -s "$tmp_prefix/$tsn_passfile".gpg ]]; then
     _die
   fi
 }
