@@ -125,7 +125,7 @@ get_gopass_files() {
 
   # the actual menu
   tsn_passfile="$(printf "%s\n" "${!tmp_gopass_files[@]}" \
-    | "$dmenu_backend" "${dmenu_backend_opts[*]}")"
+    | "$dmenu_backend" "${dmenu_backend_opts[@]}")"
 
   if [[ -z $tsn_passfile ]]; then
     _die
