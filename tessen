@@ -745,22 +745,8 @@ parse_config() {
 }
 
 main() {
-  # initialize basic options for users who expect sane defaults and don't use
-  # either the config file or args
-  if [[ -z $pass_backend ]]; then
-    find_pass_backend
-  fi
-  if [[ -z $dmenu_backend ]]; then
-    find_dmenu_backend
-  fi
-  validate_dmenu_backend "$dmenu_backend"
-  validate_action default
-
-  # parse the config file
-  parse_config "$@"
-
-  # parse command line arguments after the config file because args hold more
-  # precedence and priority than the config file
+  # parse arguments because they have the highest priority
+  # make the values supplied to -p, -d, and -a as readonly
   local _opt
   while [[ $# -gt 0 ]]; do
     _opt="$1"
@@ -863,6 +849,21 @@ main() {
   elif [[ $dmenu_backend == "wofi" ]]; then
     dmenu_backend_opts+=("${tmp_wofi_opts[@]}")
     readonly dmenu_backend_opts
+  fi
+
+  # initialize basic options for users who expect sane defaults and don't use
+  # either the config file or args
+  if [[ -z $pass_backend ]]; then
+    find_pass_backend
+    readonly pass_backend
+  fi
+  if [[ -z $dmenu_backend ]]; then
+    find_dmenu_backend
+    validate_dmenu_backend "$dmenu_backend"
+    readonly dmenu_backend
+  fi
+  if [[ -z $tsn_action ]]; then
+    validate_action default
   fi
 
   trap '_clear' EXIT TERM INT
