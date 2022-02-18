@@ -690,28 +690,6 @@ for reporting bugs or feedback, visit https://github.com/ayushnix/tessen/issues
 # this block of code is needed because we can't source the file and execute
 # arbitrary input
 parse_config() {
-  local _opt
-  while [[ $# -gt 0 ]]; do
-    _opt="$1"
-    case "$_opt" in
-      -c | --config)
-        if [[ $# -lt 2 ]] || ! [[ -s $2 ]]; then
-          _die "please specify a valid path for the configuration file of tessen"
-        fi
-        tsn_config="$2"
-        shift
-        ;;
-      --config=*)
-        if ! [[ -s ${_opt##--config=} ]]; then
-          _die "please specify a valid path for the configuration file of tessen"
-        fi
-        tsn_config="${_opt##--config=}"
-        ;;
-    esac
-    shift
-  done
-  unset -v _opt
-
   local line idx key val
   local -a config_arr
   local config_regex='^[[:alpha:]_]+="[[:alnum:]~_./^$|()-]+"$'
@@ -762,6 +740,7 @@ parse_config() {
       fi
     done
   fi
+
   unset -v line key val idx config_arr config_regex
 }
 
@@ -849,9 +828,19 @@ main() {
         validate_action "${_opt##--action=}"
         readonly tsn_action
         ;;
-      # we've already parsed `-c` before so we'll need to skip it here
-      -c | --config) shift ;;
-      --config=*) : ;;
+      -c | --config)
+        if [[ $# -lt 2 ]] || ! [[ -f $2 ]]; then
+          _die "please specify a valid path for the configuration file of tessen"
+        fi
+        tsn_config="$2"
+        shift
+        ;;
+      --config=*)
+        if ! [[ -f ${_opt##--config=} ]]; then
+          _die "please specify a valid path for the configuration file of tessen"
+        fi
+        tsn_config="${_opt##--config=}"
+        ;;
       -h | --help)
         print_help
         exit 0
