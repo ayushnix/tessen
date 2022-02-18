@@ -13,7 +13,7 @@ set +x
 # GLOBAL VARIABLES
 readonly tsn_version="2.0.0"
 declare pass_backend dmenu_backend tsn_action tsn_config
-declare -a dmenu_backend_opts tmp_opts
+declare -a dmenu_backend_opts tmp_rofi_opts tmp_wofi_opts
 declare tsn_userkey tsn_urlkey tsn_autokey tsn_delay tsn_web_browser
 # show both actions, 'autotype' and 'copy', to choose from by default
 tsn_action="default"
@@ -736,19 +736,15 @@ parse_config() {
         validate_dmenu_backend "$val"
       elif [[ $key == "action" ]]; then
         validate_action "$val"
-      elif [[ $key == "rofi_config_file" ]] && [[ $dmenu_backend == "rofi" ]]; then
-        validate_dmenu_backend rofi
-        dmenu_backend_opts+=("-config $val")
-        tmp_opts+=("-config $val")
-      elif [[ $key == "wofi_config_file" ]] && [[ $dmenu_backend == "wofi" ]]; then
-        dmenu_backend_opts+=("-c $val")
-        tmp_opts+=("-c $val")
-      elif [[ $key == "wofi_style_file" ]] && [[ $dmenu_backend == "wofi" ]]; then
-        dmenu_backend_opts+=("-s $val")
-        tmp_opts+=("-s $val")
-      elif [[ $key == "wofi_color_file" ]] && [[ $dmenu_backend == "wofi" ]]; then
-        dmenu_backend_opts+=("-C $val")
-        tmp_opts+=("-C $val")
+        readonly tsn_action
+      elif [[ $key == "rofi_config_file" ]] && [[ -f ${val@P} ]]; then
+        tmp_rofi_opts+=("-config" "${val@P}")
+      elif [[ $key == "wofi_config_file" ]] && [[ -f ${val@P} ]]; then
+        tmp_wofi_opts+=("-c" "${val@P}")
+      elif [[ $key == "wofi_style_file" ]] && [[ -f ${val@P} ]]; then
+        tmp_wofi_opts+=("-s" "${val@P}")
+      elif [[ $key == "wofi_color_file" ]] && [[ -f ${val@P} ]]; then
+        tmp_wofi_opts+=("-C" "${val@P}")
       elif [[ $key == "userkey" ]]; then
         tsn_userkey="$val"
       elif [[ $key == "urlkey" ]]; then
