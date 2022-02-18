@@ -785,18 +785,13 @@ main() {
           _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
         fi
         validate_dmenu_backend "$2"
-        # if rofi or wofi are selected, the additional values of
-        # dmenu_backend_opts which were mentioned in the config file should be
-        # appended
-        # we need tmp_opts because even if dmenu_backend_opts is set to the
-        # correct value, validating it would reset it back to the default
-        # values
         readonly dmenu_backend
-        if [[ $dmenu_backend == "rofi" ]] || [[ $dmenu_backend == "wofi" ]]; then
-          if [[ ${#tmp_opts[@]} -gt 0 ]]; then
-            dmenu_backend_opts+=("${tmp_opts[@]}")
-            readonly dmenu_backend_opts
-          fi
+        # since there's a possibility that a user may mention config files for
+        # rofi and wofi, we will make dmenu_backend_opts readonly only if
+        # dmenu_backend is fuzzel and bemenu, the dmenu programs which don't
+        # support configuration files
+        if [[ $dmenu_backend == "fuzzel" ]] || [[ $dmenu_backend == "bemenu" ]]; then
+          readonly dmenu_backend_opts
         fi
         shift
         ;;
@@ -806,11 +801,8 @@ main() {
         fi
         validate_dmenu_backend "${_opt##--dmenu=}"
         readonly dmenu_backend
-        if [[ $dmenu_backend == "rofi" ]] || [[ $dmenu_backend == "wofi" ]]; then
-          if [[ ${#tmp_opts[@]} -gt 0 ]]; then
-            dmenu_backend_opts+=("${tmp_opts[@]}")
-            readonly dmenu_backend_opts
-          fi
+        if [[ $dmenu_backend == "fuzzel" ]] || [[ $dmenu_backend == "bemenu" ]]; then
+          readonly dmenu_backend_opts
         fi
         ;;
       -a | --action)
@@ -857,7 +849,21 @@ main() {
     esac
     shift
   done
-  unset -v _opt tmp_opts
+  unset -v _opt
+
+  # parse the config file
+  # the config file comes AFTER the argparse because the config file has some
+  # options that argparse doesn't offer
+  # the options which are mutual between the argparse and the config file will
+  # be considered in the config file only if those options aren't already set
+  parse_config
+  if [[ $dmenu_backend == "rofi" ]]; then
+    dmenu_backend_opts+=("${tmp_rofi_opts[@]}")
+    readonly dmenu_backend_opts
+  elif [[ $dmenu_backend == "wofi" ]]; then
+    dmenu_backend_opts+=("${tmp_wofi_opts[@]}")
+    readonly dmenu_backend_opts
+  fi
 
   trap '_clear' EXIT TERM INT
   if [[ $pass_backend == "pass" ]]; then
