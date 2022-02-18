@@ -536,7 +536,7 @@ validate_dmenu_backend() {
       ;;
     fuzzel)
       dmenu_backend="fuzzel"
-      dmenu_backend_opts=('-d')
+      dmenu_backend_opts=('-d' '--log-level=warning')
       ;;
     bemenu)
       dmenu_backend="bemenu"
