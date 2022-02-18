@@ -730,11 +730,15 @@ parse_config() {
       val="${idx#*\"}"
       val="${val%*\"}"
       # here comes the ladder
-      if [[ $key == "pass_backend" ]]; then
+      # the -p, -d, and -a options will be parsed and set only if they're not
+      # already set, i.e., from the argparse
+      if [[ $key == "pass_backend" ]] && [[ -z $pass_backend ]]; then
         validate_pass_backend "$val"
-      elif [[ $key == "dmenu_backend" ]]; then
+        readonly pass_backend
+      elif [[ $key == "dmenu_backend" ]] && [[ -z $dmenu_backend ]]; then
         validate_dmenu_backend "$val"
-      elif [[ $key == "action" ]]; then
+        readonly dmenu_backend
+      elif [[ $key == "action" ]] && [[ -z $tsn_action ]]; then
         validate_action "$val"
         readonly tsn_action
       elif [[ $key == "rofi_config_file" ]] && [[ -f ${val@P} ]]; then
