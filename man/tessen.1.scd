@@ -2,29 +2,35 @@ tessen(1)
 
 # NAME
 
-tessen - an interactive menu to autotype and copy pass(1) data
+tessen - autotype and copy *pass*(1) and *gopass*(1) data on wayland
 
 # SYNOPSIS
 
-tessen [*-hv*] [*-b* dmenu_backend] [*-a* action]
+tessen [*-hv*] [*-p* pass backend] [*-d* dmenu backend] [*-a* action] [*-c* config file]
 
 # DESCRIPTION
 
-tessen is a *bash*(1) script that helps interact with *pass*(1). It can autotype
-and copy data from pass, open URLs, generate one-time passwords using
-*pass-otp*(1), and execute custom auto-type operations.
+tessen is a *bash*(1) script that helps to autotype and copy data encrypted
+using *pass*(1) and *gopass*(1). It can also open URLs, generate HOTP and TOTP,
+and execute custom autotype operations.
 
-tessen has been written to work on wayland compositors based on wlroots, such as
-*sway*(1). It will not work on window managers and desktop environments using
-the legacy X.Org display server.
+tessen has been written for wayland compositors like *sway*(1) and it will NOT
+work on window managers and desktop environments based on X.Org/X11.
 
 The options understood by tessen are:
 
-*-b*, *--backend*, *--backend=*[dmenu_backend]
-	specify a dmenu like backend and (optionally) its flags
+*-p*, *--pass*, *--pass=*[pass backend]
+	specify either *pass* or *gopass*
+
+*-d*, *--dmenu*, *--dmenu=*[dmenu backend]
+	specify a dmenu backend - the list of recognized backends are *rofi*,
+	*fuzzel*, *bemenu*, and *wofi*
 
 *-a*, *--action*, *--action=*[action]
-	choose either *autotype*, *copy*, or *both*
+	specify either *autotype*, *copy*, or *both*
+
+*-c*, *--config*, *--config=*[location of config file]
+	specify the location of the config file for *tessen*(5)
 
 *-h*, *--help*
 	show a brief help message
@@ -34,67 +40,79 @@ The options understood by tessen are:
 
 ## DEFAULT BEHAVIOR
 
-If a backend is not specified, tessen tries to find either one of *bemenu*(1),
-*fuzzel*(1), *rofi*(1), or *wofi*(1) in the order mentioned here. If rofi is
-used, it is expected that the Wayland fork of rofi
-_https://github.com/lbonn/rofi_ is being used. The original rofi
-_https://github.com/davatorium/rofi_ implementation made for X.Org is NOT
+If a pass backend is not specified, tessen tries to find either one of *pass*(1)
+or *gopass*(1) in the order mentioned here.
+
+tessen assumes that the data organization format is the same as mentioned on
+the home page of password store, when using *pass*(1) and *gopass*(1)
+
+https://www.passwordstore.org/#organization
+
+The first line should always have the password, and nothing else. All other
+lines may have key-value pairs like 'key1: value1' or the *otpauth://* format
+URI. However, if a key called 'password' is present, it will be ignored. Note
+that tessen does NOT support parsing YAML files when using *gopass*(1).
+
+If a dmenu backend is not specified, tessen tries to find either one of
+*rofi*(1), *fuzzel*(1), *bemenu*(1), or *wofi*(1) in the order mentioned here.
+If *rofi* is used, it is expected that the wayland native fork of rofi
+(https://github.com/lbonn/rofi) is being used. The original rofi
+(https://github.com/davatorium/rofi) implementation made for X.Org is NOT
 supported.
 
 If an action is not specified, tessen shows an additional menu with the option
-to either autotype or copy data. If data is copied, it will be removed from the
-clipboard after *PASSWORD_STORE_CLIP_TIME*. If this environment variable isn't
-set, a default value of 10 seconds is used.
+to either autotype or copy data.
 
-The default value of the backend can also be set using the *TESSEN_BACKEND*
-environment variable. The default value of the action can be set using the
-*TESSEN_ACTION* environment variable.
+If data is copied, it will be removed from the clipboard after
+*PASSWORD_STORE_CLIP_TIME* when using *pass*(1) and after *cliptimeout* when
+using *gopass*(1). If *PASSWORD_STORE_CLIP_TIME* is not set, a default value of
+15 seconds is assumed.
 
-By default, tessen will keep a delay of 200 milliseconds when auto-typing data
-using wtype(1). This can be changed using the *TESSEN_DELAY* environment
-variable.
+A delay of 100 milliseconds will be used between successive autotype operations.
+This can be changed using the 'delay' option in the *tessen*(5) configuration
+file.
+
+tessen will look for a configuration file in *$XDG_CONFIG_HOME/tessen/config*
+and *$HOME/.config/tessen/config*. A custom location can be specified using the
+*-c* flag.
+
+Command line flags have the highest preference and supersede equivalent options
+set in the config file.
 
 ## DEPENDENCIES
 
 tessen depends on
 
 - *bash*(1)
-- *pass*(1)
-- a wayland native dmenu like backend such as *bemenu*(1) and *fuzzel*(1)
-- *wtype*(1)
-- *wl-clipboard*(1)
+- at least one wayland native dmenu backend - *rofi*(1), *fuzzel*(1),
+  *bemenu*(1), *wofi*(1)
+- at least one pass backend - either *pass*(1) or *gopass*(1)
+- *wtype*(1) (if you want to autotype data)
+- *wl-clipboard*(1) (if you want to copy and paste data)
 - *scdoc*(1) (optional, to build this man page)
-- *libnotify* (optional, to use *notify-send*(1) for showing notifications)
-- *pass-otp*(1) (optional, to generate one-time password tokens)
-- *xdg-open*(1), provided by *xdg-utils* (optional, to open URLs)
+- *libnotify* (optional, to use *notify-send*(1) for showing notifications about
+  copied data and the timeout for clearing the clipboard)
+- *pass-otp*(1) (optional, to generate HOTP/TOTP when using *pass*(1))
+- *xdg-utils* (optional, if you want to use *xdg-open*(1) to open URLs)
 
 ## ADDITIONAL FEATURES
 
-tessen assumes that the data organization format is the same as mentioned on
-the home page of password store.
-
-_https://www.passwordstore.org/#organization_
-
-The first line should always have the password, and nothing else. All other
-lines may have key-value pairs like 'key1: value1' or the *otpauth://* format
-URI. However, if a key called 'password' is present, it will be ignored.
-
-If a key called 'user' is present, its value will be the default username
-instead of the basename of the selected file. This key can be modified using the
-*TESSEN_USERKEY* environment variable. If entries in password store use
-different keys for specifying user names regular expression can be used.
+If a key called 'user' is present inside a password file, its value will be the
+default username instead of the basename of the selected file. This key can be
+modified using the 'userkey' variable in the *tessen*(5) configuration file.
 
 If a key called 'url' is present, an option to open the value of the 'url' key
 in the default web browser will be shown instead of auto type. This becomes the
 default behavior if *-a autotype* option is provided during the execution of
-tessen. The 'url' key can be modified using the *TESSEN_URLKEY* environment
-variable.
+tessen. The 'url' key can be modified using the 'urlkey' variable in the
+*tessen*(5) config file.
 
-The *otpauth://* format is supported and used if pass-otp is installed.
+The *otpauth://* format is supported and used if *pass-otp*(1) is installed when
+using *pass*(1). *gopass*(1) supports this feature natively.
 
-A value for the 'autotype' key can be specified for custom auto-type behavior
-which overrides the default behavior of auto-typing the username and the
-password. For example,
+A value for the 'autotype' key can be specified in password files for custom
+autotype behavior which overrides the default behavior of autotyping the
+username and the password. For example,
 
 ```
 $ pass example/john
@@ -104,14 +122,7 @@ key2: value2
 key3: value3
 key4: value4
 otpauth://totp/ACME%20Co:john@example.com?secret=HXDMVJECJJWSRB3HWIZR4IF...
-autotype: key1 :tab key2 :space key3 :enter key4 :delay :tab :otp pass :space path
-```
-
-When the default auto-type option is used, an output similar to what is shown
-below will be auto-typed:
-
-```
-value1 <Tab> value2 <space> value3 <Return> value4 <delay for 1 sec> 384534 mypassword
+autotype: key1 :tab key2 :space key3 :enter key4 :delay :tab :otp pass
 ```
 
 When specified as a value of the 'autotype' key,
@@ -121,85 +132,34 @@ When specified as a value of the 'autotype' key,
 - *:enter* can be used to type the Enter key
 - *:delay* can be used to delay the type operation by 1 second
 - *:otp* can be used to generate and type the OTP, if *otpauth://* is present
-- *user*, or the value of *TESSEN_USERKEY*, can be used to type the username
+- *user*, or the value of *user* in the config file, can be used to type the
+  username
 - *pass* or *password* can be used to type the password
 - *path*, *basename*, or *filename* can be used to type the name of the
   selected file
 - any other key, such as 'key1', can be specified to print its value
 
-The value of the 'autotype' key can be modified using the *TESSEN_AUTOKEY*
-environment variable.
+The 'autotype' key can be changed using the 'autotype_key' variable in the
+*tessen*(5) configuration file.
 
-# EXAMPLES
+# FILES
 
-Find a dmenu-like backend and autotype or copy data:
-
-	$ tessen
-
-Use bemenu and autotype or copy data:
-
-	$ tessen -b bemenu
-
-Use bemenu but override default options and show 20 lines
-
-	$ tessen -b 'bemenu -l 20'
-
-Use bemenu and always autotype data:
-
-	$ tessen -b bemenu -a autotype
-
-Use bemenu and always copy data:
-
-	$ tessen -b bemenu -a copy
-
-Use bemenu and always autotype AND copy data simultaneously:
-
-	$ tessen -b bemenu -a both
-
-# ENVIRONMENT
-
-*PASSWORD_STORE_DIR*
-	The default location of the password store directory.
-
-*PASSWORD_STORE_CLIP_TIME*
-	The number of seconds after which the clipboard will be cleared.
-
-*TESSEN_BACKEND*
-	A wayland native dmenu like backend that should be used by tessen.
-	Although tessen provides default options for bemenu, fuzzel, rofi, and
-	wofi, any compatible backend may be used.
-
-*TESSEN_ACTION*
-	The default action of tessen. Choose either *autotype*, *copy*, or
-	*both*.
-
-*TESSEN_USERKEY*
-	The key which specifies the username. By default, it is assumed to be
-	*user*.
-
-*TESSEN_URLKEY*
-	The key which specifies the URL. By default, it is assumed to be *url*.
-
-*TESSEN_AUTOKEY*
-	The key which specifies the auto-type key. By default, it is assumed to
-	be *autotype*.
-
-*TESSEN_DELAY*
-	The delay in milliseconds when auto-typing is done using wtype(1). By
-	default, it is 200 milliseconds.
-
-*BROWSER*
-	The default web browser to use to open URLs. If xdg-open is installed,
-	this variable isn't needed.
+_$XDG_CONFIG_HOME/tessen/config_, _$HOME/.config/tessen/config_
+	The default configuration file for tessen. It can be used to specify all
+	the options provided by the command line flags and additional
+	customization options for keys interpreted by tessen.
 
 # SEE ALSO
 
-*pass*(1), *pass-otp*(1), *bemenu*(1), *fuzzel*(1), *rofi*(1), *wofi*(1),
-*wl-clipboard*(1), *wtype*(1), *notify-send*(1)
+*tessen*(5), *pass*(1), *gopass*(1) *pass-otp*(1), *rofi*(1), *fuzzel*(1),
+*bemenu*(1), *wofi*(1), *wl-clipboard*(1), *wtype*(1), *notify-send*(1)
 
 # AUTHORS
 
-Maintained by Ayush Agarwal
+Maintained by Ayush Agarwal <ayushnix at fastmail dot com> and other open source
+contributors mentioned here
 
-The latest source can be found at _https://github.com/ayushnix/tessen_ and
+https://github.com/ayushnix/tessen/graphs/contributors
+
+The latest source can be found at https://github.com/ayushnix/tessen and
 bugs/patches/suggestions should be submitted there as well.
