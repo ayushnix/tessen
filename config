@@ -1,0 +1,44 @@
+# vim:ft=sh
+# shellcheck disable=SC2148,SC2034
+#
+# configuration file for tessen
+# place this file in $XDG_CONFIG_HOME/tessen/config
+
+# the default pass program to use - pass or gopass
+# pass_backend="pass"
+
+# the default dmenu backend program to use - rofi, fuzzel, bemenu, or rofi
+# dmenu_backend="rofi"
+
+# leave it commented if you want the default behavior - the choice to either
+# autotype or copy should be presented in the menu
+# action="autotype"
+
+# config files for dmenu_backends should be specified AFTER specifying the
+# dmenu_backend in this config file
+# alternatively, use the command line arguments to specify the dmenu backend
+# while running tessen
+# rofi_config_file="$XDG_CONFIG_HOME/rofi/test.rasi"
+# wofi_config_file=""
+# wofi_style_file=""
+# wofi_color_file=""
+
+# the name of the key which will be used to decide the username
+# this can also be a simple regex such as (user|login)
+# userkey="(user|login)"
+# the name of the key which will be used to decide the url
+# this can also be a simple regex such as (url|website)
+# urlkey="(url|website)"
+# the name of the key which will be used to implement a custom autotype operation
+# this can also be a simple regex as such as (auto|type)
+# autotype_key="(autotype|type)"
+
+# the delay (in milliseconds) introduced between successive autotype operations
+# leave it commented to use the default value of 100ms
+# delay=""
+
+# the default web browser to open urls
+# use this only if xdg-open is either not installed on your system or you don't
+# want to use it
+# if this key is set, xdg-open will not be used even if it's installed
+# web_browser=""
