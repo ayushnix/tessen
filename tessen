@@ -714,7 +714,7 @@ parse_config() {
 
   local line idx key val
   local -a config_arr
-  local config_regex='^[[:alpha:]_]+="[[:alnum:]~_.\/^$|()*?-]+"$'
+  local config_regex='^[[:alpha:]_]+="[[:alnum:]~_./^$|()-]+"$'
   # in case the user hasn't provided an explicit location, we'll have to check
   # if the default file exists before we parse it
   if [[ -s $tsn_config ]]; then
