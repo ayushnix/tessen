@@ -1,0 +1,20 @@
+diff --git a/tessen b/tessen
+index fd5e6fd..d500141 100755
+--- a/tessen
++++ b/tessen
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env bash
++#!/bin/bash
+ # SPDX-License-Identifier: GPL-2.0-or-later
+ # Copyright (C) 2021 Ayush Agarwal <ayushnix at fastmail dot com>
+ #
+@@ -7,6 +7,9 @@
+ # tessen - a data selection interface for pass and gopass on Wayland
+ # ------------------------------------------------------------------------------
+ 
++# set the path explicitly to avoid executing arbitrary user owned binaries
++export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
++
+ # don't leak password data if debug mode is enabled
+ set +x
+ 
