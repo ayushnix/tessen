@@ -654,7 +654,7 @@ _die() {
 }
 
 print_help() {
-  local prog="${0##*/}"
+  local prog="tessen"
 
   printf "%s" "\
 $prog - autotype and copy data from password-store and gopass on wayland
@@ -824,7 +824,7 @@ main() {
         exit 0
         ;;
       -v | --version)
-        printf "%s\n" "${0##*/} version $tsn_version"
+        printf "%s\n" "tessen version $tsn_version"
         exit 0
         ;;
       --)
