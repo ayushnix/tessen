@@ -14,8 +14,8 @@ If you want to use another wayland native dmenu backend not mentioned here, plea
 [issue](https://github.com/ayushnix/tessen/issues) or [raise a
 PR](https://github.com/ayushnix/tessen/pulls).
 
-`tessen` is written to work only on wayland compositors such as [sway](https://swaywm.org/). If
-you'd rather use [fzf](https://github.com/junegunn/fzf) to copy your password-store data on both
+`tessen` is written to work only on wayland wlroots compositors such as [sway](https://swaywm.org/).
+If you'd rather use [fzf](https://github.com/junegunn/fzf) to copy your password-store data on both
 xorg/x11 and wayland, check out [pass-tessen](https://github.com/ayushnix/pass-tessen).
 
 ### Why use `tessen`?
@@ -142,6 +142,21 @@ make a real mess. This is why `tessen` also provides an option to define custom 
 `tessen` uses [wtype](https://github.com/atx/wtype/) for autotyping and it seems to work fine on
 Firefox. You'll need at least version [v0.4](https://github.com/atx/wtype/releases/tag/v0.4), or
 later, of wtype for autotyping to work on Chromium. I haven't tested any other web browsers.
+
+It seems like `wtype` uses the
+[virtual-keyboard-unstable-v1](https://wayland.app/protocols/virtual-keyboard-unstable-v1) protocol
+to emulate a virtual keyboard and [KDE
+supports](https://invent.kde.org/plasma/kwin/-/issues/74#note_369803) the
+[input-method-unstable-v2](https://wayland.app/protocols/input-method-unstable-v1) protocol. GNOME
+seems to be doing its own thing with [libie](https://gitlab.gnome.org/GNOME/mutter/-/issues/1974).
+There's also [ydotool](https://github.com/ReimuNotMoe/ydotool) which requires that users access
+`/dev/uinput`, which is restricted to the root user.
+
+I don't like this sort of fragmentation myself but if `tessen` ends up working on wlroots based
+compositors and on KDE, I'd be satisfied with that. It looks like `wtype` [doesn't
+use](https://github.com/atx/wtype/issues/5) the `input-method` protocol yet which restricts
+autotyping to wlroots based compositors for now. While using `/dev/uinput` sounds like an attractive
+option, I won't add support for it due to security concerns.
 
 ## What does `tessen` mean?
 
