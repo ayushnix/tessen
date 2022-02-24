@@ -48,7 +48,7 @@ get_pass_files() {
   tsn_passfile="$(printf "%s\n" "${tmp_pass_files[@]}" \
     | "$dmenu_backend" "${dmenu_backend_opts[@]}")"
 
-  if ! [[ -s "$tmp_prefix/$tsn_passfile".gpg ]]; then
+  if ! [[ -f "$tmp_prefix/$tsn_passfile".gpg ]]; then
     _die
   fi
 
