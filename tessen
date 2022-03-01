@@ -444,14 +444,10 @@ auto_type_def() {
       esac
     done
   fi
-  _clear
-  exit 0
 }
 
 auto_type() {
   printf "%s" "$1" | wtype -s "$tsn_delay" -
-  _clear
-  exit 0
 }
 
 # POTENTIAL IMPROVEMENT: We could restore the clipboard as it was before pass
