@@ -79,9 +79,9 @@ Linux, which you probably should.
 ### Stable Release
 
 ```
-curl -LO https://github.com/ayushnix/tessen/releases/download/v2.0.0/tessen-2.0.0.tar.gz
-tar xvzf tessen-2.0.0.tar.gz
-cd tessen-2.0.0/
+curl -LO https://github.com/ayushnix/tessen/releases/download/v2.0.1/tessen-2.0.1.tar.gz
+tar xvzf tessen-2.0.1.tar.gz
+cd tessen-2.0.1/
 sudo make install
 ```
 

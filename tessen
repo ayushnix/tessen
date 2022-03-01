@@ -11,7 +11,7 @@
 set +x
 
 # GLOBAL VARIABLES
-readonly tsn_version="2.0.0"
+readonly tsn_version="2.0.1"
 declare pass_backend dmenu_backend tsn_action tsn_config
 declare -a dmenu_backend_opts tmp_rofi_opts tmp_wofi_opts
 declare tsn_userkey tsn_urlkey tsn_autokey tsn_delay tsn_web_browser
