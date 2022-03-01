@@ -1,6 +1,12 @@
 ---
 name: run shellcheck and shfmt
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'tessen'
+  pull_request:
+    paths:
+      - 'tessen'
 jobs:
   lint:
     name: use shellcheck to lint tessen
