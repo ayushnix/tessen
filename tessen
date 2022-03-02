@@ -479,7 +479,7 @@ wld_copy() {
       "Copied username to clipboard. Will clear in $tsn_cliptime seconds."
   fi
   {
-    sleep "$tsn_cliptime" || exit 1
+    sleep "$tsn_cliptime" || kill 0
     wl-copy --clear
   } > /dev/null 2>&1 &
 
