@@ -634,9 +634,6 @@ is_installed() {
 }
 
 _clear() {
-  if [[ $tsn_action =~ ^(copy|both|default)$ ]]; then
-    wl-copy --clear
-  fi
   unset -v tsn_passfile tsn_passdata tsn_username tsn_password tsn_url
   unset -v tsn_autotype chosen_key
 }
@@ -645,7 +642,6 @@ _die() {
   if [[ -n $1 ]]; then
     printf "%s\n" "$1" >&2
   fi
-  _clear
   exit 1
 }
 
