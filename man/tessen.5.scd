@@ -38,7 +38,7 @@ The following options are understood by the configuration file for *tessen*(1):
 	*dmenu_backend*
 
 	The default dmenu backend to use - either *rofi*(1), *fuzzel*(1),
-	*bemenu*(1), or *wofi*(1)
+	*bemenu*(1), *wofi*(1), or *dmenu*
 
 	*action*
 

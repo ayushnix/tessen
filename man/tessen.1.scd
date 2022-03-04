@@ -24,7 +24,7 @@ The options understood by tessen are:
 
 *-d*, *--dmenu*, *--dmenu=*[dmenu backend]
 	specify a dmenu backend - the list of recognized backends are *rofi*,
-	*fuzzel*, *bemenu*, and *wofi*
+	*fuzzel*, *bemenu*, *wofi*, and *dmenu*
 
 *-a*, *--action*, *--action=*[action]
 	specify either *autotype*, *copy*, or *both*
@@ -54,9 +54,9 @@ URI. However, if a key called 'password' is present, it will be ignored. Note
 that tessen does NOT support parsing YAML files when using *gopass*(1).
 
 If a dmenu backend is not specified, tessen tries to find either one of
-*rofi*(1), *fuzzel*(1), *bemenu*(1), or *wofi*(1) in the order mentioned here.
-If *rofi* is used, it is expected that the wayland native fork of rofi
-(https://github.com/lbonn/rofi) is being used. The original rofi
+*rofi*(1), *fuzzel*(1), *bemenu*(1), *wofi*(1), or *dmenu* in the order
+mentioned here. If *rofi* is used, it is expected that the wayland native fork
+of rofi (https://github.com/lbonn/rofi) is being used. The original rofi
 (https://github.com/davatorium/rofi) implementation made for X.Org is NOT
 supported.
 
@@ -85,7 +85,7 @@ tessen depends on
 
 - *bash*(1)
 - at least one wayland native dmenu backend - *rofi*(1), *fuzzel*(1),
-  *bemenu*(1), *wofi*(1)
+  *bemenu*(1), *wofi*(1), *dmenu*
 - at least one pass backend - either *pass*(1) or *gopass*(1)
 - *wtype*(1) (if you want to autotype data)
 - *wl-clipboard*(1) (if you want to copy and paste data)
