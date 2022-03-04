@@ -7,7 +7,7 @@
 # the default pass program to use - pass or gopass
 # pass_backend="pass"
 
-# the default dmenu backend program to use - rofi, fuzzel, bemenu, or rofi
+# the default dmenu backend program to use - rofi, fuzzel, bemenu, rofi, or dmenu
 # dmenu_backend="rofi"
 
 # leave it commented if you want the default behavior - the choice to either
