@@ -521,7 +521,7 @@ validate_pass_backend() {
 # tessen
 validate_dmenu_backend() {
   if ! is_installed "$1"; then
-    _die "please install a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
+    _die "please install a valid dmenu backend: rofi | fuzzel | bemenu | wofi | dmenu"
   fi
 
   local -a bemenu_opts
@@ -546,8 +546,12 @@ validate_dmenu_backend() {
       dmenu_backend="wofi"
       dmenu_backend_opts=('-d' '-k /dev/null')
       ;;
+    dmenu)
+      dmenu_backend="dmenu"
+      dmenu_backend_opts=()
+      ;;
     *)
-      _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
+      _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi | dmenu"
       ;;
   esac
   unset -v bemenu_opts
@@ -610,7 +614,7 @@ find_pass_backend() {
 }
 
 find_dmenu_backend() {
-  local -a tmp_dmenu_arr=('rofi' 'fuzzel' 'bemenu' 'wofi')
+  local -a tmp_dmenu_arr=('rofi' 'fuzzel' 'bemenu' 'wofi' 'dmenu')
   local idx
 
   for idx in "${tmp_dmenu_arr[@]}"; do
@@ -620,7 +624,7 @@ find_dmenu_backend() {
     fi
   done
   if [[ -z $dmenu_backend ]]; then
-    _die "please install a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
+    _die "please install a valid dmenu backend: rofi | fuzzel | bemenu | wofi | dmenu"
   fi
   unset -v idx tmp_dmenu_arr
 }
@@ -665,7 +669,7 @@ usage: $prog [options]
 
   -p, --pass, --pass=         choose either 'pass' or 'gopass'
   -d, --dmenu, --dmenu=       specify a dmenu backend - 'rofi', 'fuzzel',
-                              'bemenu', and 'wofi' are supported
+                              'bemenu', 'wofi', and 'dmenu' are supported
   -a, --action, --action=     choose either 'autotype', 'copy', or 'both'
                               omit this option to use the default behavior
   -c, --config, --config=     use a config file on a custom path
@@ -760,7 +764,7 @@ main() {
         ;;
       -d | --dmenu)
         if [[ $# -lt 2 ]]; then
-          _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
+          _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi | dmenu"
         fi
         validate_dmenu_backend "$2"
         readonly dmenu_backend
@@ -768,18 +772,20 @@ main() {
         # rofi and wofi, we will make dmenu_backend_opts readonly only if
         # dmenu_backend is fuzzel and bemenu, the dmenu programs which don't
         # support configuration files
-        if [[ $dmenu_backend == "fuzzel" ]] || [[ $dmenu_backend == "bemenu" ]]; then
+        if [[ $dmenu_backend == "fuzzel" ]] || [[ $dmenu_backend == "bemenu" ]] \
+          || [[ $dmenu_backend == "dmenu" ]]; then
           readonly dmenu_backend_opts
         fi
         shift
         ;;
       --dmenu=*)
         if [[ -z ${_opt##--dmenu=} ]]; then
-          _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi"
+          _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi | dmenu"
         fi
         validate_dmenu_backend "${_opt##--dmenu=}"
         readonly dmenu_backend
-        if [[ $dmenu_backend == "fuzzel" ]] || [[ $dmenu_backend == "bemenu" ]]; then
+        if [[ $dmenu_backend == "fuzzel" ]] || [[ $dmenu_backend == "bemenu" ]] \
+          || [[ $dmenu_backend == "dmenu" ]]; then
           readonly dmenu_backend_opts
         fi
         ;;
