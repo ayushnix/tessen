@@ -822,7 +822,7 @@ main() {
         exit 0
         ;;
       -v | --version)
-        printf "%s\n" "tessen version $tsn_version"
+        printf "%s\n" "$tsn_version"
         exit 0
         ;;
       --)
