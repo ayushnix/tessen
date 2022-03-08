@@ -544,7 +544,7 @@ validate_dmenu_backend() {
       ;;
     wofi)
       dmenu_backend="wofi"
-      dmenu_backend_opts=('-d' '-k /dev/null')
+      dmenu_backend_opts=('-d' '-k' '/dev/null')
       ;;
     dmenu)
       dmenu_backend="dmenu"
