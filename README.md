@@ -65,6 +65,10 @@ xorg/x11 and wayland, check out [pass-tessen](https://github.com/ayushnix/pass-t
 
 `tessen` is available in the [Arch User Repository](https://aur.archlinux.org/packages/tessen/).
 
+### GNU Guix
+
+`tessen` is available in the [official GNU Guix repositories](https://guix.gnu.org/en/packages/tessen-2.1.0/).
+
 ### Git Release
 
 ```
