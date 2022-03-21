@@ -91,7 +91,8 @@ get_gopass_files() {
       if [[ -d ${line#*=> } ]]; then
         path_files=("${line#*=> }"/**/*.gpg)
         path_files=("${path_files[@]#"${line#*=> }"/}")
-        path_files=("$mount_name"/"${path_files[@]%.gpg}")
+        path_files=("${path_files[@]%.gpg}")
+        path_files=("${path_files[@]/#/"$mount_name/"}")
         for file in "${path_files[@]}"; do
           tmp_gopass_files["$file"]="${line#*=> }"
         done
