@@ -56,34 +56,14 @@ get_pass_files() {
 }
 
 # FIRST MENU: generate a list of gopass files, let the user select one
-# this function feels like a hack to me. ideally, the issues that led to this
-# hack should be fixed in gopass but if anyone has any suggestions about making
-# this function better, please raise a PR
 get_gopass_files() {
   local line path_files file mount_name tmp_tsn_passfile
   local -A tmp_gopass_files
   local -a mount_name_arr
 
-  # this feels like a hack and it's dependent on the output of `gopass config`
-  #
-  # still, this block of code saves us from using coreutils
-  #
-  # to be clear, this is needed to confirm whether the filename entered in the
-  # dmenu actually exists or not because dmenu backends will happily print the
-  # input received from a user even if that input doesn't exist in the menu
-  # presented to the user
-  #
-  # if you're wondering why I didn't just use `gopass ls -f`, it's because in
-  # an apparent effort to be user-friendly, `gopass show -n invalid-input`
-  # doesn't seem to exit with an error
-  # https://github.com/gopasspw/gopass/issues/551
-  # like drew devault wrote on his blog, I hate the stale bot
-  # https://drewdevault.com/2021/10/26/stalebot.html
+  # why not use `gopass config path` and `gopass ls -f`?
   shopt -s nullglob globstar
   while read -r line || [[ -n $line ]]; do
-    # we could've used `gopass config path` but since we have parse the output
-    # of `gopass config` because of possible mounts, better to just use `gopass
-    # config`
     # we assume that we'll encounter `path: ...` only once and as soon as we
     # do, we parse the list of all the files inside the dir and store them in
     # an associative array with the name of the files as the index and the path
@@ -100,9 +80,6 @@ get_gopass_files() {
     # inside those mount points, add those files to the associative array with
     # the file names as the index and the location of the mount point as the
     # value
-    #
-    # there's no easy way to parse and associate file names with mount points
-    # so we'll have to resort to some ugly hacks again
     if [[ $line == mount* ]]; then
       # remove the quotes from the parsed line
       line="${line//\"/}"
