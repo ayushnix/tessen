@@ -4,32 +4,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2022-04-02
+
+### Fixed
+
+- fixed parsing issue in the config file for the `action` variable
+
 ## [2.1.1] - 2022-03-21
 
-## Fixed
+### Fixed
 
 - `tessen` is able to parse multiple files inside a gopass mount correctly
 
 ## [2.1.0] - 2022-03-08
 
-## Added
+### Added
 
 - `dmenu` can now be specified as the dmenu backend, this was motivated by
   [this](https://codeberg.com/dnkl/fuzzel/commit/ffec2bc2ef7e5ca1398ab7ed7f134bd769706dcd) commit
 
-## Fixed
+### Fixed
 
 - using `wofi` will no longer create a directory with an empty name containing another directory
   called `dev` with a file called `null`
 
-## Changed
+### Changed
 
 - `tessen -v` will now print only the version number and will omit the unnecessary prefix `tessen
   version`
 
 ## [2.0.2] - 2022-03-02
 
-## Fixed
+### Fixed
 
 - the clipboard is not cleared if no action is performed and tessen exits when ESC is pressed
 
@@ -38,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1] - 2022-03-01
 
-## Fixed
+### Fixed
 
 - even if the selected file has 0 size, it will now be considered as a valid selection because the
   file name may be used as a value for autotyping/copying
@@ -47,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - 2022-02-19
 
-## Added
+### Added
 
 - gopass has been added as a supported pass backend
 
@@ -67,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - an optional patch has been provided to change the shebang back to `#!/bin/bash` and to set the
   `$PATH` explicitly to `/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`
 
-## Changed
+### Changed
 
 - instead of considering the last non-unique key in the list of key-value pairs inside a password
   store file, the first non-unique key will now be considered and other keys with the same name will
@@ -80,7 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - the shebang for bash has been changed from `#!/bin/bash` to `#!/usr/bin/env bash` to accomodate
   users who don't use an operating system with `/bin/bash`
 
-## Removed
+### Removed
 
 - the `-b`, `--backend`, `--backend=` options have been removed and replaced with `-d`, `--dmenu`,
   and `--dmenu=`
@@ -96,45 +102,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     TESSEN_DELAY
     BROWSER
 
-## Fixed
+### Fixed
 
 - tessen should now clear all sensitive variables on exit if it receives the `SIGINT` signal
 
 ## [1.3.1] - 2022-01-17
 
-## Fixed
+### Fixed
 
 - if the provided backend isn't recognized, return an empty value for the list of options passed to
   the dmenu backend
 
 ## [1.3.0] - 2022-01-16
 
-## Added
+### Added
 
 - add support for using arbitary dmenu backends and arbitary options for dmenu backends
 
 - shellcheck and shfmt CI jobs are added on the github repository for tessen to make sure that
   commits and pull requests conform to the guidelines in CONTRIBUTING.md
 
-## Changed
+### Changed
 
 - fuzzel will now be searched before rofi and wofi
 
 ## [1.2.3] - 2021-11-29
 
-## Changed
+### Changed
 
 - don't check for the prescence of oathtool if pass-otp is installed
 
 ## [1.2.2] - 2021-11-15
 
-## Fixed
+### Fixed
 
 - if the selected gpg file is empty or if the decryption fails, exit
 
 ## [1.2.1] - 2021-11-14
 
-## Changed
+### Changed
 
 - use tabs instead of spaces in the Makefile
 
@@ -159,7 +165,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TESSEN_DELAY` environnment variable has been defined to accept custom values for delay between
   successive autotype operations
 
-## Changed
+### Changed
 
 - bemenu is no longer the default dmenu backend
 
@@ -169,7 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - the location of the bash completion file has been changed from `/etc/bash_completion.d/` to
   `/usr/share/bash-completion/completions/`
 
-## Fixed
+### Fixed
 
 - don't proceed if the selected gpg file is empty
 
