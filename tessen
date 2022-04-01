@@ -690,7 +690,7 @@ parse_config() {
       elif [[ $key == "dmenu_backend" ]] && [[ -z $dmenu_backend ]]; then
         validate_dmenu_backend "$val"
         readonly dmenu_backend
-      elif [[ $key == "action" ]] && [[ -z $tsn_action ]]; then
+      elif [[ $key == "action" ]] && unset -v tsn_action 2> /dev/null; then
         validate_action "$val"
         readonly tsn_action
       elif [[ $key == "rofi_config_file" ]] && [[ -f ${val@P} ]]; then
@@ -838,8 +838,9 @@ main() {
     validate_dmenu_backend "$dmenu_backend"
     readonly dmenu_backend
   fi
-  if [[ -z $tsn_action ]]; then
-    validate_action default
+  if unset -v tsn_action 2> /dev/null; then
+    validate_action "default"
+    readonly tsn_action
   fi
 
   trap '_clear' EXIT TERM INT
