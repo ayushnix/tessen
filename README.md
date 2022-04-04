@@ -65,6 +65,10 @@ xorg/x11 and wayland, check out [pass-tessen](https://github.com/ayushnix/pass-t
 
 `tessen` is available in the [Arch User Repository](https://aur.archlinux.org/packages/tessen/).
 
+### Gentoo
+
+`gui-apps/tessen` is available in the [GURU Repository](https://wiki.gentoo.org/wiki/Project:GURU)
+
 ### GNU Guix
 
 `tessen` is available in the [official GNU Guix repositories](https://guix.gnu.org/en/packages/tessen-2.1.0/).
