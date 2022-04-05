@@ -57,8 +57,10 @@ xorg/x11 and wayland, check out [pass-tessen](https://github.com/ayushnix/pass-t
 - [wl-clipboard](https://github.com/bugaevc/wl-clipboard) (optional, if you want to copy data)
 - [libnotify](https://gitlab.gnome.org/GNOME/libnotify) (optional, to send notifications about
   copied data and the timeout period after which the clipboard will be cleared)
-- [pass-otp](https://github.com/tadfisher/pass-otp) (optional, to generate TOTP/HOTP)
-- [xdg-utils](https://www.freedesktop.org/wiki/Software/xdg-utils/) (optional, to open URLs)
+- [pass-otp](https://github.com/tadfisher/pass-otp) (optional, to generate TOTP/HOTP when using
+  `pass`)
+- [xdg-utils](https://www.freedesktop.org/wiki/Software/xdg-utils/) (optional, to open URLs in the
+  default web browser)
 - [scdoc](https://git.sr.ht/~sircmpwn/scdoc) (optional, to build the man page)
 
 ### Arch Linux
