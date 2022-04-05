@@ -154,7 +154,7 @@ It seems like `wtype` uses the
 to emulate a virtual keyboard and [KDE
 supports](https://invent.kde.org/plasma/kwin/-/issues/74#note_369803) the
 [input-method-unstable-v2](https://wayland.app/protocols/input-method-unstable-v1) protocol. GNOME
-seems to be doing its own thing with [libie](https://gitlab.gnome.org/GNOME/mutter/-/issues/1974).
+seems to be doing its own thing with [libei](https://gitlab.gnome.org/GNOME/mutter/-/issues/1974).
 There's also [ydotool](https://github.com/ReimuNotMoe/ydotool) which requires that users access
 `/dev/uinput`, which is restricted to the root user.
 
