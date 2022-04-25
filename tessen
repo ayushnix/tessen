@@ -454,7 +454,7 @@ wld_copy() {
   printf "%s" "$1" | wl-copy
   if is_installed notify-send; then
     notify-send -t $((tsn_cliptime * 1000)) \
-      "Copied username to clipboard. Will clear in $tsn_cliptime seconds."
+      "data has been copied and will be cleared from the clipboard after $tsn_cliptime seconds"
   fi
   {
     sleep "$tsn_cliptime" || kill 0
