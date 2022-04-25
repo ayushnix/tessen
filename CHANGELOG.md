@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - use a generic message in the notification when data is copied
 
+### Changed
+
+- remove the default options `-w`, `--scrollbar=autohide`, and `-i` from the bemenu configuration
+
 ## [2.1.2] - 2022-04-02
 
 ### Fixed
