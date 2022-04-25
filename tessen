@@ -506,7 +506,7 @@ validate_dmenu_backend() {
   case "$1" in
     rofi)
       dmenu_backend="rofi"
-      dmenu_backend_opts=('-dmenu')
+      dmenu_backend_opts=('-i' '-dmenu')
       ;;
     fuzzel)
       dmenu_backend="fuzzel"
