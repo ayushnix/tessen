@@ -515,7 +515,7 @@ validate_dmenu_backend() {
     bemenu)
       dmenu_backend="bemenu"
       dmenu_backend_opts=()
-      bemenu_opts=('-i' '-l' '10' '-w' '--scrollbar=autohide' '-n')
+      bemenu_opts=('-l' '10' '-n')
       if [[ -z ${BEMENU_OPTS[*]} ]]; then
         export BEMENU_OPTS="${bemenu_opts[*]}"
       fi
