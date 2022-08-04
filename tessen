@@ -655,7 +655,11 @@ usage: $prog [options]
   -v, --version               print the version of $prog
 
 for more details and additional features, please read the man page of $prog(1)
-for reporting bugs or feedback, visit https://github.com/ayushnix/tessen/issues
+
+for reporting bugs or feedback, visit one of the following git forge providers
+https://sr.ht/~ayushnix/tessen
+https://codeberg.org/ayushnix/tessen
+https://github.com/ayushnix/tessen
 "
 
   unset -v prog
