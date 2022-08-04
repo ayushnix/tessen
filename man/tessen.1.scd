@@ -23,8 +23,8 @@ The options understood by tessen are:
 	specify either *pass* or *gopass*
 
 *-d*, *--dmenu*, *--dmenu=*[dmenu backend]
-	specify a dmenu backend - the list of recognized backends are *rofi*,
-	*fuzzel*, *bemenu*, *wofi*, and *dmenu*
+	specify a dmenu backend - the list of recognized backends are *fuzzel*,
+	*tofi*, *bemenu*, *wofi*, *rofi*, and *dmenu*
 
 *-a*, *--action*, *--action=*[action]
 	specify either *autotype*, *copy*, or *both*
@@ -54,9 +54,9 @@ URI. However, if a key called 'password' is present, it will be ignored. Note
 that tessen does NOT support parsing YAML files when using *gopass*(1).
 
 If a dmenu backend is not specified, tessen tries to find either one of
-*rofi*(1), *fuzzel*(1), *bemenu*(1), *wofi*(1), or *dmenu* in the order
-mentioned here. If *rofi* is used, it is expected that the wayland native fork
-of rofi (https://github.com/lbonn/rofi) is being used. The original rofi
+*fuzzel*(1), *tofi*(1), *bemenu*(1), *wofi*(1), *rofi*(1) or *dmenu* in the
+order mentioned here. If *rofi* is used, it is expected that the wayland native
+fork of rofi (https://github.com/lbonn/rofi) is being used. The original rofi
 (https://github.com/davatorium/rofi) implementation made for X.Org is NOT
 supported.
 
@@ -84,8 +84,8 @@ set in the config file.
 tessen depends on
 
 - *bash*(1)
-- at least one wayland native dmenu backend - *rofi*(1), *fuzzel*(1),
-  *bemenu*(1), *wofi*(1), *dmenu*
+- at least one wayland native dmenu backend - *fuzzel*(1), *tofi*(1),
+  *bemenu*(1), *wofi*(1), *rofi*(1), *dmenu*
 - at least one pass backend - either *pass*(1) or *gopass*(1)
 - *wtype*(1) (if you want to autotype data)
 - *wl-clipboard*(1) (if you want to copy and paste data)
@@ -151,8 +151,9 @@ _$XDG_CONFIG_HOME/tessen/config_, _$HOME/.config/tessen/config_
 
 # SEE ALSO
 
-*tessen*(5), *pass*(1), *gopass*(1) *pass-otp*(1), *rofi*(1), *fuzzel*(1),
-*bemenu*(1), *wofi*(1), *wl-clipboard*(1), *wtype*(1), *notify-send*(1)
+*tessen*(5), *pass*(1), *gopass*(1) *pass-otp*(1), *fuzzel*(1), *tofi*(1),
+*bemenu*(1), *wofi*(1), *rofi*(1), *wl-clipboard*(1), *wtype*(1),
+*notify-send*(1)
 
 # AUTHORS
 

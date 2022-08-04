@@ -37,8 +37,8 @@ The following options are understood by the configuration file for *tessen*(1):
 
 	*dmenu_backend*
 
-	The default dmenu backend to use - either *rofi*(1), *fuzzel*(1),
-	*bemenu*(1), *wofi*(1), or *dmenu*
+	The default dmenu backend to use - either *fuzzel*(1), *tofi*(1),
+	*bemenu*(1), *wofi*(1), *rofi*(1),  or *dmenu*
 
 	*action*
 
@@ -112,8 +112,9 @@ The following options are understood by the configuration file for *tessen*(1):
 
 # SEE ALSO
 
-*tessen*(5), *pass*(1), *gopass*(1) *pass-otp*(1), *rofi*(1), *fuzzel*(1),
-*bemenu*(1), *wofi*(1), *wl-clipboard*(1), *wtype*(1), *notify-send*(1)
+*tessen*(5), *pass*(1), *gopass*(1) *pass-otp*(1), *fuzzel*(1), *tofi*(1),
+*bemenu*(1), *wofi*(1), *rofi*(1), *wl-clipboard*(1), *wtype*(1),
+*notify-send*(1)
 
 # AUTHORS
 
