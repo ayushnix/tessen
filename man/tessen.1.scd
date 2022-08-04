@@ -156,10 +156,7 @@ _$XDG_CONFIG_HOME/tessen/config_, _$HOME/.config/tessen/config_
 
 # AUTHORS
 
-Maintained by Ayush Agarwal <ayushnix at fastmail dot com> and other open source
-contributors mentioned here
+Developed and Maintained by Ayush Agarwal <ayushnix at fastmail dot com>.
 
-https://github.com/ayushnix/tessen/graphs/contributors
-
-The latest source can be found at https://github.com/ayushnix/tessen and
-bugs/patches/suggestions should be submitted there as well.
+The latest source can be found at https://sr.ht/~ayushnix/tessen and
+bugs/patches/suggestions should be reported there as well.

@@ -25,7 +25,7 @@ The double quotes should always be specified as mentioned.
 
 A default configuration file is available at
 
-https://github.com/ayushnix/tessen/blob/master/config
+https://git.sr.ht/~ayushnix/tessen/blob/master/config
 
 ## OPTIONS
 
@@ -117,10 +117,7 @@ The following options are understood by the configuration file for *tessen*(1):
 
 # AUTHORS
 
-Maintained by Ayush Agarwal <ayushnix at fastmail dot com> and other open source
-contributors mentioned here
+Developed and Maintained by Ayush Agarwal <ayushnix at fastmail dot com>.
 
-https://github.com/ayushnix/tessen/graphs/contributors
-
-The latest source can be found at https://github.com/ayushnix/tessen and
-bugs/patches/suggestions should be submitted there as well.
+The latest source can be found at https://sr.ht/~ayushnix/tessen and
+bugs/patches/suggestions should be reported there as well.
