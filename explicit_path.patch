@@ -1,12 +1,12 @@
 diff --git a/tessen b/tessen
-index fd5e6fd..d500141 100755
+index 609ed09..bfeacf2 100755
 --- a/tessen
 +++ b/tessen
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env bash
 +#!/bin/bash
- # SPDX-License-Identifier: GPL-2.0-or-later
- # Copyright (C) 2021 Ayush Agarwal <ayushnix at fastmail dot com>
+ # SPDX-License-Identifier: GPL-2.0-only
+ # Copyright (C) 2021-2022 Ayush Agarwal <ayushnix at fastmail dot com>
  #
 @@ -7,6 +7,9 @@
  # tessen - a data selection interface for pass and gopass on Wayland
