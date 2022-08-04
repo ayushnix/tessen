@@ -13,7 +13,7 @@ set +x
 # GLOBAL VARIABLES
 readonly tsn_version="2.1.2"
 declare pass_backend dmenu_backend tsn_action tsn_config
-declare -a dmenu_backend_opts tmp_rofi_opts tmp_wofi_opts
+declare -a dmenu_backend_opts tmp_tofi_opts tmp_rofi_opts tmp_wofi_opts
 declare tsn_userkey tsn_urlkey tsn_autokey tsn_delay tsn_web_browser
 # show both actions, 'autotype' and 'copy', to choose from by default
 tsn_action="default"
@@ -499,7 +499,7 @@ validate_pass_backend() {
 # tessen
 validate_dmenu_backend() {
   if ! is_installed "$1"; then
-    _die "please install a valid dmenu backend: rofi | fuzzel | bemenu | wofi | dmenu"
+    _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
   fi
 
   local -a bemenu_opts
@@ -511,6 +511,10 @@ validate_dmenu_backend() {
     fuzzel)
       dmenu_backend="fuzzel"
       dmenu_backend_opts=('-d' '--log-level=warning')
+      ;;
+    tofi)
+      dmenu_backend="tofi"
+      dmenu_backend_opts=()
       ;;
     bemenu)
       dmenu_backend="bemenu"
@@ -529,7 +533,7 @@ validate_dmenu_backend() {
       dmenu_backend_opts=()
       ;;
     *)
-      _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi | dmenu"
+      _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
       ;;
   esac
   unset -v bemenu_opts
@@ -592,7 +596,7 @@ find_pass_backend() {
 }
 
 find_dmenu_backend() {
-  local -a tmp_dmenu_arr=('rofi' 'fuzzel' 'bemenu' 'wofi' 'dmenu')
+  local -a tmp_dmenu_arr=('fuzzel' 'tofi' 'bemenu' 'wofi' 'rofi' 'dmenu')
   local idx
 
   for idx in "${tmp_dmenu_arr[@]}"; do
@@ -602,7 +606,7 @@ find_dmenu_backend() {
     fi
   done
   if [[ -z $dmenu_backend ]]; then
-    _die "please install a valid dmenu backend: rofi | fuzzel | bemenu | wofi | dmenu"
+    _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
   fi
   unset -v idx tmp_dmenu_arr
 }
@@ -635,19 +639,19 @@ $prog - autotype and copy data from password-store and gopass on wayland
 
 usage: $prog [options]
 
-  $prog                      find a dmenu and pass backend, look for a config
-                              file in \$XDG_CONFIG_HOME/tessen/config, and either
-                              autotype OR copy data
-  $prog -p gopass            use gopass as the pass backend
-  $prog -d rofi              use rofi as the dmenu backend
-  $prog -d rofi -a autotype  use rofi and always autotype data
-  $prog -d rofi -a copy      use rofi and always copy data
-  $prog -d rofi -a both      use rofi and always autotype AND copy data
-  $prog -c \$HOME/tsncfg      specify a custom location for the $prog config file
+  $prog                        find a dmenu and pass backend, look for a config
+                                file in \$XDG_CONFIG_HOME/tessen/config, and either
+                                autotype OR copy data
+  $prog -p gopass              use gopass as the pass backend
+  $prog -d fuzzel              use fuzzel as the dmenu backend
+  $prog -d fuzzel -a autotype  use fuzzel and always autotype data
+  $prog -d fuzzel -a copy      use fuzzel and always copy data
+  $prog -d fuzzel -a both      use fuzzel and always autotype AND copy data
+  $prog -c \$HOME/tsncfg        specify a custom location for the $prog config file
 
   -p, --pass, --pass=         choose either 'pass' or 'gopass'
-  -d, --dmenu, --dmenu=       specify a dmenu backend - 'rofi', 'fuzzel',
-                              'bemenu', 'wofi', and 'dmenu' are supported
+  -d, --dmenu, --dmenu=       specify a dmenu backend - 'fuzzel', 'tofi',
+                              'bemenu', 'wofi', 'rofi', and 'dmenu' are supported
   -a, --action, --action=     choose either 'autotype', 'copy', or 'both'
                               omit this option to use the default behavior
   -c, --config, --config=     use a config file on a custom path
@@ -697,6 +701,8 @@ parse_config() {
       elif [[ $key == "action" ]] && unset -v tsn_action 2> /dev/null; then
         validate_action "$val"
         readonly tsn_action
+      elif [[ $key == "tofi_config_file" ]] && [[ -f ${val@P} ]]; then
+        tmp_tofi_opts+=("--config" "${val@P}")
       elif [[ $key == "rofi_config_file" ]] && [[ -f ${val@P} ]]; then
         tmp_rofi_opts+=("-config" "${val@P}")
       elif [[ $key == "wofi_config_file" ]] && [[ -f ${val@P} ]]; then
@@ -746,7 +752,7 @@ main() {
         ;;
       -d | --dmenu)
         if [[ $# -lt 2 ]]; then
-          _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi | dmenu"
+          _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
         fi
         validate_dmenu_backend "$2"
         readonly dmenu_backend
@@ -762,7 +768,7 @@ main() {
         ;;
       --dmenu=*)
         if [[ -z ${_opt##--dmenu=} ]]; then
-          _die "please specify a valid dmenu backend: rofi | fuzzel | bemenu | wofi | dmenu"
+          _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
         fi
         validate_dmenu_backend "${_opt##--dmenu=}"
         readonly dmenu_backend
@@ -823,7 +829,10 @@ main() {
   # the options which are mutual between the argparse and the config file will
   # be considered in the config file only if those options aren't already set
   parse_config
-  if [[ $dmenu_backend == "rofi" ]]; then
+  if [[ $dmenu_backend == "tofi" ]]; then
+    dmenu_backend_opts+=("${tmp_tofi_opts[@]}")
+    readonly dmenu_backend_opts
+  elif [[ $dmenu_backend == "rofi" ]]; then
     dmenu_backend_opts+=("${tmp_rofi_opts[@]}")
     readonly dmenu_backend_opts
   elif [[ $dmenu_backend == "wofi" ]]; then
