@@ -194,9 +194,9 @@ buying me a coffee.
 <a href='https://www.buymeacoffee.com/ayushnix' target='_blank' rel='noopener'><img height='36' style='border: 0;' src='https://cdn.buymeacoffee.com/buttons/default-blue.png' alt='Buy Me a Coffee at https://www.buymeacoffee.com/ayushnix'></a>
 
 If you're in India, you can also use UPI for donations. My UPI address is `ayushnix@ybl`.
-Alternatievly, scan this QR code in a UPI application.
+Alternatively, scan this QR code in a UPI application.
 
-<img alt="ayushnix@ybl - ayushnix UPI address" src="https://git.sr.ht/~ayushnix/tessen/blob/master/ayushnix-upi.png" align="right" width="128" height="128">
+<img alt="ayushnix@ybl - ayushnix UPI address" src="https://git.sr.ht/~ayushnix/tessen/blob/master/ayushnix-upi.png" width="128" height="128">
 
 [1]: https://git.zx2c4.com/password-store/
 [2]: https://github.com/gopasspw/gopass
