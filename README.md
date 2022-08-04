@@ -1,22 +1,23 @@
 ## tessen
 
-`tessen` is a bash script that can autotype and copy data from
-[password-store](https://git.zx2c4.com/password-store/) and
-[gopass](https://github.com/gopasspw/gopass) files. A wayland native dmenu is required to use tessen
-and the following dmenu backends are recognized
+[![sourcehut](https://img.shields.io/badge/repository-sourcehut-lightgrey.svg?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSINCiAgICB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCI+DQogIDxkZWZzPg0KICAgIDxmaWx0ZXIgaWQ9InNoYWRvdyIgeD0iLTEwJSIgeT0iLTEwJSIgd2lkdGg9IjEyNSUiIGhlaWdodD0iMTI1JSI+DQogICAgICA8ZmVEcm9wU2hhZG93IGR4PSIwIiBkeT0iMCIgc3RkRGV2aWF0aW9uPSIxLjUiDQogICAgICAgIGZsb29kLWNvbG9yPSJibGFjayIgLz4NCiAgICA8L2ZpbHRlcj4NCiAgICA8ZmlsdGVyIGlkPSJ0ZXh0LXNoYWRvdyIgeD0iLTEwJSIgeT0iLTEwJSIgd2lkdGg9IjEyNSUiIGhlaWdodD0iMTI1JSI+DQogICAgICA8ZmVEcm9wU2hhZG93IGR4PSIwIiBkeT0iMCIgc3RkRGV2aWF0aW9uPSIxLjUiDQogICAgICAgIGZsb29kLWNvbG9yPSIjQUFBIiAvPg0KICAgIDwvZmlsdGVyPg0KICA8L2RlZnM+DQogIDxjaXJjbGUgY3g9IjUwJSIgY3k9IjUwJSIgcj0iMzglIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQlIg0KICAgIGZpbGw9Im5vbmUiIGZpbHRlcj0idXJsKCNzaGFkb3cpIiAvPg0KICA8Y2lyY2xlIGN4PSI1MCUiIGN5PSI1MCUiIHI9IjM4JSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI0JSINCiAgICBmaWxsPSJub25lIiBmaWx0ZXI9InVybCgjc2hhZG93KSIgLz4NCjwvc3ZnPg0KCg==)](https://sr.ht/~ayushnix/tessen) [![Codeberg mirror](https://img.shields.io/badge/mirror-Codeberg-blue.svg?logo=codeberg)](https://codeberg.org/ayushnix/tessen) [![GitHub mirror](https://img.shields.io/badge/mirror-GitHub-black.svg?logo=github)](https://github.com/ayushnix/tessen)
 
-- [rofi](https://github.com/lbonn/rofi)
-- [fuzzel](https://codeberg.org/dnkl/fuzzel)
-- [bemenu](https://github.com/Cloudef/bemenu)
-- [wofi](https://hg.sr.ht/~scoopta/wofi)
+`tessen` is a bash script that can autotype and copy data from [password-store][1] and [gopass][2]
+files. A wayland native dmenu is required to use tessen and the following dmenu backends are
+recognized
 
-If you want to use another wayland native dmenu backend not mentioned here, please open an
-[issue](https://github.com/ayushnix/tessen/issues) or [raise a
-PR](https://github.com/ayushnix/tessen/pulls).
+- [rofi][3]
+- [fuzzel][4]
+- [tofi][15]
+- [bemenu][5]
+- [wofi][6]
 
-`tessen` is written to work only on wayland wlroots compositors such as [sway](https://swaywm.org/).
-If you'd rather use [fzf](https://github.com/junegunn/fzf) to copy your password-store data on both
-xorg/x11 and wayland, check out [pass-tessen](https://github.com/ayushnix/pass-tessen).
+If you want to add another Wayland native dmenu not mentioned above, please see the
+[CONTRIBUTING.md][7] file for information about how to contribute to `tessen`.
+
+`tessen` is written to work only on wayland wlroots compositors such as [sway][8]. If you'd rather
+use a fuzzy data selection program like [fzf][9] to copy your password-store data on both Xorg/X11
+and Wayland, check out [pass-tessen][10].
 
 ### Why use `tessen`?
 
@@ -27,65 +28,64 @@ xorg/x11 and wayland, check out [pass-tessen](https://github.com/ayushnix/pass-t
   pair data. They also do not offer choices about autotyping or copying data with the same
   flexibility as `tessen` does.
 
-  Although [rofi-pass](https://github.com/carnager/rofi-pass) is a good alternative, it only works
-  on xorg/x11. `tessen` is made to work on wayland.
+  Although [rofi-pass][11] is a good alternative, it only works on Xorg/X11. `tessen` is made to
+  work on Wayland.
 
-- if you're using a web browser extension to access your passwords, you may wanna read
-  [this](https://cmpxchg8b.com/passmgrs.html) article
+- if you're using a web browser extension to access your passwords, you may wanna read an [article
+  by Tavis Ormandy on Password Managers][12]
 
-- `tessen` does not use any external programs unless they are absolutely necessary. This means that
-  `tessen` doesn't need programs like `sed`, `awk`, `tr`, `cut`, `find`, `sort`, `head`, `tail`.
-  This ensures that `tessen` isn't dependent on the subtle differences between GNU, BSD, and busybox
-  coreutils.
+- `tessen` does not use any external programs unless absolutely necessary. This means that `tessen`
+  doesn't need programs like `sed`, `awk`, `tr`, `cut`, `find`, `sort`, `head`, `tail` (although
+  password-store needs them).
 
-- the code is linted using [shellcheck](https://github.com/koalaman/shellcheck) and formatted using
-  [shfmt](https://github.com/mvdan/sh). I've also tried to ensure that `tessen` doesn't leak any
-  sensitive data. Please raise an issue or a pull request if you can make tessen more minimalistic
-  or secure.
+- the code is linted using [shellcheck][13] and formatted using [shfmt][14]. I've also tried to
+  ensure that `tessen` doesn't leak any sensitive data. Please raise an issue or a pull request if
+  you can make tessen more minimalistic or secure.
 
 ## Installation
 
 ### Dependencies
 
-- [bash](https://www.gnu.org/software/bash/)
-- at least one pass backend is needed - either [pass](https://git.zx2c4.com/password-store/) or
-  [gopass](https://github.com/gopasspw/gopass)
-- a wayland native dmenu backend such as [rofi](https://github.com/lbonn/rofi),
-  [bemenu](https://github.com/Cloudef/bemenu), [fuzzel](https://codeberg.org/dnkl/fuzzel), or
-  [wofi](https://hg.sr.ht/~scoopta/wofi)
-- [wtype](https://github.com/atx/wtype) (optional, if you want to auto-type data)
-- [wl-clipboard](https://github.com/bugaevc/wl-clipboard) (optional, if you want to copy data)
-- [libnotify](https://gitlab.gnome.org/GNOME/libnotify) (optional, to send notifications about
-  copied data and the timeout period after which the clipboard will be cleared)
-- [pass-otp](https://github.com/tadfisher/pass-otp) (optional, to generate TOTP/HOTP when using
-  `pass`)
-- [xdg-utils](https://www.freedesktop.org/wiki/Software/xdg-utils/) (optional, to open URLs in the
-  default web browser)
-- [scdoc](https://git.sr.ht/~sircmpwn/scdoc) (optional, to build the man page)
+- [bash][16]
+
+- at least one pass backend is needed - either [password-store][1] or [gopass][2]
+
+- at least one Wayland native dmenu backend - [rofi][3], [fuzzel][4], [tofi][15], [bemenu][5], or
+  [wofi][6]
+
+- at least one (or both if needed) action backend - [wtype][17] or [wl-clipboard][18]
+
+- [libnotify][19] (optional, to send notifications about copied data and the timeout period after
+  which the clipboard will be cleared)
+
+- [pass-otp][20] (optional, to generate TOTP/HOTP when using `pass`)
+
+- [xdg-utils][21] (optional, to open URLs in the default web browser)
+
+- [scdoc][22] (optional, to build the man page)
 
 ### Arch Linux
 
-`tessen` is available in the [Arch User Repository](https://aur.archlinux.org/packages/tessen/).
+`tessen` is available in the [Arch User Repository][23].
 
 ### GNU Guix
 
-`tessen` is available in the [official GNU Guix repositories](https://guix.gnu.org/en/packages/tessen-2.1.0/).
+`tessen` is available in the [official GNU Guix repository][24].
 
 ### Git Release
 
 ```
-git clone https://github.com/ayushnix/tessen.git
+git clone https://git.sr.ht/~ayushnix/tessen
 cd tessen
 sudo make install
 ```
 
-You can also do `doas make install` if you're using [doas](https://github.com/Duncaen/OpenDoas) on
-Linux, which you probably should.
+You can also do `doas make install` if you're using [doas][25] on Linux, which you probably should.
 
 ### Stable Release
 
 ```
-curl -LO https://github.com/ayushnix/tessen/releases/download/v2.1.2/tessen-2.1.2.tar.gz
+curl -LO https://git.sr.ht/~ayushnix/tessen/refs/download/v2.1.2/tessen-2.1.2.tar.gz
 tar xvzf tessen-2.1.2.tar.gz
 cd tessen-2.1.2/
 sudo make install
@@ -132,10 +132,9 @@ completion file can be installed using `sudo make fishcomp`.
 - use custom autotype operations
 - use custom delay time for autotype
 
-Please read the [man page](https://github.com/ayushnix/tessen/blob/master/man/tessen.1.scd) for more
-information.
+Please read the [man page][26] for more information.
 
-## Caveats :warning:
+## Caveats
 
 The reason why `tessen` offers flexibility between autotyping and copying data is because autotyping
 may not always work accurately. There can be several reasons for this.
@@ -145,28 +144,21 @@ expectation of having a username and password text field one after the other and
 between them. A good example is the login popup offered by Discourse. In such cases, autotyping can
 make a real mess. This is why `tessen` also provides an option to define custom autotype operations.
 
-`tessen` uses [wtype](https://github.com/atx/wtype/) for autotyping and it seems to work fine on
-Firefox. You'll need at least version [v0.4](https://github.com/atx/wtype/releases/tag/v0.4), or
-later, of wtype for autotyping to work on Chromium. I haven't tested any other web browsers.
+`tessen` uses [wtype][17] for autotyping and it seems to work fine on Firefox. You'll need at least
+version [v0.4][27], or later, of wtype for autotyping to work on Chromium although I've experienced
+issues on some websites when autotyping on Chromium using `wtype`. I haven't tested any other web
+browsers.
 
-It seems like `wtype` uses the
-[virtual-keyboard-unstable-v1](https://wayland.app/protocols/virtual-keyboard-unstable-v1) protocol
-to emulate a virtual keyboard and [KDE
-supports](https://invent.kde.org/plasma/kwin/-/issues/74#note_369803) the
-[input-method-unstable-v2](https://wayland.app/protocols/input-method-unstable-v1) protocol. GNOME
-seems to be doing its own thing with [libei](https://gitlab.gnome.org/GNOME/mutter/-/issues/1974).
-There's also [ydotool](https://github.com/ReimuNotMoe/ydotool) which requires that users access
-`/dev/uinput`, which is restricted to the root user.
-
-I don't like this sort of fragmentation myself but if `tessen` ends up working on wlroots based
-compositors and on KDE, I'd be satisfied with that. It looks like `wtype` [doesn't
-use](https://github.com/atx/wtype/issues/5) the `input-method` protocol yet which restricts
-autotyping to wlroots based compositors for now. While using `/dev/uinput` sounds like an attractive
-option, I won't add support for it due to security concerns.
+It also seems like autotyping on Wayland is in somewhat of a mess right now. An issue tracker on the
+the wayland-protocols repository by Roman Gilg titled [Input Method Hub][28] presents an overview on
+the state of things. As of [version 1.7 of sway][8], the `input-method-unstable-v2.xml` protocol and
+the `virtual-keyboard-unstable-v1.xml` protocol (which is what `wtype` implements) are supported.
+There's [ydotool][30] but it requires root access to access `/dev/uinput`, which makes it
+unattractive.
 
 ## What does `tessen` mean?
 
-[Here](https://en.wikipedia.org/wiki/Japanese_war_fan) you go.
+[Here you go.][31]
 
 ## Why did you choose this weird name?
 
@@ -177,23 +169,63 @@ name.
 
 ## Contributions
 
-Please see [this](https://github.com/ayushnix/tessen/blob/master/CONTRIBUTING.md) file.
+Please see the [CONTRIBUTING.md file.][7]
 
-## Features that WON'T be implemented
+## Features that WILL NOT be implemented
 
-- xorg/x11 support, use [rofi-pass](https://github.com/carnager/rofi-pass) or fork this repo and
-  implement it yourself
-- using [ydotool](https://github.com/ReimuNotMoe/ydotool), because it needs root access
+- Xorg/X11 support
+
+  either use [rofi-pass][11] or fork this repository and implement it yourself
+
+- using [ydotool][30], because it needs root access
+
 - adding, editing, or removing existing password store data
+
 - cache for storing frequently used password store selection data
+
 - importing passwords or exporting them
 
 ## Donate
 
-If you feel that this project helped you transition to wayland, please consider supporting me by
-buying me a coffee :coffee:
+If you feel that this project helped you transition to Wayland, please consider supporting me by
+buying me a coffee.
 
-<a href='https://www.buymeacoffee.com/ayushnix' target='_blank' rel="noopener"><img height='36' style='border:0px;height:36px;' src='https://cdn.buymeacoffee.com/buttons/default-blue.png' border='0' alt='Buy Me a Coffee at buymeacoffee.com' /></a>
-<a href='https://ko-fi.com/O5O64SQ4C' target='_blank' rel="noopener"><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi1.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+<a href='https://ko-fi.com/O5O64SQ4C' target='_blank' rel='noopener'><img height='36' style='border: 0;' src='https://cdn.ko-fi.com/cdn/kofi5.png?v=3' alt='Buy Me a Coffee at https://ko-fi.com/O5O64SQ4C'></a>
+<a href='https://www.buymeacoffee.com/ayushnix' target='_blank' rel='noopener'><img height='36' style='border: 0;' src='https://cdn.buymeacoffee.com/buttons/default-blue.png' alt='Buy Me a Coffee at https://www.buymeacoffee.com/ayushnix'></a>
 
 If you're in India, you can also use UPI for donations. My UPI address is `ayushnix@ybl`.
+Alternatievly, scan this QR code in a UPI application.
+
+<svg width='32' height='32' viewBox="0 0 49 49" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M0 0h49v49H0z"/><path style="stroke:#000" transform="translate(4 4.5)" d="M0 0h7m1 0h1m1 0h1m4 0h2m1 0h2m2 0h2m2 0h1m2 0h2m3 0h7M0 1h1m5 0h1m2 0h2m2 0h2m1 0h3m3 0h1m2 0h2m1 0h1m1 0h1m1 0h1m1 0h1m5 0h1M0 2h1m1 0h3m1 0h1m1 0h2m3 0h2m1 0h1m1 0h1m2 0h3m1 0h1m1 0h1m6 0h1m1 0h3m1 0h1M0 3h1m1 0h3m1 0h1m3 0h1m1 0h4m4 0h1m1 0h1m7 0h1m1 0h1m1 0h1m1 0h3m1 0h1M0 4h1m1 0h3m1 0h1m1 0h1m1 0h1m3 0h6m1 0h3m1 0h1m3 0h1m1 0h2m1 0h1m1 0h3m1 0h1M0 5h1m5 0h1m2 0h1m3 0h2m1 0h1m4 0h1m2 0h1m5 0h1m1 0h1m1 0h1m5 0h1M0 6h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7h1m1 0h2m2 0h1m2 0h5m2 0h2m1 0h2M5 8h2m2 0h3m3 0h3m6 0h3m2 0h4m1 0h1m1 0h1m1 0h1m1 0h1M0 9h1m1 0h2m6 0h4m1 0h1m1 0h1m1 0h4m3 0h2m3 0h1m4 0h3M0 10h2m4 0h3m3 0h1m2 0h2m3 0h1m3 0h2m1 0h4m1 0h3m1 0h2M1 11h1m2 0h1m5 0h1m1 0h4m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m2 0h1m3 0h1m2 0h1M2 12h2m1 0h3m1 0h1m3 0h3m1 0h1m3 0h6m4 0h2m1 0h2m4 0h1M0 13h1m4 0h1m2 0h5m2 0h2m1 0h1m2 0h1m1 0h2m5 0h1m1 0h1m2 0h3m1 0h2M0 14h1m2 0h2m1 0h1m4 0h3m2 0h1m2 0h2m1 0h4m1 0h3m1 0h1m2 0h1m2 0h1M1 15h1m2 0h1m3 0h1m1 0h2m1 0h2m1 0h3m1 0h2m2 0h2m2 0h1m2 0h1m1 0h1m1 0h1m1 0h4M0 16h1m1 0h3m1 0h6m1 0h1m3 0h1m1 0h2m1 0h2m3 0h1m1 0h1m1 0h1m1 0h1m3 0h3M2 17h3m4 0h1m1 0h1m1 0h2m4 0h2m2 0h3m1 0h4m1 0h1m1 0h1m1 0h1m1 0h3M4 18h8m1 0h1m1 0h1m1 0h1m3 0h1m1 0h5m3 0h3m1 0h1m2 0h1m1 0h1M0 19h1m3 0h2m2 0h1m2 0h1m3 0h4m1 0h5m2 0h4m2 0h1m3 0h1m1 0h1M0 20h1m1 0h8m8 0h1m3 0h6m4 0h1m3 0h5M0 21h2m1 0h3m3 0h3m2 0h1m1 0h2m2 0h3m4 0h1m1 0h3m1 0h1m1 0h2m1 0h2M2 22h1m3 0h1m1 0h1m2 0h2m1 0h2m3 0h1m1 0h2m1 0h1m2 0h1m1 0h1m5 0h4M0 23h1m3 0h2m5 0h1m2 0h1m2 0h2m1 0h1m1 0h2m9 0h1m1 0h1m1 0h1m1 0h2M0 24h2m1 0h1m2 0h1m3 0h6m3 0h2m1 0h1m1 0h2m1 0h1m3 0h5m3 0h2M7 25h1m1 0h3m3 0h3m3 0h2m2 0h3m1 0h1m1 0h6m3 0h1M2 26h3m1 0h1m3 0h2m1 0h1m2 0h2m3 0h8m5 0h2m3 0h1M0 27h1m4 0h1m2 0h2m1 0h1m1 0h4m3 0h2m2 0h1m1 0h1m1 0h1m1 0h1m1 0h1m3 0h3m1 0h1M3 28h2m1 0h2m5 0h1m7 0h1m2 0h1m2 0h1m1 0h2m7 0h1m1 0h1M0 29h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2m1 0h2m3 0h1m4 0h1m1 0h1m2 0h1m1 0h2M0 30h4m1 0h3m2 0h1m2 0h1m1 0h2m2 0h1m2 0h2m1 0h1m2 0h5m2 0h2m3 0h1M0 31h1m1 0h3m3 0h1m1 0h1m1 0h2m2 0h1m1 0h5m1 0h5m2 0h1m1 0h2m2 0h1m1 0h1M0 32h1m1 0h3m1 0h3m2 0h1m3 0h3m2 0h3m1 0h1m1 0h1m1 0h2m2 0h5m1 0h1m1 0h1M8 33h2m2 0h2m1 0h1m3 0h2m1 0h1m3 0h2m3 0h2m3 0h4M0 34h7m3 0h1m1 0h1m3 0h1m1 0h4m1 0h1m3 0h1m2 0h3m1 0h1m1 0h2M0 35h1m5 0h1m1 0h6m4 0h1m1 0h3m2 0h3m4 0h1m3 0h2m1 0h1M0 36h1m1 0h3m1 0h1m3 0h1m3 0h1m2 0h1m2 0h1m1 0h6m1 0h8m2 0h2M0 37h1m1 0h3m1 0h1m2 0h1m1 0h1m4 0h3m1 0h1m1 0h1m4 0h2m3 0h2m1 0h1m1 0h1m1 0h2M0 38h1m1 0h3m1 0h1m2 0h1m1 0h1m2 0h5m5 0h1m1 0h2m2 0h1m3 0h1m1 0h2m1 0h1M0 39h1m5 0h1m2 0h1m1 0h1m4 0h1m1 0h6m2 0h2m2 0h1m1 0h1m2 0h2m1 0h1m1 0h1M0 40h7m2 0h1m2 0h1m1 0h1m3 0h3m2 0h1m2 0h2m1 0h1m1 0h1m1 0h1m3 0h2"/></svg>
+
+[1]: https://git.zx2c4.com/password-store/
+[2]: https://github.com/gopasspw/gopass
+[3]: https://github.com/lbonn/rofi
+[4]: https://codeberg.org/dnkl/fuzzel
+[5]: https://github.com/Cloudef/bemenu
+[6]: https://hg.sr.ht/~scoopta/wofi
+[7]: https://git.sr.ht/~ayushnix/tessen/tree/master/item/CONTRIBUTING.md
+[8]: https://swaywm.org/
+[9]: https://github.com/junegunn/fzf
+[10]: https://sr.ht/~ayushnix/pass-tessen
+[11]: https://github.com/carnager/rofi-pass
+[12]: https://cmpxchg8b.com/passmgrs.html
+[13]: https://github.com/koalaman/shellcheck
+[14]: https://github.com/mvdan/sh
+[15]: https://github.com/philj56/tofi
+[16]: https://www.gnu.org/software/bash/
+[17]: https://github.com/atx/wtype
+[18]: https://github.com/bugaevc/wl-clipboard
+[19]: https://gitlab.gnome.org/GNOME/libnotify
+[20]: https://github.com/tadfisher/pass-otp
+[21]: https://www.freedesktop.org/wiki/Software/xdg-utils/
+[22]: https://git.sr.ht/~sircmpwn/scdoc
+[23]: https://aur.archlinux.org/packages/tessen/
+[24]: https://guix.gnu.org/en/packages/tessen-2.1.0/
+[25]: https://github.com/Duncaen/OpenDoas
+[26]: https://git.sr.ht/~ayushnix/tessen/tree/master/item/man/tessen.1.scd
+[27]: https://github.com/atx/wtype/releases/tag/v0.4
+[28]: https://gitlab.freedesktop.org/wayland/wayland-protocols/-/issues/39
+[29]: https://github.com/swaywm/sway/releases/tag/1.7
+[30]: https://github.com/ReimuNotMoe/ydotool
+[31]: https://en.wikipedia.org/wiki/Japanese_war_fan
