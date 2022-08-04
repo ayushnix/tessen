@@ -1,6 +1,6 @@
 complete -f -c tessen
 complete -x -c tessen -s p -l pass -k -a "pass gopass" -d "use pass or gopass"
-complete -x -c tessen -s d -l dmenu -k -a "rofi fuzzel bemenu wofi dmenu" -d "use either rofi, fuzzel, bemenu, rofi, or dmenu"
+complete -x -c tessen -s d -l dmenu -k -a "fuzzel tofi bemenu wofi rofi dmenu" -d "use either fuzzel, tofi, bemenu, wofi, rofi, or dmenu"
 complete -x -c tessen -s a -l action -k -a "autotype copy both" -d "either 'autotype' data, 'copy' it, or do 'both'"
 complete -x -c tessen -s h -l help -d "show the help menu"
 complete -x -c tessen -s v -l version -d "show the version"
