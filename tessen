@@ -89,7 +89,6 @@ get_gopass_files() {
       mount_name="${mount_name%.path*}"
       mount_name_arr+=("$mount_name")
       if [[ -d ${line#*= } ]]; then
-        echo $line >> debug;
         path_files=("${line#*= }"/**/*.gpg)
         path_files=("${path_files[@]#"${line#*= }"/}")
         path_files=("${path_files[@]%.gpg}")
