@@ -85,9 +85,9 @@ You can also do `doas make install` if you're using [doas][25] on Linux, which y
 ### Stable Release
 
 ```
-curl -LO https://git.sr.ht/~ayushnix/tessen/refs/download/v2.1.2/tessen-2.1.2.tar.gz
-tar xvzf tessen-2.1.2.tar.gz
-cd tessen-2.1.2/
+curl -LO https://git.sr.ht/~ayushnix/tessen/refs/download/v2.1.3/tessen-2.1.3.tar.gz
+tar xvzf tessen-2.1.3.tar.gz
+cd tessen-2.1.3/
 sudo make install
 ```
 
@@ -221,7 +221,7 @@ Alternatively, scan this QR code in a UPI application.
 [21]: https://www.freedesktop.org/wiki/Software/xdg-utils/
 [22]: https://git.sr.ht/~sircmpwn/scdoc
 [23]: https://aur.archlinux.org/packages/tessen/
-[24]: https://guix.gnu.org/en/packages/tessen-2.1.0/
+[24]: https://packages.guix.gnu.org/packages/tessen/2.1.2/
 [25]: https://github.com/Duncaen/OpenDoas
 [26]: https://git.sr.ht/~ayushnix/tessen/tree/master/item/man/tessen.1.scd
 [27]: https://github.com/atx/wtype/releases/tag/v0.4
