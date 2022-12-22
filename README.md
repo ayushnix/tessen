@@ -221,7 +221,7 @@ Alternatively, scan this QR code in a UPI application.
 [21]: https://www.freedesktop.org/wiki/Software/xdg-utils/
 [22]: https://git.sr.ht/~sircmpwn/scdoc
 [23]: https://aur.archlinux.org/packages/tessen/
-[24]: https://packages.guix.gnu.org/packages/tessen/2.1.2/
+[24]: https://packages.guix.gnu.org/packages/tessen/
 [25]: https://github.com/Duncaen/OpenDoas
 [26]: https://git.sr.ht/~ayushnix/tessen/tree/master/item/man/tessen.1.scd
 [27]: https://github.com/atx/wtype/releases/tag/v0.4
