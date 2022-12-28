@@ -440,7 +440,7 @@ wld_copy() {
       return 1
     fi
   elif [[ $pass_backend == "gopass" ]]; then
-    tsn_cliptime="$(gopass config cliptimeout)"
+    tsn_cliptime="$(gopass config core.cliptimeout)"
     tsn_cliptime="${tsn_cliptime##*: }"
     if ! are_digits "$tsn_cliptime"; then
       printf "%s\n" "invalid clipboard timeout value in cliptimeout" >&2
