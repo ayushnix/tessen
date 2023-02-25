@@ -10,6 +10,10 @@
 # don't leak password data if debug mode is enabled
 set +x
 
+# potentially improve speed by using C locale
+LC_ALL=C
+LANG=C
+
 # GLOBAL VARIABLES
 declare _PASS_BACKEND dmenu_backend tsn_action tsn_config
 declare -a dmenu_backend_opts tmp_tofi_opts tmp_rofi_opts tmp_wofi_opts
