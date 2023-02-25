@@ -59,52 +59,12 @@ get_pass_files() {
 
 # FIRST MENU: generate a list of gopass files, let the user select one
 get_gopass_files() {
-  local line path_files file mount_name tmp_tsn_passfile
-  local -A tmp_gopass_files
-  local -a mount_name_arr
+  local file
+  local -i ctr=0
+  local -a tmp_gopass_files
+  mapfile -t tmp_gopass_files < <(gopass ls -f)
 
-  # why not use `gopass config path` and `gopass ls -f`?
-  shopt -s nullglob globstar
-  while read -r line || [[ -n $line ]]; do
-    # we assume that we'll encounter `path: ...` only once and as soon as we
-    # do, we parse the list of all the files inside the dir and store them in
-    # an associative array with the name of the files as the index and the path
-    # as the value
-    if [[ $line == mounts.path* ]] && [[ -d ${line#*= } ]]; then
-      path_files=("${line#*= }"/**/*.gpg)
-      path_files=("${path_files[@]#"${line#*= }"/}")
-      path_files=("${path_files[@]%.gpg}")
-      for file in "${path_files[@]}"; do
-        tmp_gopass_files["$file"]="${line#*= }"
-      done
-    fi
-    # similarly, we go through the mount points, generate the list of files
-    # inside those mount points, add those files to the associative array with
-    # the file names as the index and the location of the mount point as the
-    # value
-    if [[ $line == mounts.*.path* ]]; then
-      # remove the quotes from the parsed line
-      line="${line//\"/}"
-      # the mount name needs to be extracted to distinguish files with
-      # potentially identical names
-      mount_name="${line#mounts*.}"
-      mount_name="${mount_name%.path*}"
-      mount_name_arr+=("$mount_name")
-      if [[ -d ${line#*= } ]]; then
-        path_files=("${line#*= }"/**/*.gpg)
-        path_files=("${path_files[@]#"${line#*= }"/}")
-        path_files=("${path_files[@]%.gpg}")
-        path_files=("${path_files[@]/#/"$mount_name/"}")
-        for file in "${path_files[@]}"; do
-          tmp_gopass_files["$file"]="${line#*= }"
-        done
-      fi
-    fi
-  done < <(gopass config)
-  shopt -u nullglob globstar
-
-  # the actual menu
-  _TSN_PASSFILE="$(printf "%s\n" "${!tmp_gopass_files[@]}" \
+  _TSN_PASSFILE="$(printf "%s\n" "${tmp_gopass_files[@]}" \
     | "$_DMENU_BACKEND" "${_DMENU_BACKEND_OPTS[@]}")"
   _EXIT_STATUS="$?"
 
@@ -112,26 +72,17 @@ get_gopass_files() {
     _die
   fi
 
-  # remove the mount name for the path check to be successful
-  # initialize the temp variable with the value of _TSN_PASSFILE in case an
-  # entry from the gopass path is chosen
-  tmp_tsn_passfile="$_TSN_PASSFILE"
-  for idx in "${mount_name_arr[@]}"; do
-    if [[ ${_TSN_PASSFILE%%/*} == "$idx" ]]; then
-      tmp_tsn_passfile="${_TSN_PASSFILE#*/}"
+  for file in "${tmp_gopass_files[@]}"; do
+    if [[ $_TSN_PASSFILE == "$file" ]]; then
+      ctr=1
+      break
     fi
   done
-
-  # we had to use an associative array to keep track of the absolute path of
-  # the selected file because it is possible to give invalid input to dmenu
-  # while making a selection and tessen should exit in that case
-  if [[ -n ${tmp_gopass_files["$_TSN_PASSFILE"]} ]]; then
-    if ! [[ -f "${tmp_gopass_files["$_TSN_PASSFILE"]}"/"$tmp_tsn_passfile".gpg ]]; then
-      _die "the selected file was not found"
-    fi
+  if [[ $ctr -ne 1 ]]; then
+    _die "the selected file was not found"
   fi
 
-  unset -v tmp_gopass_files line path_files file mount_name mount_name_arr tmp_tsn_passfile
+  unset -v file ctr tmp_gopass_files
 }
 
 # parse the password store file for username, password, otp, custom autotype,
