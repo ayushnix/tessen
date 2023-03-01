@@ -106,35 +106,15 @@ get_pass_data() {
     fi
   fi
 
-  # the key can contain alphanumerics, spaces, hyphen, underscore, plus, at,
-  # and hash
-  #
-  # the value can contain anything but `key:` and `val` should be separated
-  # with a whitespace
   keyval_regex='^[[:alnum:][:blank:]+#@_-]+:[[:blank:]].+$'
-  # parse the 'otpauth://' URI
+  # for parsing the 'otpauth://' URI
   # this regex is borrowed from pass-otp at commit 3ba564c
-  #
-  # note that OTP support in gopass has been deprecated and for good reasons
-  # I, for one, don't see how storing OTPs in the same place as storing your
-  # passwords is a sane idea
-  # https://github.com/gopasspw/gopass/blob/master/docs/features.md#adding-otp-secrets
   otp_regex='^otpauth:\/\/(totp|hotp)(\/(([^:?]+)?(:([^:?]*))?)(:([0-9]+))?)?\?(.+)$'
   _TSN_PASSWORD="${passdata[0]}"
 
-  # the first line should contain the only the password
-  # this assumes the caveat highlighted earlier about gopass' behavior
-  tsn_password="${passdata[0]}"
-
-  # each key should be unique
-  # if non-unique keys are present, the value of the first non-unique key will
-  # be considered
-  # in addition, the 'username', 'autotype', 'url', and 'password' keys are
-  # considered as case insensitive
   for idx in "${passdata[@]:1}"; do
     key="${idx%%:*}"
     val="${idx#*: }"
-    # keys with the case insensitive name 'password' are ignored
     if [[ ${key,,} == "password" ]]; then
       continue
     elif [[ ${key,,} =~ ^$_TSN_USERKEY$ ]] && [[ -z ${_TSN_USERNAME} ]]; then
