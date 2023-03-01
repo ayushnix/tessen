@@ -814,7 +814,7 @@ main() {
     get_gopass_files
   fi
   get_pass_data
-  if [[ "$_EXIT_STATUS" -ge 10 ]]; then
+  if [[ $_EXIT_STATUS -ge 10 ]]; then
     custom_keyb_action
     exit 0
   fi
