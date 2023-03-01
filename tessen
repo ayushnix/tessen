@@ -256,7 +256,7 @@ key_action() {
         key_open_url
         wld_copy "$_TSN_URL"
       else
-        printf "%s" "$arg" | wtype -s "$tsn_delay" -
+        auto_type "$arg"
         wld_copy "$arg"
       fi
       ;;
@@ -333,7 +333,7 @@ auto_type_def() {
   if [[ -z $_TSN_AUTOTYPE ]]; then
     auto_type "$_TSN_USERNAME"
     wtype -s "$tsn_delay" -k Tab --
-    printf "%s" "$tsn_password" | wtype -s "$tsn_delay" -
+    auto_type "$_TSN_PASSWORD"
   else
     for word in $_TSN_AUTOTYPE; do
       case "$word" in
@@ -342,9 +342,9 @@ auto_type_def() {
         ":space") wtype -s "$tsn_delay" -k space -- ;;
         ":enter") wtype -s "$tsn_delay" -k Return -- ;;
         ":otp") key_otp ;;
-        path | basename | filename) printf "%s" "${_TSN_PASSFILE##*/}" | wtype -s "$tsn_delay" - ;;
-        "$tsn_userkey") printf "%s" "$tsn_username" | wtype -s "$tsn_delay" - ;;
-        pass | password) printf "%s" "$tsn_password" | wtype -s "$tsn_delay" - ;;
+        path | basename | filename) auto_type "${_TSN_PASSFILE##*/}" ;;
+        "$_TSN_USERKEY") auto_type "$_TSN_USERNAME" ;;
+        pass | password) auto_type "$_TSN_PASSWORD" ;;
         *)
           if [[ -n ${_TSN_PASSDATA["$word"]} ]]; then
             auto_type "${_TSN_PASSDATA["$word"]}"
