@@ -26,6 +26,7 @@ tsn_delay=100
 tsn_config="${XDG_CONFIG_HOME:-$HOME/.config}"/tessen/config
 # variables with sensitive data which will be manually unset using _clear
 declare tsn_passfile tsn_username tsn_password tsn_url tsn_autotype chosen_key
+declare -i _EXIT_STATUS
 declare -A tsn_passdata
 
 # FIRST MENU: generate a list of pass files, let the user select one
@@ -46,6 +47,7 @@ get_pass_files() {
 
   tsn_passfile="$(printf "%s\n" "${tmp_pass_files[@]}" \
     | "$dmenu_backend" "${dmenu_backend_opts[@]}")"
+  _EXIT_STATUS="$?"
 
   if ! [[ -f "$tmp_prefix/$tsn_passfile".gpg ]]; then
     _die
@@ -103,6 +105,7 @@ get_gopass_files() {
   # the actual menu
   tsn_passfile="$(printf "%s\n" "${!tmp_gopass_files[@]}" \
     | "$dmenu_backend" "${dmenu_backend_opts[@]}")"
+  _EXIT_STATUS="$?"
 
   if [[ -z $tsn_passfile ]]; then
     _die
@@ -215,6 +218,20 @@ get_pass_data() {
   fi
 
   unset -v passdata keyval_regex otp_regex idx key val
+}
+
+# map custom actions to specific dmenu exit codes
+custom_keyb_action() {
+  case "$_EXIT_STATUS" in
+    10) auto_type_def ;;
+    11) auto_type "$tsn_username" ;;
+    12) auto_type "$tsn_password" ;;
+    13) key_open_url ;;
+    14) wld_copy "$tsn_username" ;;
+    15) wld_copy "$tsn_password" ;;
+    16) wld_copy "$tsn_url" ;;
+    *) _die "unmapped exit code detected" ;;
+  esac
 }
 
 # SECOND MENU: show a list of possible keys to choose from for autotyping or
@@ -863,6 +880,10 @@ main() {
     get_gopass_files
   fi
   get_pass_data
+  if [[ $_EXIT_STATUS -ge 10 ]]; then
+    custom_keyb_action
+    exit 0
+  fi
   key_menu
   trap - EXIT TERM INT
 }
