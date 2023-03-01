@@ -49,9 +49,12 @@ the home page of password store, when using *pass*(1) and *gopass*(1)
 https://www.passwordstore.org/#organization
 
 The first line should always have the password, and nothing else. All other
-lines may have key-value pairs like 'key1: value1' or the *otpauth://* format
-URI. However, if a key called 'password' is present, it will be ignored. Note
-that tessen does NOT support parsing YAML files when using *gopass*(1).
+lines may have key-value pairs like 'key1: value1' or an *otpauth://* format
+URI. If non-unique keys are found, the first non-unique key will be considered
+and others will be ignored. If a key called 'password' is present, it will also
+be ignored. The 'autotype', 'url', 'username', and 'password' keys are
+considered case-insensitive. Note that tessen does NOT support parsing YAML
+files when using *gopass*(1).
 
 If a dmenu backend is not specified, tessen tries to find either one of
 *fuzzel*(1), *tofi*(1), *bemenu*(1), *wofi*(1), *rofi*(1) or *dmenu* in the
