@@ -94,7 +94,7 @@ get_pass_data() {
   if [[ $_PASS_BACKEND == "pass" ]]; then
     mapfile -t passdata < <(pass show "$_TSN_PASSFILE" 2> /dev/null)
     if [[ ${#passdata[@]} -eq 0 ]]; then
-      _die "$_TSN_PASSFILE is empty"
+      _die "the selected file is empty"
     fi
   elif [[ $_PASS_BACKEND == "gopass" ]]; then
     # the output from gopass show -n -f that prints the first line and the
@@ -102,7 +102,7 @@ get_pass_data() {
     # the output is detected to be a terminal ... weird
     mapfile -t passdata < <(gopass show -n -f "$_TSN_PASSFILE" 2> /dev/null)
     if [[ ${#passdata[@]} -eq 0 ]]; then
-      _die "$_TSN_PASSFILE is empty"
+      _die "the selected file is empty"
     fi
   fi
 
