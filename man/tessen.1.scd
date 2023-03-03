@@ -145,6 +145,36 @@ When specified as a value of the 'autotype' key,
 The 'autotype' key can be changed using the 'autotype_key' variable in the
 *tessen*(5) configuration file.
 
+If the dmenu program of your choice supports custom keybindings with exit codes
+greater than or equal to 10, tessen can execute custom operations on a selected
+file in the first menu. At the very least, *fuzzel*(1), *bemenu*(1), and
+*rofi*(1) support this feature. The following exit codes have been mapped to the
+actions mentioned besides them
+
+[[ *Exit Code*
+:[ *Action*
+|[ 10
+:  auto type username and password
+|[ 11
+:  auto type username
+|[ 12
+:  auto type password
+|[ 13
+:  open URL
+|[ 14
+:  copy username
+|[ 15
+:  copy password
+|[ 16
+:  copy URL
+|[ 17
+:  auto type OTP
+|[ 18
+:  copy OTP
+
+These exit codes can be mapped to custom keybindings by configuring the dmenu
+program of your choice.
+
 # FILES
 
 _$XDG_CONFIG_HOME/tessen/config_, _$HOME/.config/tessen/config_
