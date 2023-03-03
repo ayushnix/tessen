@@ -118,7 +118,12 @@ The following options are understood by the configuration file for *tessen*(1):
 
 # AUTHORS
 
-Developed and Maintained by Ayush Agarwal <ayushnix at fastmail dot com>.
+Developed and Maintained by Ayush Agarwal <ayush at ayushnix dot com>.
 
-The latest source can be found at https://sr.ht/~ayushnix/tessen and
-bugs/patches/suggestions should be reported there as well.
+The latest source can be found at https://git.sr.ht/~ayushnix/tessen and bugs or
+suggestions can be reported on https://todo.sr.ht/~ayushnix/tessen. For
+contributing to tessen, please read the CONTRIBUTING.md file in the tessen
+source code and send patches by email to ~ayushnix/tessen@lists.sr.ht.
+Alternatively, pull requests can be raised on
+https://codeberg.org/ayushnix/tessen/pulls or
+https://github.com/ayushnix/tessen/pulls.
