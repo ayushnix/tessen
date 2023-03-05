@@ -23,7 +23,7 @@ key="val"
 
 The double quotes should always be specified as mentioned.
 
-A default configuration file is available at
+A default configuration file is also available at
 
 https://git.sr.ht/~ayushnix/tessen/blob/master/config
 
@@ -45,6 +45,21 @@ The following options are understood by the configuration file for *tessen*(1):
 	The action that should be performed by tessen. If you prefer to use both
 	autotyping and copying, it is recommended to leave this option commented
 	or unspecified.
+
+	*fuzzel_config_file*
+
+	The path to the configuration file of *fuzzel*(1). The location of the
+	file specified here is passed to fuzzel using its *-config=* option.
+
+	*tofi_config_file*
+
+	The path to the configuration file of *tofi*(1). The location of the
+	file specified here is passed to tofi using its *-c* option.
+
+	*yofi_config_file*
+
+	The path to the configuration file of yofi. The location of the file
+	specified here is passed to fuzzel using its *-config-file* option.
 
 	*rofi_config_file*
 
