@@ -155,34 +155,16 @@ get_pass_data() {
     fi
   fi
 
-  # the key can contain alphanumerics, spaces, hyphen, underscore, plus, at,
-  # and hash
-  #
-  # the value can contain anything but `key:` and `val` should be separated
-  # with a whitespace
   keyval_regex='^[[:alnum:][:blank:]+#@_-]+:[[:blank:]].+$'
-  # parse the 'otpauth://' URI
+  # for parsing the 'otpauth://' URI
   # this regex is borrowed from pass-otp at commit 3ba564c
-  #
-  # note that OTP support in gopass has been deprecated and for good reasons
-  # I, for one, don't see how storing OTPs in the same place as storing your
-  # passwords is a sane idea
-  # https://github.com/gopasspw/gopass/blob/master/docs/features.md#adding-otp-secrets
   otp_regex='^otpauth:\/\/(totp|hotp)(\/(([^:?]+)?(:([^:?]*))?)(:([0-9]+))?)?\?(.+)$'
 
-  # the first line should contain the only the password
-  # this assumes the caveat highlighted earlier about gopass' behavior
   tsn_password="${passdata[0]}"
 
-  # each key should be unique
-  # if non-unique keys are present, the value of the first non-unique key will
-  # be considered
-  # in addition, the 'username', 'autotype', 'url', and 'password' keys are
-  # considered as case insensitive
   for idx in "${passdata[@]:1}"; do
     key="${idx%%:*}"
     val="${idx#*: }"
-    # keys with the case insensitive name 'password' are ignored
     if [[ ${key,,} == "password" ]]; then
       continue
     elif [[ ${key,,} =~ ^$tsn_userkey$ ]] && [[ -z ${tsn_username} ]]; then
@@ -314,8 +296,8 @@ key_menu() {
 
 # this function checks the value of tsn_action and decides if the third menu
 # should be presented or not
-# in case it receives a parameter called "url", autotype becomes equivalent to
-# opening the url in the web browser
+# in case it receives "url", autotype becomes equivalent to opening the url in
+# a web browser
 key_action() {
   local arg="$1"
 
@@ -367,8 +349,7 @@ key_action() {
 }
 
 # THIRD MENU: optional, this function is used if an 'otpauth://' URI is found
-# note that OTP support in gopass is deprecated and if they end up removing
-# support for it, we'll have to make changes here as well
+# OTP support in gopass is deprecated
 key_otp() {
   local tmp_otp
 
@@ -390,8 +371,6 @@ key_otp() {
   unset -v tmp_otp
 }
 
-# open the url using either xdg-open or tsn_web_browser
-# if tsn_web_browser is defined, xdg-open won't be used
 key_open_url() {
   if [[ -n $tsn_web_browser ]]; then
     "$tsn_web_browser" "$tsn_url" > /dev/null 2>&1 || {
@@ -444,8 +423,6 @@ auto_type() {
   printf "%s" "$1" | wtype -s "$tsn_delay" -
 }
 
-# POTENTIAL IMPROVEMENT: We could restore the clipboard as it was before pass
-# was used. This is done by default by pass.
 wld_copy() {
   local tsn_cliptime
 
@@ -500,19 +477,6 @@ validate_pass_backend() {
   fi
 }
 
-# fuzzel and bemenu do not support config files so their backend options won't
-# be changed after this function, rofi and wofi do support config files and
-# those will be appended to the dmenu_backend_opts array by sourcing the config
-# file of tessen
-#
-# of course, this limits customization when using fuzzel or bemenu and when
-# multiple contexts are invovled, which I don't like myself, but I won't accept
-# arbitrary input as arguments and use hacks like
-# [this](https://github.com/ayushnix/tessen/pull/13)
-#
-# if [this](https://codeberg.org/dnkl/fuzzel/issues/3) issue gets resolved,
-# fuzzel will be promoted as the recommended and the default dmenu backend for
-# tessen
 validate_dmenu_backend() {
   if ! is_installed "$1"; then
     _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
