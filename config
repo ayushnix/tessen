@@ -18,6 +18,7 @@
 # dmenu_backend in this config file
 # alternatively, use the command line arguments to specify the dmenu backend
 # while running tessen
+# fuzzel_config_file=""
 # tofi_config_file=""
 # rofi_config_file="$XDG_CONFIG_HOME/rofi/test.rasi"
 # wofi_config_file=""

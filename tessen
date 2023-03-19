@@ -13,6 +13,7 @@ set +x
 # GLOBAL VARIABLES
 declare _PASS_BACKEND _DMENU_BACKEND _TSN_ACTION _TSN_CONFIG
 declare -a _DMENU_BACKEND_OPTS _TMP_TOFI_OPTS _TMP_ROFI_OPTS _TMP_WOFI_OPTS
+declare -a _TMP_FUZZEL_OPTS
 declare _TSN_USERKEY _TSN_URLKEY _TSN_AUTOKEY _TSN_WEB_BROWSER
 declare -i _TSN_DELAY
 # show both actions, 'autotype' and 'copy', to choose from by default
@@ -630,6 +631,8 @@ parse_config() {
       elif [[ $key == "action" ]] && unset -v _TSN_ACTION 2> /dev/null; then
         validate_action "$val"
         readonly _TSN_ACTION
+      elif [[ $key == "fuzzel_config_file" ]] && [[ -f ${val@P} ]]; then
+        _TMP_FUZZEL_OPTS+=("--config=${val@P}")
       elif [[ $key == "tofi_config_file" ]] && [[ -f ${val@P} ]]; then
         _TMP_TOFI_OPTS+=("-c" "${val@P}")
       elif [[ $key == "rofi_config_file" ]] && [[ -f ${val@P} ]]; then
@@ -687,11 +690,10 @@ main() {
         validate_dmenu_backend "$2"
         readonly _DMENU_BACKEND
         # since there's a possibility that a user may mention config files for
-        # rofi and wofi, we will make _DMENU_BACKEND_OPTS readonly only if
-        # _DMENU_BACKEND is fuzzel and bemenu, the dmenu programs which don't
-        # support configuration files
-        if [[ $_DMENU_BACKEND == "fuzzel" ]] || [[ $_DMENU_BACKEND == "bemenu" ]] \
-          || [[ $_DMENU_BACKEND == "dmenu" ]]; then
+        # dmenu backends, we will make _DMENU_BACKEND_OPTS readonly only if
+        # _DMENU_BACKEND is bemenu, the only dmenu program which don't support
+        # configuration files
+        if [[ $_DMENU_BACKEND == "bemenu" ]] || [[ $_DMENU_BACKEND == "dmenu" ]]; then
           readonly _DMENU_BACKEND_OPTS
         fi
         shift
@@ -702,8 +704,7 @@ main() {
         fi
         validate_dmenu_backend "${_opt##--dmenu=}"
         readonly _DMENU_BACKEND
-        if [[ $_DMENU_BACKEND == "fuzzel" ]] || [[ $_DMENU_BACKEND == "bemenu" ]] \
-          || [[ $_DMENU_BACKEND == "dmenu" ]]; then
+        if [[ $_DMENU_BACKEND == "bemenu" ]] || [[ $_DMENU_BACKEND == "dmenu" ]]; then
           readonly _DMENU_BACKEND_OPTS
         fi
         ;;
@@ -759,7 +760,9 @@ main() {
   # the options which are mutual between the argparse and the config file will
   # be considered in the config file only if those options aren't already set
   parse_config
-  if [[ $_DMENU_BACKEND == "tofi" ]]; then
+  if [[ $_DMENU_BACKEND == "fuzzel" ]]; then
+    _DMENU_BACKEND_OPTS+=("${_TMP_FUZZEL_OPTS[@]}")
+  elif [[ $_DMENU_BACKEND == "tofi" ]]; then
     _DMENU_BACKEND_OPTS+=("${_TMP_TOFI_OPTS[@]}")
     readonly _DMENU_BACKEND_OPTS
   elif [[ $_DMENU_BACKEND == "rofi" ]]; then
