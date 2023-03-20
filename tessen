@@ -13,7 +13,7 @@ set +x
 # GLOBAL VARIABLES
 declare _PASS_BACKEND _DMENU_BACKEND _TSN_ACTION _TSN_CONFIG
 declare -a _DMENU_BACKEND_OPTS _TMP_TOFI_OPTS _TMP_ROFI_OPTS _TMP_WOFI_OPTS
-declare -a _TMP_FUZZEL_OPTS
+declare -a _TMP_FUZZEL_OPTS _TMP_YOFI_OPTS
 declare _TSN_USERKEY _TSN_URLKEY _TSN_AUTOKEY _TSN_WEB_BROWSER
 declare -i _TSN_DELAY
 # show both actions, 'autotype' and 'copy', to choose from by default
@@ -429,7 +429,7 @@ validate_pass_backend() {
 
 validate_dmenu_backend() {
   if ! is_installed "$1"; then
-    _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
+    _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | yofi | wofi | rofi | dmenu"
   fi
 
   local -a bemenu_opts
@@ -450,6 +450,11 @@ validate_dmenu_backend() {
       _DMENU_BACKEND="tofi"
       _DMENU_BACKEND_OPTS=()
       ;;
+    yofi)
+      _DMENU_BACKEND="yofi"
+      # yofi needs the 'dialog' option after the '--config-file' argument
+      _DMENU_BACKEND_OPTS=()
+      ;;
     wofi)
       _DMENU_BACKEND="wofi"
       _DMENU_BACKEND_OPTS=('-d' '-k' '/dev/null')
@@ -463,7 +468,7 @@ validate_dmenu_backend() {
       _DMENU_BACKEND_OPTS=()
       ;;
     *)
-      _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
+      _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | yofi | wofi | rofi | dmenu"
       ;;
   esac
   unset -v bemenu_opts
@@ -526,7 +531,7 @@ find_pass_backend() {
 }
 
 find_dmenu_backend() {
-  local -a tmp_dmenu_arr=('fuzzel' 'tofi' 'bemenu' 'wofi' 'rofi' 'dmenu')
+  local -a tmp_dmenu_arr=('fuzzel' 'tofi' 'bemenu' 'yofi' 'wofi' 'rofi' 'dmenu')
   local idx
 
   for idx in "${tmp_dmenu_arr[@]}"; do
@@ -536,7 +541,7 @@ find_dmenu_backend() {
     fi
   done
   if [[ -z $_DMENU_BACKEND ]]; then
-    _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
+    _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | yofi | wofi | rofi | dmenu"
   fi
   unset -v idx tmp_dmenu_arr
 }
@@ -581,7 +586,7 @@ usage: $prog [options]
 
   -p, --pass, --pass=         choose either 'pass' or 'gopass'
   -d, --dmenu, --dmenu=       specify a dmenu backend - 'fuzzel', 'tofi',
-                              'bemenu', 'wofi', 'rofi', and 'dmenu' are supported
+                              'bemenu', 'yofi', 'wofi', 'rofi', and 'dmenu' are supported
   -a, --action, --action=     choose either 'autotype', 'copy', or 'both'
                               omit this option to use the default behavior
   -c, --config, --config=     use a config file on a custom path
@@ -643,6 +648,8 @@ parse_config() {
         _TMP_WOFI_OPTS+=("-s" "${val@P}")
       elif [[ $key == "wofi_color_file" ]] && [[ -f ${val@P} ]]; then
         _TMP_WOFI_OPTS+=("-C" "${val@P}")
+      elif [[ $key == "yofi_config_file" ]] && [[ -f ${val@P} ]]; then
+        _TMP_YOFI_OPTS+=("--config-file" "${val@P}" "dialog")
       elif [[ $key == "userkey" ]]; then
         _TSN_USERKEY="$val"
       elif [[ $key == "urlkey" ]]; then
@@ -685,7 +692,7 @@ main() {
         ;;
       -d | --dmenu)
         if [[ $# -lt 2 ]]; then
-          _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
+          _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | yofi | wofi | rofi | dmenu"
         fi
         validate_dmenu_backend "$2"
         readonly _DMENU_BACKEND
@@ -700,7 +707,7 @@ main() {
         ;;
       --dmenu=*)
         if [[ -z ${_opt##--dmenu=} ]]; then
-          _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | wofi | rofi | dmenu"
+          _die "please install a valid dmenu backend: fuzzel | tofi | bemenu | yofi | wofi | rofi | dmenu"
         fi
         validate_dmenu_backend "${_opt##--dmenu=}"
         readonly _DMENU_BACKEND
@@ -770,6 +777,9 @@ main() {
     readonly _DMENU_BACKEND_OPTS
   elif [[ $_DMENU_BACKEND == "wofi" ]]; then
     _DMENU_BACKEND_OPTS+=("${_TMP_WOFI_OPTS[@]}")
+    readonly _DMENU_BACKEND_OPTS
+  elif [[ $_DMENU_BACKEND == "yofi" ]]; then
+    _DMENU_BACKEND_OPTS+=("${_TMP_YOFI_OPTS[@]}")
     readonly _DMENU_BACKEND_OPTS
   fi
 

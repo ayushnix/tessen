@@ -24,6 +24,7 @@
 # wofi_config_file=""
 # wofi_style_file=""
 # wofi_color_file=""
+# yofi_config_file=""
 
 # the name of the key which will be used to decide the username
 # this can also be a simple regex such as (user|login)
