@@ -23,7 +23,11 @@ _TSN_USERKEY="user"
 _TSN_URLKEY="url"
 _TSN_AUTOKEY="autotype"
 _TSN_DELAY=100
-_TSN_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"/tessen/config
+if [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/tessen/config ]]; then
+  _TSN_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"/tessen/config
+elif [[ -f "${XDG_CONFIG_DIRS:-/etc/xdg}"/tessen/config ]]; then
+  _TSN_CONFIG="${XDG_CONFIG_DIRS:-/etc/xdg}"/tessen/config
+fi
 # variables with sensitive data which will be manually unset using _clear
 declare _TSN_PASSFILE _TSN_USERNAME _TSN_PASSWORD _TSN_URL _TSN_AUTOTYPE _CHOSEN_KEY
 declare -i _EXIT_STATUS
