@@ -323,9 +323,9 @@ key_otp() {
     _die "invalid OTP detected"
   fi
 
-  if [[ "$1" == "autotype" ]]; then
+  if [[ $1 == "autotype" ]]; then
     auto_type "$tmp_otp"
-  elif [[ "$1" == "copy" ]]; then
+  elif [[ $1 == "copy" ]]; then
     wld_copy "$tmp_otp"
   else
     key_action "$tmp_otp"
