@@ -14,8 +14,9 @@ tessen is a *bash*(1) script that helps to autotype and copy data encrypted
 using *pass*(1) and *gopass*(1). It can also open URLs, generate HOTP and TOTP,
 and execute custom autotype operations.
 
-tessen has been written for wayland compositors like *sway*(1) and it will NOT
-work on window managers and desktop environments based on X.Org/X11.
+tessen has been written for wlroots based wayland compositors like *sway*(1)
+that support the virtual-keyboard-unstable-v1 protocol. It will NOT work on
+window managers and desktop environments based on X.Org/X11.
 
 The options understood by tessen are:
 
