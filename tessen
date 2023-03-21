@@ -14,7 +14,7 @@ set +x
 declare _PASS_BACKEND _DMENU_BACKEND _TSN_ACTION _TSN_CONFIG
 declare -a _DMENU_BACKEND_OPTS _TMP_TOFI_OPTS _TMP_ROFI_OPTS _TMP_WOFI_OPTS
 declare -a _TMP_FUZZEL_OPTS _TMP_YOFI_OPTS
-declare _TSN_USERKEY _TSN_URLKEY _TSN_AUTOKEY _TSN_WEB_BROWSER
+declare _TSN_USERKEY _TSN_URLKEY _TSN_AUTOKEY _TSN_WEB_BROWSER _TSN_OTP
 declare -i _TSN_DELAY
 # show both actions, 'autotype' and 'copy', to choose from by default
 _TSN_ACTION="default"
