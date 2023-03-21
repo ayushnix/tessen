@@ -166,6 +166,8 @@ custom_keyb_action() {
     14) wld_copy "$_TSN_USERNAME" ;;
     15) wld_copy "$_TSN_PASSWORD" ;;
     16) wld_copy "$_TSN_URL" ;;
+    17) key_otp autotype ;;
+    18) key_otp copy ;;
     *) _die "unmapped exit code detected" ;;
   esac
 }
@@ -320,7 +322,14 @@ key_otp() {
   if ! [[ $tmp_otp =~ ^[[:digit:]]+$ ]]; then
     _die "invalid OTP detected"
   fi
-  key_action "$tmp_otp"
+
+  if [[ "$1" == "autotype" ]]; then
+    auto_type "$tmp_otp"
+  elif [[ "$1" == "copy" ]]; then
+    wld_copy "$tmp_otp"
+  else
+    key_action "$tmp_otp"
+  fi
 
   unset -v tmp_otp
 }
