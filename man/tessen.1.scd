@@ -25,7 +25,7 @@ The options understood by tessen are:
 
 *-d*, *--dmenu*, *--dmenu=*[dmenu backend]
 	specify a dmenu backend - the list of recognized backends are *fuzzel*,
-	*tofi*, *bemenu*, *wofi*, *rofi*, and *dmenu*
+	*tofi*, *bemenu*, *yofi*, *wofi*, *rofi*, and *dmenu*
 
 *-a*, *--action*, *--action=*[action]
 	specify either *autotype*, *copy*, or *both*
@@ -58,10 +58,10 @@ considered case-insensitive. Note that tessen does NOT support parsing YAML
 files when using *gopass*(1).
 
 If a dmenu backend is not specified, tessen tries to find either one of
-*fuzzel*(1), *tofi*(1), *bemenu*(1), *wofi*(1), *rofi*(1) or *dmenu* in the
-order mentioned here. If *rofi* is used, it is expected that the wayland native
-fork of rofi (https://github.com/lbonn/rofi) is being used. The original rofi
-(https://github.com/davatorium/rofi) implementation made for X.Org is NOT
+*fuzzel*(1), *tofi*(1), *bemenu*(1), *yofi*, *wofi*(1), *rofi*(1) or *dmenu* in
+the order mentioned here. If *rofi* is used, it is expected that the wayland
+native fork of rofi (https://github.com/lbonn/rofi) is being used. The original
+rofi (https://github.com/davatorium/rofi) implementation made for X.Org is NOT
 supported.
 
 If an action is not specified, tessen shows an additional menu with the option
@@ -76,9 +76,14 @@ A delay of 100 milliseconds will be used between successive autotype operations.
 This can be changed using the 'delay' option in the *tessen*(5) configuration
 file.
 
-tessen will look for a configuration file in *$XDG_CONFIG_HOME/tessen/config*
-and *$HOME/.config/tessen/config*. A custom location can be specified using the
-*-c* flag.
+tessen will look for a configuration file in the following locations
+
+- *$XDG_CONFIG_HOME/tessen/config*
+- *$HOME/.config/tessen/config*
+- *$XDG_CONFIG_DIRS/tessen/config*
+- */etc/xdg/tessen/config*
+
+A custom location can be specified using the *-c* flag.
 
 Command line flags have the highest preference and supersede equivalent options
 set in the config file.
@@ -178,7 +183,8 @@ program of your choice.
 
 # FILES
 
-_$XDG_CONFIG_HOME/tessen/config_, _$HOME/.config/tessen/config_
+_$XDG_CONFIG_HOME/tessen/config_, _$HOME/.config/tessen/config_,
+_$XDG_CONFIG_DIRS/tessen/config_, _/etc/xdg/tessen/config_
 	The default configuration file for tessen. It can be used to specify all
 	the options provided by the command line flags and additional
 	customization options for keys interpreted by tessen.

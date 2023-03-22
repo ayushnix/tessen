@@ -10,6 +10,8 @@ tessen will search for a config file in the following locations
 
 - *$XDG_CONFIG_HOME/tessen/config*
 - *$HOME/.config/tessen/config*
+- *$XDG_CONFIG_DIRS/tessen/config*
+- */etc/xdg/tessen/config*
 
 The location of the configuration file can also be specified using the *-c*
 option as specified in *tessen*(1).
