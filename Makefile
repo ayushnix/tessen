@@ -10,6 +10,8 @@ FISHCOMPDIR := $(DATAROOTDIR)/fish/vendor_completions.d
 PROG = tessen
 
 SCDOC = scdoc
+SHCHK = shellcheck
+SHFMT = shfmt
 INSTALL = install
 
 .PHONY: all install minimal bashcomp fishcomp clean uninstall
@@ -44,6 +46,10 @@ fishcomp:
 clean:
 	rm -f man/$(PROG).1
 	rm -f man/$(PROG).5
+
+check:
+	$(SHCHK) $(PROG)
+	$(SHFMT) -d -s -i 2 -bn -ci -sr $(PROG)
 
 uninstall:
 	rm -f "$(DESTDIR)$(BINDIR)/$(PROG)"
