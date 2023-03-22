@@ -6,18 +6,21 @@
 files. A wayland native dmenu is required to use tessen and the following dmenu backends are
 recognized
 
-- [rofi][3]
 - [fuzzel][4]
 - [tofi][15]
 - [bemenu][5]
+- [yofi][32]
 - [wofi][6]
+- [rofi][3]
+
+As of version 2.2.0 of tessen, fuzzel is the default dmenu backend.
 
 If you want to add another Wayland native dmenu not mentioned above, please see the
 [CONTRIBUTING.md][7] file for information about how to contribute to `tessen`.
 
-`tessen` is written to work only on wayland wlroots compositors such as [sway][8]. If you'd rather
-use a fuzzy data selection program like [fzf][9] to copy your password-store data on both Xorg/X11
-and Wayland, check out [pass-tessen][10].
+`tessen` is written to work only on wayland wlroots compositors such as [sway][8] that support the
+`virtual-keyboard-unstable-v1` protocol. If you'd rather use a fuzzy data selection program like
+[fzf][9] to copy your password-store data on both Xorg/X11 and Wayland, check out [pass-tessen][10].
 
 ### Why use `tessen`?
 
@@ -50,8 +53,8 @@ and Wayland, check out [pass-tessen][10].
 
 - at least one pass backend is needed - either [password-store][1] or [gopass][2]
 
-- at least one Wayland native dmenu backend - [rofi][3], [fuzzel][4], [tofi][15], [bemenu][5], or
-  [wofi][6]
+- at least one Wayland native dmenu backend, preferably [fuzzel][4], or [tofi][15], [bemenu][5],
+  [yofi][32], [wofi][6], [rofi][3]
 
 - at least one (or both if needed) action backend - [wtype][17] or [wl-clipboard][18]
 
@@ -62,7 +65,7 @@ and Wayland, check out [pass-tessen][10].
 
 - [xdg-utils][21] (optional, to open URLs in the default web browser)
 
-- [scdoc][22] (optional, to build the man page)
+- [scdoc][22] (optional, to build the man pages)
 
 ### Arch Linux
 
@@ -80,7 +83,8 @@ cd tessen
 sudo make install
 ```
 
-You can also do `doas make install` if you're using [doas][25] on Linux, which you probably should.
+You can also do `doas make install` if you're using [doas][25] on Linux, [which you probably
+should][33].
 
 ### Stable Release
 
@@ -106,21 +110,22 @@ to prevent execution of arbitrary binaries not owned by the root user. If you wa
 patch, execute
 
 ```
-patch -i explicit_path.patch tessen
+make expatch
 ```
 
 before executing `sudo make install`. This patch should make `tessen` work fine on almost all Linux
 distributions except perhaps NixOS and GuixSD.
 
-If you don't want to build the man pages or install the shell completion files, you can use
+If you don't want to install the man pages or the shell completion files, you can use
 
 ```
 sudo make minimal
 ```
 
-to install the tessen script and nothing else. The man pages can be installed if needed using `sudo
-make man`, the bash completion file can be installed using `sudo make bashcomp`, and the fish
-completion file can be installed using `sudo make fishcomp`.
+to install the `tessen` and its default configuration file and nothing else. The man pages can be
+installed if needed using `sudo make man`, the bash completion file can be installed using `sudo
+make bashcomp`, and the fish completion file can be installed using `sudo make fishcomp`. For more
+information, use `make help`.
 
 ## Features
 
@@ -229,3 +234,5 @@ Alternatively, scan this QR code in a UPI application.
 [29]: https://github.com/swaywm/sway/releases/tag/1.7
 [30]: https://github.com/ReimuNotMoe/ydotool
 [31]: https://en.wikipedia.org/wiki/Japanese_war_fan
+[32]: https://github.com/l4l/yofi
+[33]: https://social.treehouse.systems/@psykose/109967460650885493
