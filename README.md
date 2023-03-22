@@ -89,9 +89,9 @@ should][33].
 ### Stable Release
 
 ```
-curl -LO https://git.sr.ht/~ayushnix/tessen/refs/download/v2.1.3/tessen-2.1.3.tar.gz
-tar xvzf tessen-2.1.3.tar.gz
-cd tessen-2.1.3/
+curl -LO https://git.sr.ht/~ayushnix/tessen/refs/download/v2.2.0/tessen-2.2.0.tar.gz
+tar xvzf tessen-2.2.0.tar.gz
+cd tessen-2.2.0/
 sudo make install
 ```
 
