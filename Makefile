@@ -10,12 +10,13 @@ FISHCOMPDIR := $(DATAROOTDIR)/fish/vendor_completions.d
 CONFDIRS = /etc/xdg
 PROG = tessen
 PROGCFG = config
+EXPATH = explicit_path.patch
 SCDOC = scdoc
 SHCHK = shellcheck
 SHFMT = shfmt
 INSTALL = install
 
-.PHONY: all install minimal bashcomp fishcomp clean uninstall
+.PHONY: all install minimal bashcomp fishcomp man expatch clean uninstall
 
 all:
 	@echo "$(PROG) is a shell script and doesn't need to be compiled"
@@ -33,6 +34,9 @@ man: man/$(PROG).1 man/$(PROG).5
 	$(INSTALL) -Dm 0644 man/$(PROG).1 -t $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -Dm 0644 man/$(PROG).5 -t $(DESTDIR)$(MANDIR)/man5
 
+expatch:
+	patch -N $(PROG) < $(EXPATH)
+
 man/%: man/%.scd
 	$(SCDOC) < $^ > $@
 
@@ -45,6 +49,7 @@ fishcomp:
 clean:
 	rm -f man/$(PROG).1
 	rm -f man/$(PROG).5
+	rm -f $(PROG).rej
 
 check:
 	$(SHCHK) $(PROG)
