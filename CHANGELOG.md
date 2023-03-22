@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2023-03-23
+
+### Added
+
+- implemented custom actions mapped to exit codes greater than and equal to 10, this feature is
+  supported, at the very least, by fuzzel, bemenu, and rofi
+
+- add support for using a custom configuration file for the fuzzel dmenu backend, this feature is
+  supported by fuzzel since its [1.8.0 release](https://codeberg.org/dnkl/fuzzel/releases/tag/1.8.0)
+
+- add support for the [yofi](https://github.com/l4l/yofi) dmenu backend
+
+- tessen will now look for a default configuration file in `$XDG_CONFIG_DIRS` which falls back to
+  `/etc/xdg`
+
+### Fixed
+
+- copy action for gopass after the change in gopass' configuration format since [version
+  1.15](https://github.com/gopasspw/gopass/releases/tag/v1.15.0), thanks @pshanoop
+
+### Changed
+
+- fuzzel is now the default dmenu backend for tessen. This means that tessen will look for fuzzel as
+  the first dmenu backend installed on a system if no dmenu backend is specified explicitly. In
+  addition, fuzzel will now be given priority in context of any dmenu related features or bugs.
+
 ## [2.1.3] - 2022-12-22
 
 ### Added
