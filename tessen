@@ -640,7 +640,7 @@ parse_config() {
       # here comes the ladder
       # the -p, -d, and -a options will be parsed and set only if they're not
       # already set, i.e., from the argparse
-      if [[ $key == "_PASS_BACKEND" ]] && [[ -z $_PASS_BACKEND ]]; then
+      if [[ $key == "pass_backend" ]] && [[ -z $_PASS_BACKEND ]]; then
         validate_pass_backend "$val"
         readonly _PASS_BACKEND
       elif [[ $key == "dmenu_backend" ]] && [[ -z $_DMENU_BACKEND ]]; then
