@@ -67,13 +67,14 @@ If you want to add another Wayland native dmenu not mentioned above, please see 
 
 - [scdoc][22] (optional, to build the man pages)
 
-### Arch Linux
+`tessen` is available in the following operating systems
 
-`tessen` is available in the [Arch User Repository][23].
-
-### GNU Guix
-
-`tessen` is available in the [official GNU Guix repository][24].
+| Operating System       |
+|------------------------|
+| [Arch Linux (AUR)][23] |
+| [Alpine Linux][34]     |
+| [NixOS][35]            |
+| [GuixSD][24]           |
 
 ### Git Release
 
@@ -236,3 +237,5 @@ Alternatively, scan this QR code in a UPI application.
 [31]: https://en.wikipedia.org/wiki/Japanese_war_fan
 [32]: https://github.com/l4l/yofi
 [33]: https://social.treehouse.systems/@psykose/109967460650885493
+[34]: https://pkgs.alpinelinux.org/packages?name=tessen
+[35]: https://search.nixos.org/packages?query=tessen
