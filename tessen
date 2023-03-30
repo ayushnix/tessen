@@ -466,7 +466,7 @@ validate_dmenu_backend() {
     yofi)
       _DMENU_BACKEND="yofi"
       # yofi needs the 'dialog' option after the '--config-file' argument
-      _DMENU_BACKEND_OPTS=()
+      _DMENU_BACKEND_OPTS=('dialog')
       ;;
     wofi)
       _DMENU_BACKEND="wofi"
@@ -662,7 +662,7 @@ parse_config() {
       elif [[ $key == "wofi_color_file" ]] && [[ -f ${val@P} ]]; then
         _TMP_WOFI_OPTS+=("-C" "${val@P}")
       elif [[ $key == "yofi_config_file" ]] && [[ -f ${val@P} ]]; then
-        _TMP_YOFI_OPTS+=("--config-file" "${val@P}" "dialog")
+        _TMP_YOFI_OPTS+=("--config-file" "${val@P}")
       elif [[ $key == "userkey" ]]; then
         _TSN_USERKEY="$val"
       elif [[ $key == "urlkey" ]]; then
@@ -792,7 +792,7 @@ main() {
     _DMENU_BACKEND_OPTS+=("${_TMP_WOFI_OPTS[@]}")
     readonly _DMENU_BACKEND_OPTS
   elif [[ $_DMENU_BACKEND == "yofi" ]]; then
-    _DMENU_BACKEND_OPTS+=("${_TMP_YOFI_OPTS[@]}")
+    _DMENU_BACKEND_OPTS=("${_TMP_YOFI_OPTS[@]}" "$_DMENU_BACKEND_OPTS")
     readonly _DMENU_BACKEND_OPTS
   fi
 
