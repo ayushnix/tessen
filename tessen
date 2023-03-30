@@ -681,7 +681,7 @@ parse_config() {
 }
 
 main() {
-  local -r tsn_version="2.2.0"
+  local -r tsn_version="2.2.1"
   # parse arguments because they have the highest priority
   # make the values supplied to -p, -d, and -a as readonly
   local _opt
