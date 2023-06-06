@@ -45,3 +45,6 @@
 # want to use it
 # if this key is set, xdg-open will not be used even if it's installed
 # web_browser=""
+
+# whether to send notifications about copied data via notify-send
+# notify="true"
