@@ -14,7 +14,7 @@ set +x
 declare _PASS_BACKEND _DMENU_BACKEND _TSN_ACTION _TSN_CONFIG
 declare -a _DMENU_BACKEND_OPTS _TMP_TOFI_OPTS _TMP_ROFI_OPTS _TMP_WOFI_OPTS
 declare -a _TMP_FUZZEL_OPTS _TMP_YOFI_OPTS
-declare _TSN_USERKEY _TSN_URLKEY _TSN_AUTOKEY _TSN_WEB_BROWSER _TSN_OTP
+declare _TSN_USERKEY _TSN_URLKEY _TSN_AUTOKEY _TSN_WEB_BROWSER _TSN_OTP _TSN_NOTIFY
 declare -i _TSN_DELAY
 # show both actions, 'autotype' and 'copy', to choose from by default
 _TSN_ACTION="default"
@@ -23,6 +23,7 @@ _TSN_USERKEY="user"
 _TSN_URLKEY="url"
 _TSN_AUTOKEY="autotype"
 _TSN_DELAY=100
+_TSN_NOTIFY=true
 if [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/tessen/config ]]; then
   _TSN_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"/tessen/config
 elif [[ -f "${XDG_CONFIG_DIRS:-/etc/xdg}"/tessen/config ]]; then
@@ -408,7 +409,7 @@ wld_copy() {
   # feature
   # https://github.com/bugaevc/wl-clipboard/issues/107
   printf "%s" "$1" | wl-copy
-  if is_installed notify-send; then
+  if [[ $_TSN_NOTIFY == true ]] && is_installed notify-send; then
     notify-send -t $((tsn_cliptime * 1000)) \
       "data has been copied and will be cleared from the clipboard after $tsn_cliptime seconds"
   fi
@@ -673,6 +674,8 @@ parse_config() {
         _TSN_DELAY="$val"
       elif [[ $key == "web_browser" ]] && is_installed "$val"; then
         _TSN_WEB_BROWSER="$val"
+      elif [[ $key == "notify" ]]; then
+        _TSN_NOTIFY="$val"
       fi
     done
   fi

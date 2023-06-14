@@ -127,6 +127,11 @@ The following options are understood by the configuration file for *tessen*(1):
 	The default web browser that should be used for opening URLs. If this is
 	specified, *xdg-open*(1) will not be used even if it's installed.
 
+  *notify*
+
+	Whether to send notifications about copied data via *notify-send*(1).
+	Either *true* or *false* (default is *true*).
+
 # SEE ALSO
 
 *tessen*(5), *pass*(1), *gopass*(1) *pass-otp*(1), *fuzzel*(1), *tofi*(1),
