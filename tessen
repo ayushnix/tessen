@@ -30,9 +30,14 @@ elif [[ -f "${XDG_CONFIG_DIRS:-/etc/xdg}"/tessen/config ]]; then
   _TSN_CONFIG="${XDG_CONFIG_DIRS:-/etc/xdg}"/tessen/config
 fi
 # variables with sensitive data which will be manually unset using _clear
-declare _TSN_PASSFILE _TSN_USERNAME _TSN_PASSWORD _TSN_URL _TSN_AUTOTYPE _CHOSEN_KEY
+declare _TSN_PASSFILE _TSN_USERNAME _TSN_PASSWORD _TSN_URL _TSN_AUTOTYPE _TSN_AUTOTYPE_10 _TSN_AUTOTYPE_11 _TSN_AUTOTYPE_12 _CHOSEN_KEY
 declare -i _EXIT_STATUS
 declare -A _TSN_PASSDATA
+
+_TSN_AUTOTYPE="user :tab password"
+_TSN_AUTOTYPE_10="user :tab password"
+_TSN_AUTOTYPE_11="user"
+_TSN_AUTOTYPE_12="password"
 
 # FIRST MENU: generate a list of pass files, let the user select one
 get_pass_files() {
@@ -126,7 +131,7 @@ get_pass_data() {
     elif [[ ${key,,} =~ ^$_TSN_USERKEY$ ]] && [[ -z ${_TSN_USERNAME} ]]; then
       _TSN_USERKEY="${key,,}"
       _TSN_USERNAME="$val"
-    elif [[ ${key,,} =~ ^$_TSN_AUTOKEY$ ]] && [[ -z ${_TSN_AUTOTYPE} ]]; then
+    elif [[ ${key,,} =~ ^$_TSN_AUTOKEY$ ]]; then
       _TSN_AUTOKEY="${key,,}"
       _TSN_AUTOTYPE="$val"
     elif [[ ${key,,} =~ ^$_TSN_URLKEY$ ]] && [[ -z ${_TSN_URL} ]]; then
@@ -160,9 +165,9 @@ get_pass_data() {
 # map custom actions to specific dmenu exit codes
 custom_keyb_action() {
   case "$_EXIT_STATUS" in
-    10) auto_type_def ;;
-    11) auto_type "$_TSN_USERNAME" ;;
-    12) auto_type "$_TSN_PASSWORD" ;;
+    10) type_def "$_TSN_AUTOTYPE_10" ;;
+    11) type_def "$_TSN_AUTOTYPE_11" ;;
+    12) type_def "$_TSN_AUTOTYPE_12" ;;
     13) key_open_url ;;
     14) wld_copy "$_TSN_USERNAME" ;;
     15) wld_copy "$_TSN_PASSWORD" ;;
@@ -353,6 +358,36 @@ key_open_url() {
 
 # SECOND MENU: the default autotype function, either autotype the username and
 # password or the custom autotype defined by the user
+type_def() {
+  local word tmp_otp
+
+  if [[ -z $1 ]]; then
+    auto_type "$_TSN_USERNAME"
+    wtype -s "$_TSN_DELAY" -k Tab --
+    auto_type "$_TSN_PASSWORD"
+  else
+    for word in $1; do
+      case "$word" in
+        ":delay") sleep 1 ;;
+        ":tab") wtype -s "$_TSN_DELAY" -k Tab -- ;;
+        ":space") wtype -s "$_TSN_DELAY" -k space -- ;;
+        ":enter") wtype -s "$_TSN_DELAY" -k Return -- ;;
+        ":otp") key_otp ;;
+        path | basename | filename) auto_type "${_TSN_PASSFILE##*/}" ;;
+        "$_TSN_USERKEY") auto_type "$_TSN_USERNAME" ;;
+        pass | password) auto_type "$_TSN_PASSWORD" ;;
+        *)
+          if [[ -n ${_TSN_PASSDATA["$word"]} ]]; then
+            auto_type "${_TSN_PASSDATA["$word"]}"
+          else
+            wtype -s "$_TSN_DELAY" -k space --
+          fi
+          ;;
+      esac
+    done
+  fi
+}
+
 auto_type_def() {
   local word tmp_otp
 
@@ -623,7 +658,7 @@ https://github.com/ayushnix/tessen
 parse_config() {
   local line idx key val
   local -a config_arr
-  local config_regex='^[[:alpha:]_]+="[[:alnum:]~_./^$|()-]+"$'
+  local config_regex='^[[:alnum:]_]+="[[:alnum:]~_./^$|()-: ]+"$'
   # in case the user hasn't provided an explicit location, we'll have to check
   # if the default file exists before we parse it
   if [[ -s $_TSN_CONFIG ]]; then
@@ -668,6 +703,14 @@ parse_config() {
         _TSN_USERKEY="$val"
       elif [[ $key == "urlkey" ]]; then
         _TSN_URLKEY="$val"
+      elif [[ $key == "autotype_default" ]]; then
+        _TSN_AUTOTYPE="$val"
+      elif [[ $key == "autotype_10" ]]; then
+        _TSN_AUTOTYPE_10="$val"
+      elif [[ $key == "autotype_11" ]]; then
+        _TSN_AUTOTYPE_11="$val"
+      elif [[ $key == "autotype_12" ]]; then
+        _TSN_AUTOTYPE_12="$val"
       elif [[ $key == "autotype_key" ]]; then
         _TSN_AUTOKEY="$val"
       elif [[ $key == "delay" ]]; then
