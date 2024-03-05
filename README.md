@@ -191,19 +191,6 @@ Please see the [CONTRIBUTING.md file.][7]
 
 - importing passwords or exporting them
 
-## Donate
-
-If you feel that this project helped you transition to Wayland, please consider supporting me by
-buying me a coffee.
-
-<a href='https://ko-fi.com/O5O64SQ4C' target='_blank' rel='noopener'><img height='36' style='border: 0;' src='https://cdn.ko-fi.com/cdn/kofi5.png?v=3' alt='Buy Me a Coffee at https://ko-fi.com/O5O64SQ4C'></a>
-<a href='https://www.buymeacoffee.com/ayushnix' target='_blank' rel='noopener'><img height='36' style='border: 0;' src='https://cdn.buymeacoffee.com/buttons/default-blue.png' alt='Buy Me a Coffee at https://www.buymeacoffee.com/ayushnix'></a>
-
-If you're in India, you can also use UPI for donations. My UPI address is `ayushnix@ybl`.
-Alternatively, scan this QR code in a UPI application.
-
-<img alt="ayushnix@ybl - ayushnix UPI address" src="https://git.sr.ht/~ayushnix/tessen/blob/master/ayushnix-upi.png" width="128" height="128">
-
 [1]: https://git.zx2c4.com/password-store/
 [2]: https://github.com/gopasspw/gopass
 [3]: https://github.com/lbonn/rofi
