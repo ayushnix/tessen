@@ -8,7 +8,7 @@
 # ------------------------------------------------------------------------------
 
 # don't leak password data if debug mode is enabled
-set +x
+#set +x
 
 # GLOBAL VARIABLES
 declare _PASS_BACKEND _DMENU_BACKEND _TSN_ACTION _TSN_CONFIG
@@ -623,7 +623,7 @@ https://github.com/ayushnix/tessen
 parse_config() {
   local line idx key val
   local -a config_arr
-  local config_regex='^[[:alpha:]_]+="[[:alnum:]~_./^$|()[],*-]+"$'
+  local config_regex='^[[:alpha:]_]+=[[:print:]]+'
   # in case the user hasn't provided an explicit location, we'll have to check
   # if the default file exists before we parse it
   if [[ -s $_TSN_CONFIG ]]; then
