@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2] - 2024-03-05
+
+### Added
+
+- add a config option to disable sending notifications, thanks @Croissong
+
+### Fixed
+
+- allow parsing characters like `*` in the config file to parse regexes correctly
+
+- fix broken indentation in manpage and ignored generated man pages using .gitignore, thanks @x4121
+
 ## [2.2.1] - 2023-03-30
 
 ### Fixed
