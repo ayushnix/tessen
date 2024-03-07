@@ -404,18 +404,24 @@ wld_copy() {
       return 1
     fi
   fi
+
+  local wl_copy_opts
+  if [[ ${_TSN_USE_PRIMARY} == "true" ]]; then
+    wl_copy_opts="-p"
+  fi
+
   # it would've been better to use, or at least provide an option, to paste
   # only once using `wl-copy -o` but web browsers don't work well with this
   # feature
   # https://github.com/bugaevc/wl-clipboard/issues/107
-  printf "%s" "$1" | wl-copy
+  printf "%s" "$1" | wl-copy ${wl_copy_opts}
   if [[ $_TSN_NOTIFY == true ]] && is_installed notify-send; then
     notify-send -t $((tsn_cliptime * 1000)) \
       "data has been copied and will be cleared from the clipboard after $tsn_cliptime seconds"
   fi
   {
     sleep "$tsn_cliptime" || kill 0
-    wl-copy --clear
+    wl-copy ${wl_copy_opts} --clear
   } > /dev/null 2>&1 &
 
   unset -v tsn_cliptime
@@ -676,6 +682,8 @@ parse_config() {
         _TSN_WEB_BROWSER="$val"
       elif [[ $key == "notify" ]]; then
         _TSN_NOTIFY="$val"
+      elif [[ $key == "use_primary" ]]; then
+        _TSN_USE_PRIMARY="$val"
       fi
     done
   fi
