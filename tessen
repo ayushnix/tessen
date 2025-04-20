@@ -385,6 +385,9 @@ auto_type_def() {
 
 auto_type() {
   printf "%s" "$1" | wtype -s "$_TSN_DELAY" -
+  if [[ $1 == "$_TSN_PASSWORD" && $_TSN_NOTIFY == true ]] && is_installed notify-send; then
+    notify-send -t 5000 "tessen" "finished typing password"
+  fi
 }
 
 wld_copy() {
