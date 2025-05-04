@@ -48,3 +48,6 @@
 
 # whether to send notifications about copied data via notify-send
 # notify="true"
+
+# whether to use the primary clipboard
+# use_primary="true"
