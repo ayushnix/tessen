@@ -604,6 +604,7 @@ usage: $prog [options]
   -a, --action, --action=     choose either 'autotype', 'copy', or 'both'
                               omit this option to use the default behavior
   -c, --config, --config=     use a config file on a custom path
+  --dopts, --dopts=           provide additional parameters for the dmenu backend
   -h, --help                  print this help menu
   -v, --version               print the version of $prog
 
@@ -758,6 +759,22 @@ main() {
           _die "please specify a valid path for the configuration file of tessen"
         fi
         _TSN_CONFIG="${_opt##--config=}"
+        ;;
+      --dopts)
+        if [[ $# -lt 2 ]]; then
+          _die "please specify valid dmenu options"
+        fi
+        read -ra new_dopts <<< "$2"
+        _DMENU_BACKEND_OPTS+=("${new_dopts[@]}")
+        shift
+        ;;
+      --dopts=*)
+        var="${_opt##--dopts=}"
+        if [[ -z $var ]]; then
+          _die "please specify valid dmenu options"
+        fi
+        read -ra new_dopts <<< "$var"
+        _DMENU_BACKEND_OPTS+=("${new_dopts[@]}")
         ;;
       -h | --help)
         print_help
